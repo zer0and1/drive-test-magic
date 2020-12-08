@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+yarn-error.log
+package-lock.json
+
+.DS_Store
+.idea
+.vscode/
+
+/bundle*.js
+
+npm-debug.log
