@@ -18,35 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Reducers
-export * from 'reducers';
+import {AUTH_TOKENS} from '../constants/default-settings';
 
-// Schemas
-export * from './schemas';
+import DropboxProvider from './dropbox/dropbox-provider';
+import CartoProvider from './carto/carto-provider';
 
-// Actions
-export * from './actions';
+const {DROPBOX_CLIENT_ID, CARTO_CLIENT_ID} = AUTH_TOKENS;
+const DROPBOX_CLIENT_NAME = 'Kepler.gl%20(managed%20by%20Uber%20Technologies%2C%20Inc.)';
 
-// Constants
-export * from './constants';
+export const DEFAULT_CLOUD_PROVIDER = 'dropbox';
 
-// Processors
-export * from './processors';
+export const CLOUD_PROVIDERS = [
+  new DropboxProvider(DROPBOX_CLIENT_ID, DROPBOX_CLIENT_NAME),
+  new CartoProvider(CARTO_CLIENT_ID)
+];
 
-// Components
-export * from './components';
-
-// Layers
-export * from './layers';
-
-// Styles
-export * from './styles';
-
-// Middleware
-export * from './middleware';
-
-// Utils
-export * from './utils';
-
-// Default export
-export {default} from './components';
+export function getCloudProvider(providerName) {
+  const cloudProvider = CLOUD_PROVIDERS.find(provider => provider.name === providerName);
+  if (!cloudProvider) {
+    throw new Error(`Unknown cloud provider ${providerName}`);
+  }
+  return cloudProvider;
+}

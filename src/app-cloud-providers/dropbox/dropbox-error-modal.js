@@ -18,36 +18,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Root Reducer, used to register, and remove core reducers of each instance
-export {default} from './root';
-export {default as keplerGlReducer} from './root';
+import React, {Component, createRef} from 'react';
+import ReactDOM from 'react-dom';
 
-// Core Reducer
-export {
-  default as keplerGlReducerCore,
-  visStateLens,
-  mapStateLens,
-  uiStateLens,
-  mapStyleLens
-} from './core';
+const WIDTH = 400;
+const HEIGHT = 800;
+const style = {borther: 0};
 
-// Each individual reducer
-export {default as visStateReducer} from './vis-state';
-export {default as mapStateReducer} from './map-state';
-export {default as mapStyleReducer} from './map-style';
+export default class Frame extends Component {
+  componentDidMount() {
+    this.renderFrameContents();
+  }
+  componentDidUpdate() {
+    this.renderFrameContents();
+  }
 
-// reducer updaters
-export * as visStateUpdaters from './vis-state-updaters';
-export * as mapStateUpdaters from './map-state-updaters';
-export * as mapStyleUpdaters from './map-style-updaters';
-export * as uiStateUpdaters from './ui-state-updaters';
+  componentWillUnmount() {
+    ReactDOM.unmountComponentAtNode(this.root.current.contentDocument);
+  }
 
-// This will be deprecated
-export * as combineUpdaters from './combined-updaters';
-export * as combinedUpdaters from './combined-updaters';
+  root = createRef();
+  innerHtml = createRef();
 
-// reducer merges
-export * as visStateMergers from './vis-state-merger';
+  renderFrameContents = () => {
+    const doc = this.root.current.contentDocument;
+    if (doc.readyState === 'complete') {
+      ReactDOM.render(
+        <html
+          ref={this.innerHtml}
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: this.props.children
+          }}
+        />,
+        doc
+      );
+    } else {
+      setTimeout(this.renderFrameContents.bind(this), 0);
+    }
+  };
 
-// Helpers
-export * from './composer-helpers';
+  render() {
+    return <iframe width={`${WIDTH}px`} height={`${HEIGHT}px`} style={style} ref={this.root} />;
+  }
+}

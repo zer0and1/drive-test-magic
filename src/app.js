@@ -38,11 +38,11 @@ import {
   loadSampleConfigurations,
   onExportFileSuccess,
   onLoadCloudMapSuccess
-} from './actions.js';
+} from 'actions/app.js';
 
-import {loadCloudMap} from './actions.js';
-import {CLOUD_PROVIDERS} from './cloud-providers';
-import {KEPLER_GL_NAME} from './constants/default-settings';
+import {loadCloudMap} from 'actions/app.js';
+import {CLOUD_PROVIDERS} from './app-cloud-providers';
+import {KEPLER_GL_NAME} from 'constants/default-settings';
 
 import $ from 'jquery';
 import 'gasparesganga-jquery-loading-overlay';
@@ -66,6 +66,8 @@ const client = new ApolloClient({
   uri: 'https://charming-hawk-93.hasura.app/v1/graphql',
   cache: new InMemoryCache()
 });
+
+global.apolloClient = client;
 
 const BannerHeight = 48;
 const BannerKey = `banner-${FormLink}`;
@@ -107,21 +109,7 @@ class App extends Component {
     height: window.innerHeight
   };
 
-  // ws = new WebSocket('ws://kepler-drive.herokuapp.com/websocket');
-
   componentDidMount() {
-    /*this.ws.onopen = () => {
-      console.log('websocket connected');
-    };
-
-    this.ws.onclose = () => {
-      console.log('disconnected');
-    };
-    
-    this.ws.onmessage = (data) => {
-      console.log(data)
-    };*/
-
     // if we pass an id as part of the url
     // we ry to fetch along map configurations
     const {params: {id, provider} = {}, location: {query = {}} = {}} = this.props;
@@ -182,7 +170,7 @@ class App extends Component {
     client.query({
         query: gql`
           query MyQuery {
-            signal_samples_view {
+            signal_db_signal_samples_view {
               aux
               bs_latitude
               bs_longitude
@@ -221,7 +209,7 @@ class App extends Component {
         `
       })
       .then(result => {
-        const data = result.data.signal_samples_view;
+        const data = result.data.signal_db_signal_samples_view;
         const order = [
           'aux',
           'bs_latitude',

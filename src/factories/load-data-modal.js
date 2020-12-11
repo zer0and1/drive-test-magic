@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LoadDataModalFactory, withState} from 'kepler.gl/components';
-import {LOADING_METHODS} from '../constants/default-settings';
+import {LoadDataModalFactory, withState} from 'components';
+import {LOADING_METHODS} from 'constants/default-settings';
 
-import SampleMapGallery from '../components/load-data-modal/sample-data-viewer';
-import LoadRemoteMap from '../components/load-data-modal/load-remote-map';
-import SampleMapsTab from '../components/load-data-modal/sample-maps-tab';
+import SampleMapGallery from 'components/load-data-modal/sample-data-viewer';
+import LoadRemoteMap from 'components/load-data-modal/load-remote-map';
+import SampleMapsTab from 'components/load-data-modal/sample-maps-tab';
 import {loadRemoteMap, loadSample, loadSampleConfigurations} from '../actions';
 
 const CustomLoadDataModalFactory = (...deps) => {

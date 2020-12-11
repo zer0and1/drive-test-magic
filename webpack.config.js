@@ -25,15 +25,15 @@
 const resolve = require('path').resolve;
 const join = require('path').join;
 const webpack = require('webpack');
+const DotEnv = require('dotenv-webpack');
 
-const CONFIG = {
+module.exports = {
   // bundle app.js and everything it imports, recursively.
   entry: {
     app: resolve('./src/main.js')
   },
   output: {
     path: resolve(__dirname, 'build'),
-    filename: 'bundle.js',
     publicPath: '/'
   },
 
@@ -62,33 +62,31 @@ const CONFIG = {
 
   // to support browser history api and remove the '#' sign
   devServer: {
-    historyApiFallback: true
+    historyApiFallback: true,
+    publicPath: '/build/',
+    writeToDisk: true
   },
 
   // Optional: Enables reading mapbox and dropbox client token from environment variable
   plugins: [
-    new webpack.EnvironmentPlugin([
-      'MapboxAccessToken',
-      'DropboxClientId',
-      'MapboxExportToken',
-      'CartoClientId'
-    ])
+    new DotEnv()
   ],
 
-  // optimization: { 
-  //   splitChunks: {
-  //     cacheGroups: {
-  //       commons: {
-  //         test: /[\\/]node_modules[\\/]/,
-  //         name: 'vendor',
-  //         chunks: 'initial'
-  //       }
-  //     }
-  //   } 
-  // }
-};
-
-// This line enables bundling against src in this repo rather than installed deck.gl module
-module.exports = env => {
-  return env ? require('../webpack.config.local')(CONFIG, __dirname)(env) : CONFIG;
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      maxInitialRequests: Infinity,
+      minSize: 200 * 1024,
+      cacheGroups: {
+        vender: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+            return `npm.${packageName.replace('@', '')}`;
+          }
+        }
+      }
+    }
+  }
 };

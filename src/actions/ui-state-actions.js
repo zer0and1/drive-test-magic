@@ -24,7 +24,7 @@ import ActionTypes from 'constants/action-types';
 /**
  * Toggle active side panel
  * @memberof uiStateActions
- * @param id  id of side panel to be shown, one of `layer`, `filter`, `interaction`, `map`
+ * @param id  id of side panel to be shown, one of `minion`, `layer`, `filter`, `interaction`, `map`
  * @type {typeof import('./ui-state-actions').toggleSidePanel}
  * @public
  */

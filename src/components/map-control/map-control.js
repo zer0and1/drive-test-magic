@@ -20,7 +20,7 @@
 
 import React, {useState} from 'react';
 import styled from 'styled-components';
-import {Icons, IconRoundSmall, MapControlButton} from 'kepler.gl/components';
+import {Icons, IconRoundSmall, MapControlButton} from 'components';
 
 import ReactMarkdown from 'react-markdown';
 

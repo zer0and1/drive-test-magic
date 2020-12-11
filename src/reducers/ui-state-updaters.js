@@ -27,6 +27,7 @@ import {
   EXPORT_HTML_MAP_MODES,
   EXPORT_IMG_RATIOS,
   EXPORT_MAP_FORMATS,
+  DIMENSIONS,
   RESOLUTIONS
 } from 'constants/default-settings';
 import {LOCALE_CODES} from 'localization/locales';
@@ -238,6 +239,7 @@ export const DEFAULT_EXPORT_MAP = {
 export const INITIAL_UI_STATE = {
   readOnly: false,
   activeSidePanel: DEFAULT_ACTIVE_SIDE_PANEL,
+  sidePanelWidth: DIMENSIONS.sidePanel.width,
   currentModal: DEFAULT_MODAL,
   datasetKeyToRemove: null,
   visibleDropdown: null,
@@ -272,7 +274,7 @@ export const initUiStateUpdater = (state, action) => ({
  * @memberof uiStateUpdaters
  * @param state `uiState`
  * @param action
- * @param action.payload id of side panel to be shown, one of `layer`, `filter`, `interaction`, `map`. close side panel if `null`
+ * @param action.payload id of side panel to be shown, one of `minion`, `layer`, `filter`, `interaction`, `map`. close side panel if `null`
  * @returns nextState
  * @type {typeof import('./ui-state-updaters').toggleSidePanelUpdater}
  * @public

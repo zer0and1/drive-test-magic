@@ -18,48 +18,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React from 'react';
-import styled from 'styled-components';
+import React, {Component} from 'react';
 import {Icons} from 'components';
+import PropTypes from 'prop-types';
 
-const StyledBanner = styled.div`
-  align-items: center;
-  background-color: ${props => props.bgColor};
-  color: ${props => props.fontColor};
-  display: flex;
-  height: ${props => props.height}px;
-  justify-content: space-between;
-  padding: 0 40px;
-  position: absolute;
-  transition: top 1s;
-  width: 100%;
-  z-index: 9999;
+class DropboxIcon extends Component {
+  static propTypes = {
+    /** Set the height of the icon, ex. '16px' */
+    height: PropTypes.string,
+    colors: PropTypes.arrayOf(PropTypes.string)
+  };
 
-  svg:hover {
-    cursor: pointer;
+  static defaultProps = {
+    height: '16px',
+    predefinedClassName: 'data-ex-icons-dropbox',
+    totalColor: 1
+  };
+
+  render() {
+    return (
+      <Icons.IconWrapper {...this.props} viewBox={'0 0 416 416'} colors={['#0060ff']}>
+        <path
+          className="cr1"
+          d="M348.911,169.42L220.258,91.062l81.133-67.164l128.732,79.217L348.911,169.42z M300.532,317.532
+		l123.547-72.331l-74.31-62.858l-120.961,73.191L300.532,317.532z M201.328,255.534L80.355,182.343L6.06,245.201l123.559,72.331
+		L201.328,255.534z M86.406,307.199v23.251l123.472,75.774V262.414l-81.989,67.168L86.406,307.199z M343.712,307.199l-41.453,22.388
+		l-82.001-67.173v143.811l123.454-75.774V307.199z M209.878,91.062l-81.135-67.164L0,103.115l81.226,66.305L209.878,91.062z"
+        />
+      </Icons.IconWrapper>
+    );
   }
+}
 
-  top: ${props => (props.visible ? 0 : -100)}px;
-`;
-
-const Banner = ({
-  bgColor = '#1F7CF4',
-  fontColor = '#FFFFFF',
-  height = 30,
-  children,
-  onClose,
-  show
-}) => (
-  <StyledBanner
-    className="top-banner"
-    bgColor={bgColor}
-    fontColor={fontColor}
-    height={height}
-    visible={show}
-  >
-    <div>{children}</div>
-    <Icons.Delete height="14px" onClick={onClose} />
-  </StyledBanner>
-);
-
-export default Banner;
+export default DropboxIcon;

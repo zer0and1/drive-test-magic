@@ -122,7 +122,7 @@ function KeplerGlFactory(
       height: 800,
       appName: KEPLER_GL_NAME,
       version: KEPLER_GL_VERSION,
-      sidePanelWidth: DIMENSIONS.sidePanel.width,
+      sidePanelWidth: DIMENSIONS.sidePanel.width.default,
       theme: {},
       cloudProviders: [],
       readOnly: false
@@ -303,6 +303,7 @@ function KeplerGlFactory(
         visStateActions,
         uiStateActions,
         width: this.props.sidePanelWidth,
+        height: this.props.height - DIMENSIONS.sidePanel.margin.top - DIMENSIONS.sidePanel.margin.bottom,
         availableProviders,
         mapSaved: providerState.mapSaved
       };
@@ -445,7 +446,8 @@ function mapStateToProps(state = {}, props) {
     mapStyle: state.mapStyle,
     mapState: state.mapState,
     uiState: state.uiState,
-    providerState: state.providerState
+    providerState: state.providerState,
+    sidePanelWidth: DIMENSIONS.sidePanel.width[state.uiState.activeSidePanel]
   };
 }
 

@@ -51,7 +51,6 @@ const SidePanelContent = styled.div`
   ${props => props.theme.sidePanelScrollBar};
   flex-grow: 1;
   padding: ${props => props.theme.sidePanelInnerPadding}px;
-  overflow-y: scroll;
   overflow-x: hidden;
 
   .side-panel__content__inner {
@@ -272,7 +271,7 @@ export default function SidePanelFactory(
               activePanel={activeSidePanel}
               togglePanel={uiStateActions.toggleSidePanel}
             />
-            <SidePanelContent className="side-panel__content">
+            <SidePanelContent className="side-panel__content" style={{ overflowY: activeSidePanel == 'minion' ? 'hidden' : 'scroll' }}>
               <div className="side-panel__content__inner">
                 <PanelTitle className="side-panel__content__title">
                   <FormattedMessage
@@ -281,8 +280,8 @@ export default function SidePanelFactory(
                 </PanelTitle>
                 {activeSidePanel === 'minion' && (
                   <MinionManager
-                    datasets={datasets}
-                    minions={minions}
+                    width={this.props.width}
+                    height={this.props.height - 54/*header*/ - 30 /*toggler*/ - 16 /*top-padding*/ - 48/*title*/}
                   />
                 )}
                 {activeSidePanel === 'layer' && (
