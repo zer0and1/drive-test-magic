@@ -26,10 +26,10 @@ import thunk from 'redux-thunk';
 // eslint-disable-next-line no-unused-vars
 import window from 'global/window';
 
-import demoReducer from './reducers/app';
+import mainReducer from './reducers/main';
 
 const reducers = combineReducers({
-  demo: demoReducer,
+  main: mainReducer,
   routing: routerReducer
 });
 

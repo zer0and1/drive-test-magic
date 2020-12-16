@@ -21,7 +21,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import {MapControlFactory, withState} from 'components';
-import {SampleMapPanel} from '../components/map-control/map-control';
+import {SampleMapPanel} from 'components/map-control/map-control';
 
 CustomMapControlFactory.deps = MapControlFactory.deps;
 function CustomMapControlFactory(...deps) {
@@ -40,7 +40,7 @@ function CustomMapControlFactory(...deps) {
     </StyledMapControlOverlay>
   );
 
-  return withState([], state => ({...state.demo.app}))(CustomMapControl);
+  return withState([], state => ({...state.main.app}))(CustomMapControl);
 }
 
 export function replaceMapControl() {

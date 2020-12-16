@@ -300,6 +300,7 @@ function KeplerGlFactory(
         onSaveMap,
         uiState,
         mapStyleActions,
+        mapStateActions,
         visStateActions,
         uiStateActions,
         width: this.props.sidePanelWidth,

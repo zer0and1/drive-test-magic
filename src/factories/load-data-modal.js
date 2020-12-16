@@ -24,7 +24,7 @@ import {LOADING_METHODS} from 'constants/default-settings';
 import SampleMapGallery from 'components/load-data-modal/sample-data-viewer';
 import LoadRemoteMap from 'components/load-data-modal/load-remote-map';
 import SampleMapsTab from 'components/load-data-modal/sample-maps-tab';
-import {loadRemoteMap, loadSample, loadSampleConfigurations} from '../actions';
+import {loadRemoteMap, loadSample, loadSampleConfigurations} from 'actions/main';
 
 const CustomLoadDataModalFactory = (...deps) => {
   const LoadDataModal = LoadDataModalFactory(...deps);
@@ -54,7 +54,7 @@ const CustomLoadDataModalFactory = (...deps) => {
     ]
   };
 
-  return withState([], state => ({...state.demo.app, ...state.demo.keplerGl.map.uiState}), {
+  return withState([], state => ({...state.main.app, ...state.main.keplerGl.map.uiState}), {
     onLoadSample: loadSample,
     onLoadRemoteMap: loadRemoteMap,
     loadSampleConfigurations

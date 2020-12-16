@@ -63,7 +63,7 @@ module.exports = {
   // to support browser history api and remove the '#' sign
   devServer: {
     historyApiFallback: true,
-    publicPath: '/build/',
+    publicPath: '/',
     writeToDisk: true
   },
 

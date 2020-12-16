@@ -76,7 +76,7 @@ export default {
   },
   sidebar: {
     panels: {
-      minion: 'Minion',
+      minion: 'Minions',
       layer: 'Layers',
       filter: 'Filters',
       interaction: 'Interactions',

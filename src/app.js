@@ -38,9 +38,9 @@ import {
   loadSampleConfigurations,
   onExportFileSuccess,
   onLoadCloudMapSuccess
-} from 'actions/app.js';
+} from 'actions/main.js';
 
-import {loadCloudMap} from 'actions/app.js';
+import {loadCloudMap} from 'actions';
 import {CLOUD_PROVIDERS} from './app-cloud-providers';
 import {KEPLER_GL_NAME} from 'constants/default-settings';
 
@@ -71,7 +71,6 @@ global.apolloClient = client;
 
 const BannerHeight = 48;
 const BannerKey = `banner-${FormLink}`;
-const keplerGlGetState = state => state.demo.keplerGl;
 
 const GlobalStyle = styled.div`
   font-family: ff-clan-web-pro, 'Helvetica Neue', Helvetica, sans-serif;
@@ -126,7 +125,7 @@ class App extends Component {
       return;
     }
 
-    this._loadData();
+    // this._loadData();
   }
 
   _showBanner = () => {
@@ -335,7 +334,7 @@ class App extends Component {
                     /*
                      * Specify path to keplerGl state, because it is not mount at the root
                      */
-                    getState={keplerGlGetState}
+                    getState={state => state.main.keplerGl}
                     width={width}
                     height={height}
                     cloudProviders={CLOUD_PROVIDERS}
