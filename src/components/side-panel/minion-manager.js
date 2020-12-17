@@ -266,9 +266,16 @@ function MinionManagerFactory() {
 
           data.push({ id: 'minion', parentid: null, field: null, value: null });
           data.push({ id: 'sample', parentid: null, field: null, value: null });
-                    
-          this.detailSource.localdata = data;
-          this.refs.detailGrid.updateBoundData();
+          
+          if (this.detailSource.localdata.length) {
+            data.forEach(row => {
+              this.refs.detailGrid.updateRow(row.field, row);
+            });
+          }
+          else {
+            this.detailSource.localdata = data;
+            this.refs.detailGrid.updateBoundData();  
+          }
           
           // this.trackMinion(sampleData);
         });
@@ -347,6 +354,8 @@ function MinionManagerFactory() {
                 rowsheight={26}
                 pageable={false}
                 sortable={true}
+                enableHover={false}
+                selectionMode={'none'}
                 altrows={true}
                 enabletooltips={true}
                 editable={false}
