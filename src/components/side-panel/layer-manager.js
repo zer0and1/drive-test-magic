@@ -20,6 +20,7 @@
 
 import React, {Component, useCallback} from 'react';
 import classnames from 'classnames';
+import {connect} from 'react-redux';
 
 import PropTypes from 'prop-types';
 import {sortableContainer, sortableElement} from 'react-sortable-hoc';
@@ -41,6 +42,14 @@ import {
 } from 'components/common/styled-components';
 
 import {LAYER_BLENDINGS} from 'constants/default-settings';
+
+import $ from 'jquery';
+import 'gasparesganga-jquery-loading-overlay';
+
+import { gql } from '@apollo/client';
+import {getFieldsFromData} from 'processors';
+import {addDataToMap} from 'actions/index.js';
+import minionConfig from 'map-config/minion';
 
 const LayerBlendingSelector = ({layerBlending, updateLayerBlending, intl}) => {
   const labeledLayerBlendings = Object.keys(LAYER_BLENDINGS).reduce(
@@ -158,6 +167,119 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       isSorting: false
     };
 
+    componentDidMount() {
+      this.loadData()
+    }
+
+    loadData() {
+      $('#kepler-container').LoadingOverlay('show');
+
+      apolloClient.query({
+          query: gql`
+            query MyQuery {
+              signal_db_signal_samples_view {
+                aux
+                bs_latitude
+                bs_longitude
+                cell_id
+                cell_name
+                connection_state
+                connection_type
+                cqi
+                date
+                dl_chan_bandwidth
+                duplex_mode
+                enodeb_id
+                freq_arfcn
+                freq_band
+                freq_mhz_dl
+                freq_mhz_ul
+                latitude
+                longitude
+                mcc_mnc
+                minion_dl_rate
+                minion_id
+                minion_module_firmware
+                minion_module_type
+                minion_state
+                minion_target_ping_ms
+                minion_ul_rate
+                pcid
+                rsrp_rscp
+                rsrq
+                rssi
+                session_id
+                sinr_ecio
+                ul_chan_bandwidth
+              }
+            }
+          `
+        })
+        .then(result => {
+          const data = result.data.signal_db_signal_samples_view;
+          const order = [
+            'aux',
+            'bs_latitude',
+            'bs_longitude',
+            'cell_id',
+            'cell_name',
+            'connection_state',
+            'connection_type',
+            'cqi',
+            'date',
+            'dl_chan_bandwidth',
+            'duplex_mode',
+            'enodeb_id',
+            'freq_arfcn',
+            'freq_band',
+            'freq_mhz_dl',
+            'freq_mhz_ul',
+            'latitude',
+            'longitude',
+            'mcc_mnc',
+            'minion_dl_rate',
+            'minion_id',
+            'minion_module_firmware',
+            'minion_module_type',
+            'minion_state',
+            'minion_target_ping_ms',
+            'minion_ul_rate',
+            'pcid',
+            'rsrp_rscp',
+            'rsrq',
+            'rssi',
+            'session_id',
+            'sinr_ecio',
+            'ul_chan_bandwidth'
+          ];
+          const fields = getFieldsFromData(data, order);
+          const rows = new Array;
+
+          data.forEach(item => {
+            rows.push(order.map(field => item[field]));
+          });
+
+          this.props.dispatch(
+            addDataToMap({
+              datasets: {
+                info: {
+                  label: 'Signal Samples',
+                  id: 'signal_sample_data'
+                },
+                data: { fields, rows }
+              },
+              options: {
+                centerMap: true,
+                readOnly: false
+              },
+              config: minionConfig
+            })
+          );
+
+          $('#kepler-container').LoadingOverlay('hide', true);
+        })
+    }
+
     layerClassSelector = props => props.layerClasses;
     layerTypeOptionsSelector = createSelector(this.layerClassSelector, layerClasses =>
       Object.keys(layerClasses).map(key => {
@@ -271,7 +393,10 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       );
     }
   }
-  return injectIntl(LayerManager);
+
+  const dispatchToProps = dispatch => ({dispatch});
+
+  return injectIntl(connect(dispatchToProps)(LayerManager));
 }
 
 export default LayerManagerFactory;
