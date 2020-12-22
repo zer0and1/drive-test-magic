@@ -177,7 +177,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       apolloClient.query({
           query: gql`
             query MyQuery {
-              signal_db_signal_samples_view {
+              signal_db_signal_samples_view(limit: 100) {
                 aux
                 bs_latitude
                 bs_longitude

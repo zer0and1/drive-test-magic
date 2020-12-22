@@ -129,7 +129,15 @@ const actionHandler = {
 
   [ActionTypes.NEXT_FILE_BATCH]: visStateUpdaters.nextFileBatchUpdater,
 
-  [ActionTypes.PROCESS_FILE_CONTENT]: visStateUpdaters.processFileContentUpdater
+  [ActionTypes.PROCESS_FILE_CONTENT]: visStateUpdaters.processFileContentUpdater,
+
+  [ActionTypes.LOAD_PROFILE]: visStateUpdaters.loadProfileUpdater,
+
+  [ActionTypes.SAVE_PROFILE]: visStateUpdaters.saveProfileUpdater,
+  
+  [ActionTypes.REMOVE_PROFILE]: visStateUpdaters.removeProfileUpdater,
+  
+  [ActionTypes.UPDATE_PROFILE_LABEL]: visStateUpdaters.updateProfileLabelUpdater
 };
 
 // construct vis-state reducer
