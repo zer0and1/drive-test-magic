@@ -1,6 +1,40 @@
 import React from 'react';
 import MinionGroupFactory from './minion-group';
 import { Minion } from 'components/common/icons';
+import styled from 'styled-components';
+
+const StyledProgBarWrapper = styled.div`
+  display: block;
+  float: left;
+  background-color: ${props => props.theme.panelBackgroundHover};
+  height: 15px;
+  width: 50px;
+  margin-top: 1px;
+`;
+
+const COLOR_LEVEL_MAP = ['#22c521', '#cfd02e', '#de7a20', '#a82f31'];
+
+const StyledProgBar = styled.span`
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  width: ${props => props.prog}%;
+  background-color: ${props => COLOR_LEVEL_MAP[props.level]}
+`;
+
+const StyledLeftDiv = styled.div`
+  padding-left: 4px;
+  float: left;
+`;
+
+const ProgressBar = ({value, prog, level}) => (
+  <>
+    <StyledProgBarWrapper>
+      <StyledProgBar prog={prog} level={level} />
+    </StyledProgBarWrapper>
+    <StyledLeftDiv>{value}</StyledLeftDiv>
+  </>
+);
 
 SignalSampleGroupFactory.deps = [MinionGroupFactory];
 
@@ -65,15 +99,15 @@ function SignalSampleGroupFactory(MinionGroup) {
           </tr>
           <tr>
             <td>RSRP:</td>
-            <td>{data.rsrp_rscp}</td>
+            <td>{data.rsrp_rscp && <ProgressBar value={data.rsrp_rscp} prog={data.rsrp_rscp_prog} level={data.rsrp_rscp_level} />}</td>
             <td>RSSI:</td>
-            <td>{data.rssi}</td>
+            <td>{data.rssi && <ProgressBar value={data.rssi} prog={data.rssi_prog} level={data.rssi_level} />}</td>
           </tr>
           <tr>
             <td>RSRQ:</td>
-            <td>{data.rsrq}</td>
+            <td>{data.rsrq && <ProgressBar value={data.rsrq} prog={data.rsrq_prog} level={data.rsrq_level} />}</td>
             <td>ECIO:</td>
-            <td>{data.sinr_ecio}</td>
+            <td>{data.sinr_ecio && <ProgressBar value={data.sinr_ecio} prog={data.sinr_ecio_prog} level={data.sinr_ecio_level} />}</td>
           </tr>
           <tr>
             <td colSpan="4" style={{ height: '10px' }}></td>

@@ -277,7 +277,42 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
           const minionData = result.data.signal_db_minions?.[0];
           const sampleData = result.data.signal_db_signal_samples?.[0];
-          this.setState({ details: { ...minionData, ...sampleData } });
+          const SIGNAL_QUALITY = {
+            rssi: [-65, -75, -85],
+            sinr: [12.5, 10, 7],
+            rsrq: [-5, -9, -12],
+            rsrp_rscp: [-84, -102, -111],
+            ecio: [-2, -5, -10]
+          };
+
+          const calcLevel = (val, factor) => {
+            const map = factor == 'sinr_ecio' ? SIGNAL_QUALITY[sampleData.connection_type == 'LTE' ? 'sinr' : 'ecio'] : SIGNAL_QUALITY[factor];
+            
+            for (let i = 0; i < 3; i++) {
+              if (parseInt(val) >= parseInt(map[i])) {
+                return {
+                  [factor + '_level']: i,
+                  [factor + '_prog']: (i == 0) ? 100 : (4 - i) * 25 + 25 * (val - map[i]) / (map[i - 1] - map[i])
+                };
+              }
+            }
+
+            return {
+              [factor + '_level']: 3,
+              [factor + '_prog']: 25
+            };
+          };
+
+          this.setState({
+            details: {
+              ...minionData,
+              ...sampleData,
+              ...calcLevel(sampleData.rssi, 'rssi'),
+              ...calcLevel(sampleData.rsrq, 'rsrq'),
+              ...calcLevel(sampleData.rsrp_rscp, 'rsrp_rscp'),
+              ...calcLevel(sampleData.sinr_ecio, 'sinr_ecio'),
+            }
+          });
         });
     }
 
@@ -326,7 +361,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       });
     }
 
-    onPanelResize({args}) {
+    onPanelResize({ args }) {
       this.panelRatio = args.panels[0].size / this.props.height;
     }
 
@@ -369,7 +404,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       );
     }
   }
-  
+
   const dispatchToProps = dispatch => ({ dispatch });
   const mapToProps = state => state.main.keplerGl;
 
