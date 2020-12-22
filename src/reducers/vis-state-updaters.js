@@ -1956,6 +1956,7 @@ export const loadProfileUpdater = (state, {profiles}) => {
   };
 }
 
+/**
  * Add marker with custom info on the map
  * @memberof visStateUpdaters
  * @type {typeof import('./vis-state-updaters').addMarkerUpdater}
