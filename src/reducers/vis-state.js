@@ -131,6 +131,10 @@ const actionHandler = {
 
   [ActionTypes.PROCESS_FILE_CONTENT]: visStateUpdaters.processFileContentUpdater,
 
+  [ActionTypes.ADD_MARKER]: visStateUpdaters.addMarkerUpdater,
+
+  [ActionTypes.REMOVE_MARKER]: visStateUpdaters.removeMarkerUpdater,
+  
   [ActionTypes.LOAD_PROFILE]: visStateUpdaters.loadProfileUpdater,
 
   [ActionTypes.SAVE_PROFILE]: visStateUpdaters.saveProfileUpdater,

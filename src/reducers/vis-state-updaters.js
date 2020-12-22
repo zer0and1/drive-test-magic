@@ -181,6 +181,7 @@ export const INITIAL_VIS_STATE = {
   layerBlending: 'normal',
   hoverInfo: undefined,
   clicked: undefined,
+  marked: undefined,
   mousePos: {},
 
   // this is used when user split maps
@@ -1953,6 +1954,35 @@ export const loadProfileUpdater = (state, {profiles}) => {
     ...state,
     profiles
   };
+}
+
+ * Add marker with custom info on the map
+ * @memberof visStateUpdaters
+ * @type {typeof import('./vis-state-updaters').addMarkerUpdater}
+ * @public
+ */
+export function addMarkerUpdater(state, {payload: {color, lng, lat, info}}) {  
+  return {
+    ...state,
+    marked: {
+      lngLat: [lng, lat],
+      color,
+      info
+    }
+  }
+}
+
+/**
+ * Remove marker
+ * @memberof visStateUpdaters
+ * @type {typeof import('./vis-state-updaters').removeMakerUpdater}
+ * @public
+ */
+export function removeMarkerUpdater(state) {
+  return {
+    ...state,
+    marked: null
+  }
 }
 
 /**

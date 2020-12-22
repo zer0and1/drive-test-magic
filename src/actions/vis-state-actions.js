@@ -951,6 +951,33 @@ export function updateProfileLabel(id, label) {
 }
 
 /**
+ * Add Marker
+ * @memberof visStateActions
+ * @param payload - the marker data
+ * @type {typeof import('./vis-state-actions').addMarker}
+ * @return action
+ */
+export function addMarker(payload) {
+  return {
+    type: ActionTypes.ADD_MARKER,
+    payload
+  };
+}
+
+/**
+ * Remove Marker
+ * @memberof visStateActions
+ * @type {typeof import('./vis-state-actions').removeMarker}
+ * @return action
+ */
+export function removeMarker() {
+  return {
+    type: ActionTypes.REMOVE_MARKER
+  };
+}
+
+
+/**
  * This declaration is needed to group actions in docs
  */
 /**

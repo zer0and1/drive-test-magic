@@ -34,7 +34,8 @@ module.exports = {
   },
   output: {
     path: resolve(__dirname, 'build'),
-    publicPath: '/'
+    publicPath: '/',
+    filename: 'bundle.js'
   },
 
   devtool: 'source-map',
@@ -64,7 +65,7 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     publicPath: '/',
-    writeToDisk: true
+    // writeToDisk: true
   },
 
   // Optional: Enables reading mapbox and dropbox client token from environment variable
