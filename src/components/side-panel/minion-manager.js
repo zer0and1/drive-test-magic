@@ -338,7 +338,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
             theme={'metrodark'}
             width={this.props.width}
             height={this.props.height}
-            panels={[{ size: this.props.height * this.panelRatio }, { size: this.props.height * (1 - this.panelRatio) }]}
+            panels={[{ size: this.props.height * this.panelRatio, collapsible: false }, { size: this.props.height * (1 - this.panelRatio), collapsible: true }]}
             orientation={"horizontal"}
             onResize={this.onPanelResize.bind(this)}
           >
