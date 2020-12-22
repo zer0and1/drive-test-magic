@@ -31,7 +31,7 @@ import CommandGroupFactory from './minion-panel/command-group';
 
 import JqxGrid, { jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxgrid';
 import JqxSplitter from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxsplitter';
-import { gql } from '@apollo/client';
+import { GQL_GET_MINIONS, GQL_GET_MINION_DETAILS } from 'graphqls';
 import $ from 'jquery';
 import 'gasparesganga-jquery-loading-overlay';
 
@@ -72,18 +72,6 @@ const PARSED_CONFIG = KeplerGlSchema.parseSavedConfig({
     }
   }
 });
-
-const GQL_GET_MINIONS = gql`
-  query MyQuery {
-    signal_db_minions {
-      id
-      name
-      lastupdate
-      gps_fix_lastupdate
-      gps_fix
-    }
-  }
-  `;
 
 const StyledMinionGroup = styled.div`
   ${props => props.theme.sidePanelScrollBar};
@@ -216,60 +204,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       const { row } = args;
       apolloClient
         .query({
-          query: gql`
-            query MyQuery {
-              signal_db_minions(where: {id: {_eq: "${row.id}"}}) {
-                name
-                lastupdate
-                session_id
-                operation_mode
-                longitude
-                latitude
-                gps_sat
-                gps_precision
-                gps_fix_lastupdate
-                gps_fix
-                command
-                command_id
-                command_id_ack
-                sleep_interval
-                aux
-              }
-              signal_db_signal_samples(where:{minion_id: {_eq: "${row.name}"}, date: {}}, order_by: {date: desc}, limit: ${looping ? 1 : 1000}) {
-                minion_id
-                mcc_mnc
-                minion_dl_rate
-                longitude
-                latitude
-                id
-                date
-                freq_mhz_ul
-                freq_mhz_dl
-                freq_band
-                freq_arfcn
-                enodeb_id
-                duplex_mode
-                dl_chan_bandwidth
-                aux
-                cell_id
-                connection_state
-                connection_type
-                cqi
-                minion_module_firmware
-                minion_module_type
-                minion_state
-                minion_target_ping_ms
-                minion_target_ping_sucess
-                minion_ul_rate
-                pcid
-                rsrp_rscp
-                rsrq
-                rssi
-                session_id
-                sinr_ecio
-                ul_chan_bandwidth
-              }
-            }`,
+          query: GQL_GET_MINION_DETAILS(row),
           fetchPolicy: 'network-only'
         })
         .then(result => {
