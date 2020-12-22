@@ -20,10 +20,13 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux';
+import {loadProfile, saveProfile, removeProfile, applyProfile, updateProfileLabel} from 'actions';
 
 import {Button, SidePanelSection} from 'components/common/styled-components';
 import MapStyleSelectorFactory from 'components/side-panel/map-style-panel/map-style-selector';
 import LayerGroupSelectorFactory from 'components/side-panel/map-style-panel/map-layer-selector';
+import MapProfileSelectorFactory from 'components/side-panel/map-style-panel/map-profile-selector';
 
 import {Add} from 'components/common/icons';
 import {DEFAULT_LAYER_GROUPS} from 'constants/default-settings';
@@ -32,12 +35,13 @@ import {createSelector} from 'reselect';
 import {injectIntl} from 'react-intl';
 import {FormattedMessage} from 'localization';
 
-MapManagerFactory.deps = [MapStyleSelectorFactory, LayerGroupSelectorFactory];
+MapManagerFactory.deps = [MapStyleSelectorFactory, LayerGroupSelectorFactory, MapProfileSelectorFactory];
 
-function MapManagerFactory(MapStyleSelector, LayerGroupSelector) {
+function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelector) {
   class MapManager extends Component {
     static propTypes = {
       mapStyle: PropTypes.object.isRequired,
+      profiles: PropTypes.arrayOf(PropTypes.any).isRequired,
       onConfigChange: PropTypes.func.isRequired,
       onStyleChange: PropTypes.func.isRequired,
       showAddMapStyleModal: PropTypes.func.isRequired
@@ -46,6 +50,10 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector) {
     state = {
       isSelecting: false
     };
+
+    componentDidMount() {
+      this.props.dispatch(loadProfile());
+    }
 
     buildingColorSelector = props => props.mapStyle.threeDBuildingColor;
     setColorSelector = props => props.set3dBuildingColor;
@@ -59,8 +67,24 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector) {
       this._toggleSelecting();
     };
 
+    _saveProfile = () => {
+      this.props.dispatch(saveProfile());
+    }
+
+    _removeProfile = (id) => {
+      this.props.dispatch(removeProfile(id));
+    }
+
+    _applyProfile = (id) => {
+      this.props.dispatch(applyProfile(id));
+    }
+
+    _updateProfileLabel = (id, label) => {
+      this.props.dispatch(updateProfileLabel(id, label));
+    }
+
     render() {
-      const {mapStyle, intl} = this.props;
+      const {mapStyle, intl, profiles} = this.props;
       const editableLayers = DEFAULT_LAYER_GROUPS.map(lg => lg.slug);
       const hasBuildingLayer = mapStyle.visibleLayerGroups['3d building'];
       const colorSetSelector = createSelector(
@@ -72,7 +96,7 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector) {
             setColor,
             isRange: false,
             label: intl.formatMessage({id: 'mapManager.3dBuildingColor'})
-          }
+         }
         ]
       );
 
@@ -98,20 +122,32 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector) {
             <SidePanelSection>
               <ColorSelector colorSets={colorSets} disabled={!hasBuildingLayer} />
             </SidePanelSection>
-            <Button
-              className="add-map-style-button"
-              onClick={this.props.showAddMapStyleModal}
-              secondary
-            >
-              <Add height="12px" />
-              <FormattedMessage id={'mapManager.addMapStyle'} />
-            </Button>
+            <SidePanelSection>
+              <Button
+                className="add-map-style-button"
+                onClick={this.props.showAddMapStyleModal}
+                secondary
+              >
+                <Add height="12px" />
+                <FormattedMessage id={'mapManager.addMapStyle'} />
+              </Button>
+            </SidePanelSection>
+            <MapProfileSelector
+              profiles={profiles}
+              saveProfile={this._saveProfile}
+              applyProfile={this._applyProfile}
+              removeProfile={this._removeProfile}
+              updateProfileLabel={this._updateProfileLabel}
+            />
           </div>
         </div>
       );
-    }
-  }
-  return injectIntl(MapManager);
+   }
+ }
+
+  const dispatchToProps = dispatch => ({dispatch});
+
+  return injectIntl(connect(dispatchToProps)(MapManager));
 }
 
 export default MapManagerFactory;
