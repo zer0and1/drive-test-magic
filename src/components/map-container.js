@@ -19,30 +19,31 @@
 // THE SOFTWARE.
 
 // libraries
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import MapboxGLMap from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
-import {createSelector} from 'reselect';
+import { createSelector } from 'reselect';
 import WebMercatorViewport from 'viewport-mercator-project';
 
 // components
 import MapPopoverFactory from 'components/map/map-popover';
 import MapControlFactory from 'components/map/map-control';
-import {StyledMapContainer, StyledAttrbution} from 'components/common/styled-components';
+import MapMarkerFactory from 'components/map/map-marker';
+import { StyledMapContainer, StyledAttrbution } from 'components/common/styled-components';
 
 import EditorFactory from './editor/editor';
 
 // utils
-import {generateMapboxLayers, updateMapboxLayers} from 'layers/mapbox-utils';
-import {OVERLAY_TYPE} from 'layers/base-layer';
-import {setLayerBlending} from 'utils/gl-utils';
-import {transformRequest} from 'utils/map-style-utils/mapbox-utils';
-import {getLayerHoverProp} from 'utils/layer-utils';
+import { generateMapboxLayers, updateMapboxLayers } from 'layers/mapbox-utils';
+import { OVERLAY_TYPE } from 'layers/base-layer';
+import { setLayerBlending } from 'utils/gl-utils';
+import { transformRequest } from 'utils/map-style-utils/mapbox-utils';
+import { getLayerHoverProp } from 'utils/layer-utils';
 
 // default-settings
 import ThreeDBuildingLayer from 'deckgl-layers/3d-building-layer/3d-building-layer';
-import {FILTER_TYPES, GEOCODER_LAYER_ID} from 'constants/default-settings';
+import { FILTER_TYPES, GEOCODER_LAYER_ID } from 'constants/default-settings';
 
 const MAP_STYLE = {
   container: {
@@ -89,9 +90,9 @@ const Attribution = () => (
   </StyledAttrbution>
 );
 
-MapContainerFactory.deps = [MapPopoverFactory, MapControlFactory, EditorFactory];
+MapContainerFactory.deps = [MapPopoverFactory, MapControlFactory, MapMarkerFactory, EditorFactory];
 
-export default function MapContainerFactory(MapPopover, MapControl, Editor) {
+export default function MapContainerFactory(MapPopover, MapControl, MapMarker, Editor) {
   class MapContainer extends Component {
     static propTypes = {
       // required
@@ -202,7 +203,7 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
     };
 
     _handleMapToggleLayer = layerId => {
-      const {index: mapIndex = 0, visStateActions} = this.props;
+      const { index: mapIndex = 0, visStateActions } = this.props;
       visStateActions.toggleLayerForMap(mapIndex, layerId);
     };
 
@@ -247,7 +248,7 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
       }
     }
 
-    _onBeforeRender = ({gl}) => {
+    _onBeforeRender = ({ gl }) => {
       setLayerBlending(gl, this.props.layerBlending);
     };
 
@@ -260,10 +261,11 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
         mapState,
         hoverInfo,
         clicked,
+        marked,
         datasets,
         interactionConfig,
         layers,
-        mousePos: {mousePosition, coordinate, pinned}
+        mousePos: { mousePosition, coordinate, pinned }
       } = this.props;
 
       if (!mousePosition) {
@@ -272,9 +274,10 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
       // if clicked something, ignore hover behavior
       let layerHoverProp = null;
       let layerPinnedProp = null;
-      const position = {x: mousePosition[0], y: mousePosition[1]};
+      const position = { x: mousePosition[0], y: mousePosition[1] };
       let pinnedPosition = {};
-
+      let markedPosition = {};
+      
       layerHoverProp = getLayerHoverProp({
         interactionConfig,
         hoverInfo,
@@ -289,6 +292,7 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
 
       const hasTooltip = pinned || clicked;
       const hasComparisonTooltip = compareMode || (!clicked && !pinned);
+      const hasMarker = marked;
 
       if (hasTooltip) {
         // project lnglat to screen so that tooltip follows the object on zoom
@@ -307,6 +311,12 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
           layerHoverProp.compareType = interactionConfig.tooltip.config.compareType;
         }
       }
+
+      if (hasMarker) {
+        const viewport = new WebMercatorViewport(mapState);
+        markedPosition = this._getHoverXY(viewport, marked.lngLat);
+      }
+
       const commonProp = {
         onClose: this._onCloseMapPopover,
         mapW: mapState.width,
@@ -334,6 +344,14 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
               coordinate={interactionConfig.coordinate.enabled && coordinate}
             />
           )}
+          {hasMarker && (
+            <MapMarker
+              {...commonProp}
+              {...markedPosition}
+              info={marked.info}
+              color={marked.color}
+            />
+          )}
         </div>
       );
     }
@@ -342,7 +360,7 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
 
     _getHoverXY(viewport, lngLat) {
       const screenCoord = !viewport || !lngLat ? null : viewport.project(lngLat);
-      return screenCoord && {x: screenCoord[0], y: screenCoord[1]};
+      return screenCoord && { x: screenCoord[0], y: screenCoord[1] };
     }
 
     _renderLayer = (overlays, idx) => {
@@ -358,7 +376,7 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
       } = this.props;
       const layer = layers[idx];
       const data = layerData[idx];
-      const {gpuFilter} = datasets[layer.config.dataId] || {};
+      const { gpuFilter } = datasets[layer.config.dataId] || {};
 
       const objectHovered = clicked || hoverInfo;
       const layerCallbacks = {
@@ -463,7 +481,7 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
     };
 
     _toggleMapControl = panelId => {
-      const {index, uiStateActions} = this.props;
+      const { index, uiStateActions } = this.props;
 
       uiStateActions.toggleMapControl(panelId, index);
     };
@@ -564,7 +582,7 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
           {mapStyle.topMapStyle || hasGeocoderLayer ? (
             <div style={MAP_STYLE.top}>
               <MapComponent {...mapProps} key="top" mapStyle={mapStyle.topMapStyle}>
-                {this._renderDeckOverlay({[GEOCODER_LAYER_ID]: true})}
+                {this._renderDeckOverlay({ [GEOCODER_LAYER_ID]: true })}
               </MapComponent>
             </div>
           ) : null}

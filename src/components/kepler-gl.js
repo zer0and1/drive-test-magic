@@ -274,6 +274,7 @@ function KeplerGlFactory(
         layerData,
         hoverInfo,
         clicked,
+        marked,
         mousePos,
         animationConfig,
         mapInfo
@@ -327,6 +328,7 @@ function KeplerGlFactory(
         interactionConfig,
         hoverInfo,
         clicked,
+        marked,
         mousePos,
         readOnly: uiState.readOnly,
         onDeckInitialized,

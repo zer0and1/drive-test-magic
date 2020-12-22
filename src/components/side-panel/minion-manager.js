@@ -23,55 +23,19 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import styled from 'styled-components';
-import moment from 'moment';
+import moment from 'moment-timezone';
+import { FlyToInterpolator } from '@deck.gl/core';
 
+import $ from 'jquery';
+import JqxGrid, { jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxgrid';
+import JqxSplitter from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxsplitter';
+import 'gasparesganga-jquery-loading-overlay';
+
+import { GQL_GET_MINIONS, GQL_GET_MINION_DETAILS } from 'graphqls';
+import {SIGNAL_QUALITY} from 'constants/default-settings';
 import GPSGroupFactory from './minion-panel/gps-group';
 import SignalSampleGroupFactory from './minion-panel/signal-sample-group';
 import CommandGroupFactory from './minion-panel/command-group';
-
-import JqxGrid, { jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxgrid';
-import JqxSplitter from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxsplitter';
-import { GQL_GET_MINIONS, GQL_GET_MINION_DETAILS } from 'graphqls';
-import $ from 'jquery';
-import 'gasparesganga-jquery-loading-overlay';
-
-import { FlyToInterpolator } from '@deck.gl/core';
-import KeplerGlSchema from 'schemas';
-import Processors from 'processors';
-
-import {
-  MINION_TRACKER_DATASET_NAME,
-  MINION_TRACKER_LAYER_ID,
-  MINION_TRACKER_ICON_COLOR,
-  MINION_TRACKER_ICON_SIZE
-} from 'constants/default-settings';
-
-const MINION_TRAKER_ICON_LAYER = {
-  id: MINION_TRACKER_LAYER_ID,
-  type: 'trip',
-  config: {
-    label: 'Minion Tracker Layer',
-    color: MINION_TRACKER_ICON_COLOR,
-    dataId: MINION_TRACKER_DATASET_NAME,
-    columns: {
-      geojson: '_geojson'
-    },
-    isVisible: true,
-    hidden: false,
-    visConfig: {
-      radius: MINION_TRACKER_ICON_SIZE
-    }
-  }
-};
-
-const PARSED_CONFIG = KeplerGlSchema.parseSavedConfig({
-  version: 'v1',
-  config: {
-    visState: {
-      layers: [MINION_TRAKER_ICON_LAYER],
-    }
-  }
-});
 
 const StyledMinionGroup = styled.div`
   ${props => props.theme.sidePanelScrollBar};
@@ -90,14 +54,14 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       updateVisData: PropTypes.func.isRequired,
       removeDataset: PropTypes.func.isRequired,
       updateMap: PropTypes.func.isRequired,
+      addMarker: PropTypes.func.isRequired,
+      removeMarker: PropTypes.func.isRequired,
       transitionDuration: PropTypes.number,
     };
 
     minionGridRef = createRef();
     detailGridRef = createRef();
     timeoutId = 0;
-    prevLatitude = 0;
-    prevLongitude = 0;
     panelRatio = 0.2;
 
     strRenderer(row, columnproperties, value) {
@@ -105,11 +69,20 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     };
 
     datetimeRenderer(row, columnproperties, value) {
-      const date = new Date(value);
-      const now = new Date();
-      const diff = now - date;
+      const date = moment(value);
+      const now = moment.tz(new Date(), 'Europe/Paris');
+      const diff = now.diff(date, 'seconds');
 
-      return this.strRenderer(row, columnproperties, moment(date).format("YYYY-MM-DD HH:mm:ss"));
+      console.log(now.format(), diff);
+
+      if (diff < 120) {
+        const mins = Math.floor(diff / 60);
+        const secs = diff % 60;
+
+        return this.strRenderer(row, columnproperties, mins ? `${mins}m ${secs}s ago` : `${secs}s ago`);
+      }
+
+      return this.strRenderer(row, columnproperties, date.format("YYYY-MM-DD HH:mm:ss"));
     };
 
     state = {
@@ -173,11 +146,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
     componentDidMount() {
       this.loadMinions(false);
-      
-      console.log(KeplerGlSchema.getConfigToSave(this.props.map));
     }
 
     componentWillUnmount() {
+      this.props.removeMarker();
       window.clearTimeout(this.timeoutId);
       this._mounted = false;
     }
@@ -218,18 +190,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
           const minionData = result.data.signal_db_minions?.[0];
           const sampleData = result.data.signal_db_signal_samples?.[0];
-          const SIGNAL_QUALITY = {
-            rssi: [-44, -65, -75, -85, -100],
-            sinr: [30, 12.5, 10, 7, -20],
-            rsrq: [-3, -5, -9, -12, -20],
-            rsrp_rscp: [-44, -84, -102, -111, -130],
-            ecio: [0, -2, -5, -10, -20],
-            cqi: [0, 0, 0, 0, 0]
-          };
 
           const calcLevel = (val, factor) => {
             const map = factor == 'sinr_ecio' ? SIGNAL_QUALITY[sampleData.connection_type == 'LTE' ? 'sinr' : 'ecio'] : SIGNAL_QUALITY[factor];
-            
+
             for (let i = 1; i < 5; i++) {
               if (parseInt(val) >= parseInt(map[i])) {
                 return {
@@ -256,50 +220,20 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
               cqi: 0,
             }
           });
+
+          this.trackMinion(sampleData);
         });
     }
 
     trackMinion(data) {
-      const now = (new Date).getTime();
-      const sampleAnimateTrip = {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            properties: {
-              vendor: 'A',
-              value: 10
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: data.map((item, idx) => [item.longitude, item.latitude, 0, now - idx * 100]).reverse()
-            }
-          }
-        ]
-      };
-      this.props.removeDataset(MINION_TRACKER_DATASET_NAME);
-      this.props.updateVisData(
-        [{
-          data: Processors.processGeojson(sampleAnimateTrip),
-          info: {
-            id: MINION_TRACKER_DATASET_NAME,
-            label: MINION_TRACKER_DATASET_NAME
-          }
-        }],
-        {
-          // keepExistingConfig: true,
-          centerMap: true,
-          readOnly: false
-        },
-        PARSED_CONFIG
-      );
-
+      const { latitude, longitude } = data;
+      this.props.addMarker({ center: true, lng: longitude, lat: latitude, color: 'red', info: { label: data.minion_id } });
       this.props.updateMap({
-        latitude: data[0].latitude,
-        longitude: data[0].longitude,
+        latitude,
+        longitude,
         pitch: 0,
         bearing: 0,
-        transitionDuration: this.props.transitionDuration,
+        transitionDuration: 1000,
         transitionInterpolator: new FlyToInterpolator()
       });
     }

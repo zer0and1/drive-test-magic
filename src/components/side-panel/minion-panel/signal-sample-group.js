@@ -2,6 +2,7 @@ import React from 'react';
 import MinionGroupFactory from './minion-group';
 import { Minion } from 'components/common/icons';
 import styled from 'styled-components';
+import moment from 'moment-timezone';
 
 const StyledProgBarWrapper = styled.div`
   display: block;
@@ -27,7 +28,7 @@ const StyledLeftDiv = styled.div`
   float: left;
 `;
 
-const ProgressBar = ({value, prog, level}) => (
+const ProgressBar = ({ value, prog, level }) => (
   <>
     <StyledProgBarWrapper>
       <StyledProgBar prog={prog} level={level} />
@@ -39,9 +40,29 @@ const ProgressBar = ({value, prog, level}) => (
 SignalSampleGroupFactory.deps = [MinionGroupFactory];
 
 function SignalSampleGroupFactory(MinionGroup) {
+
+  const makeTimeLabel = (value) => {
+    if (!value) {
+      return '';
+    }
+
+    const date = moment(value);
+    const now = moment.tz(new Date(), 'Europe/Paris');
+    const diff = Math.floor((now.unix() - date.unix()) / 1000);
+
+    if (diff < 120) {
+      const mins = Math.floor(diff / 60);
+      const secs = diff % 60;
+
+      return mins ? `${mins}m ${secs}s ago` : `${secs}s ago`;
+    }
+
+    return '';
+  };
+
   const SignalSampleGroup = ({ data }) => (
-    <MinionGroup groupIcon={Minion} label="Signal Sample">
-      <table style={{tableLayout: 'fixed', width: '100%'}}>
+    <MinionGroup groupIcon={Minion} label={`Signal Sample${makeTimeLabel(data.lastupdate) && ' - ' + makeTimeLabel(data.lastupdate)}`}>
+      <table style={{ tableLayout: 'fixed', width: '100%' }}>
         <tbody>
           <tr>
             <td>Con State:</td>

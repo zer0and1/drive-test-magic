@@ -129,7 +129,11 @@ const actionHandler = {
 
   [ActionTypes.NEXT_FILE_BATCH]: visStateUpdaters.nextFileBatchUpdater,
 
-  [ActionTypes.PROCESS_FILE_CONTENT]: visStateUpdaters.processFileContentUpdater
+  [ActionTypes.PROCESS_FILE_CONTENT]: visStateUpdaters.processFileContentUpdater,
+
+  [ActionTypes.ADD_MARKER]: visStateUpdaters.addMarkerUpdater,
+
+  [ActionTypes.REMOVE_MARKER]: visStateUpdaters.removeMarkerUpdater
 };
 
 // construct vis-state reducer

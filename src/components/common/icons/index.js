@@ -70,6 +70,7 @@ export {default as Messages} from './messages';
 export {default as Pause} from './pause';
 export {default as Picture} from './picture';
 export {default as Pin} from './pin';
+export {default as Place} from './place';
 export {default as Play} from './play';
 export {default as Reduce} from './reduce';
 export {default as Reset} from './reset';

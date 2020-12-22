@@ -287,6 +287,8 @@ export default function SidePanelFactory(
                     removeDataset={visStateActions.removeDataset}
                     updateMap={mapStateActions.updateMap}
                     transitionDuration={1000}
+                    addMarker={visStateActions.addMarker}
+                    removeMarker={visStateActions.removeMarker}
                   />
                 )}
                 {activeSidePanel === 'layer' && (
