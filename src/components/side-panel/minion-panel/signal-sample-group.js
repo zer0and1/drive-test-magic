@@ -74,7 +74,7 @@ function SignalSampleGroupFactory(MinionGroup) {
             <td>{data.freq_mhz_ul}{data.freq_mhz_ul && ' MHz'}</td>
           </tr>
           <tr>
-            <td>DL Bandwidth:</td>
+            <td>DL Band:</td>
             <td>{data.dl_chan_bandwidth}</td>
             <td>UL Band:</td>
             <td>{data.ul_chan_bandwidth}</td>

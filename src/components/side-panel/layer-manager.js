@@ -172,6 +172,10 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
     }
 
     loadData() {
+      if (this.props.datasets.signal_sample_data) {
+        return;
+      }
+      
       $('#kepler-container').LoadingOverlay('show');
 
       apolloClient.query({ query: GQL_GET_SIGNAL_SAMPLES })

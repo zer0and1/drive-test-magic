@@ -70,7 +70,7 @@ query MyQuery {
 
 export const GQL_GET_SIGNAL_SAMPLES = gql`
 query MyQuery {
-  signal_db_signal_samples_view {
+  signal_db_signal_samples_view (limit: 100) {
     aux
     bs_latitude
     bs_longitude
