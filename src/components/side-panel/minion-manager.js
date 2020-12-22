@@ -172,7 +172,9 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     componentDidMount() {
-      this.loadMinions();
+      this.loadMinions(false);
+      
+      console.log(KeplerGlSchema.getConfigToSave(this.props.map));
     }
 
     componentWillUnmount() {
@@ -180,13 +182,17 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       this._mounted = false;
     }
 
-    loadMinions() {
+    loadMinions(looping) {
+      looping || $('#minion-grid').LoadingOverlay('show');
+
       apolloClient
         .query({ query: GQL_GET_MINIONS, fetchPolicy: 'network-only' })
         .then(result => {
+          looping || $('#minion-grid').LoadingOverlay('hide', true);
+
           this.minionSource.localdata = result.data.signal_db_minions;
           this.refs.minionGrid.updatebounddata();
-          this.timeoutId = this._mounted && window.setTimeout(this.loadMinions.bind(this), 15000);
+          this.timeoutId = this._mounted && window.setTimeout(this.loadMinions.bind(this), 15000, true);
 
           const idx = this.refs.minionGrid.getselectedrowindex();
           if (idx < 0) {
@@ -208,33 +214,34 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
           fetchPolicy: 'network-only'
         })
         .then(result => {
-          $('#minion-group').LoadingOverlay('hide', true);
+          looping || $('#minion-group').LoadingOverlay('hide', true);
 
           const minionData = result.data.signal_db_minions?.[0];
           const sampleData = result.data.signal_db_signal_samples?.[0];
           const SIGNAL_QUALITY = {
-            rssi: [-65, -75, -85],
-            sinr: [12.5, 10, 7],
-            rsrq: [-5, -9, -12],
-            rsrp_rscp: [-84, -102, -111],
-            ecio: [-2, -5, -10]
+            rssi: [-44, -65, -75, -85, -100],
+            sinr: [30, 12.5, 10, 7, -20],
+            rsrq: [-3, -5, -9, -12, -20],
+            rsrp_rscp: [-44, -84, -102, -111, -130],
+            ecio: [0, -2, -5, -10, -20],
+            cqi: [0, 0, 0, 0, 0]
           };
 
           const calcLevel = (val, factor) => {
             const map = factor == 'sinr_ecio' ? SIGNAL_QUALITY[sampleData.connection_type == 'LTE' ? 'sinr' : 'ecio'] : SIGNAL_QUALITY[factor];
             
-            for (let i = 0; i < 3; i++) {
+            for (let i = 1; i < 5; i++) {
               if (parseInt(val) >= parseInt(map[i])) {
                 return {
-                  [factor + '_level']: i,
-                  [factor + '_prog']: (i == 0) ? 100 : (4 - i) * 25 + 25 * (val - map[i]) / (map[i - 1] - map[i])
+                  [factor + '_level']: i - 1,
+                  [factor + '_prog']: (4 - i) * 25 + 25 * (val - map[i]) / (map[i - 1] - map[i])
                 };
               }
             }
 
             return {
-              [factor + '_level']: 3,
-              [factor + '_prog']: 25
+              [factor + '_level']: 4,
+              [factor + '_prog']: 0
             };
           };
 
@@ -246,6 +253,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
               ...calcLevel(sampleData.rsrq, 'rsrq'),
               ...calcLevel(sampleData.rsrp_rscp, 'rsrp_rscp'),
               ...calcLevel(sampleData.sinr_ecio, 'sinr_ecio'),
+              cqi: 0,
             }
           });
         });
@@ -312,7 +320,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
             orientation={"horizontal"}
             onResize={this.onPanelResize.bind(this)}
           >
-            <div className={"splitter-panel"}>
+            <div className={"splitter-panel"} id="minion-grid">
               <JqxGrid
                 ref={'minionGrid'}
                 width={'100%'}

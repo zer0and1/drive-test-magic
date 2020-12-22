@@ -74,10 +74,10 @@ function SignalSampleGroupFactory(MinionGroup) {
             <td>{data.freq_mhz_ul}{data.freq_mhz_ul && ' MHz'}</td>
           </tr>
           <tr>
-            <td>DL Band:</td>
-            <td>{data.dl_chan_bandwidth}</td>
-            <td>UL Band:</td>
-            <td>{data.ul_chan_bandwidth}</td>
+            <td>DL Channel:</td>
+            <td>{data.dl_chan_bandwidth}{data.dl_chan_bandwidth && ' MHz'}</td>
+            <td>UL Channel:</td>
+            <td>{data.ul_chan_bandwidth}{data.ul_chan_bandwidth && ' MHz'}</td>
           </tr>
           <tr>
             <td colSpan="4" style={{ height: '10px' }}></td>
@@ -99,16 +99,23 @@ function SignalSampleGroupFactory(MinionGroup) {
           </tr>
           <tr>
             <td>RSRP:</td>
-            <td>{data.rsrp_rscp && <ProgressBar value={data.rsrp_rscp} prog={data.rsrp_rscp_prog} level={data.rsrp_rscp_level} />}</td>
+            <td>{data.rsrp_rscp != undefined && <ProgressBar value={data.rsrp_rscp} prog={data.rsrp_rscp_prog} level={data.rsrp_rscp_level} />}</td>
             <td>RSSI:</td>
-            <td>{data.rssi && <ProgressBar value={data.rssi} prog={data.rssi_prog} level={data.rssi_level} />}</td>
+            <td>{data.rssi != undefined && <ProgressBar value={data.rssi} prog={data.rssi_prog} level={data.rssi_level} />}</td>
           </tr>
           <tr>
             <td>RSRQ:</td>
-            <td>{data.rsrq && <ProgressBar value={data.rsrq} prog={data.rsrq_prog} level={data.rsrq_level} />}</td>
-            <td>ECIO:</td>
-            <td>{data.sinr_ecio && <ProgressBar value={data.sinr_ecio} prog={data.sinr_ecio_prog} level={data.sinr_ecio_level} />}</td>
+            <td>{data.rsrq != undefined && <ProgressBar value={data.rsrq} prog={data.rsrq_prog} level={data.rsrq_level} />}</td>
+            <td>{data.connection_type == 'LTE' ? 'SINR' : 'ECIO'}:</td>
+            <td>{data.sinr_ecio != undefined && <ProgressBar value={data.sinr_ecio} prog={data.sinr_ecio_prog} level={data.sinr_ecio_level} />}</td>
           </tr>
+          {data.connection_type == 'LTE' && (
+            <tr>
+              <td>CQI:</td>
+              <td>{data.cqi != undefined && <ProgressBar value={data.cqi} prog={data.cqi_prog} level={data.cqi_level} />}</td>
+              <td colSpan="2"></td>
+            </tr>
+          )}
           <tr>
             <td colSpan="4" style={{ height: '10px' }}></td>
           </tr>

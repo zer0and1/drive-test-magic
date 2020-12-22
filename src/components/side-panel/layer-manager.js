@@ -49,7 +49,6 @@ import 'gasparesganga-jquery-loading-overlay';
 import { GQL_GET_SIGNAL_SAMPLES } from 'graphqls';
 import { getFieldsFromData } from 'processors';
 import { addDataToMap } from 'actions/index.js';
-import minionConfig from 'map-config/minion';
 
 const LayerBlendingSelector = ({ layerBlending, updateLayerBlending, intl }) => {
   const labeledLayerBlendings = Object.keys(LAYER_BLENDINGS).reduce(
@@ -207,10 +206,29 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
                 centerMap: true,
                 readOnly: false
               },
-              config: minionConfig
+              config: {
+                version: 'v1',
+                config: {
+                  visState: {
+                    layers: [
+                      {
+                        type: 'point',
+                        config: {
+                          dataId: 'signal_sample_data',
+                          columns: {
+                            lat: 'latitude',
+                            lng: 'longitude'
+                          },
+                          isVisible: true
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
             })
           );
-
+          
           $('#kepler-container').LoadingOverlay('hide', true);
         })
     }
