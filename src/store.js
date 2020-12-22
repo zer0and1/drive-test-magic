@@ -52,7 +52,8 @@ if (window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) {
       '@@kepler.gl/MOUSE_MOVE',
       '@@kepler.gl/UPDATE_MAP',
       '@@kepler.gl/LAYER_HOVER'
-    ]
+    ],
+    trace: true
   });
 }
 
