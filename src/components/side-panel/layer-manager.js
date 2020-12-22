@@ -18,21 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component, useCallback} from 'react';
+import React, { Component, useCallback } from 'react';
 import classnames from 'classnames';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 
 import PropTypes from 'prop-types';
-import {sortableContainer, sortableElement} from 'react-sortable-hoc';
+import { sortableContainer, sortableElement } from 'react-sortable-hoc';
 import styled from 'styled-components';
-import {createSelector} from 'reselect';
-import {injectIntl} from 'react-intl';
-import {FormattedMessage} from 'localization';
-import {arrayMove} from 'utils/data-utils';
+import { createSelector } from 'reselect';
+import { injectIntl } from 'react-intl';
+import { FormattedMessage } from 'localization';
+import { arrayMove } from 'utils/data-utils';
 
 import LayerPanelFactory from './layer-panel/layer-panel';
 import SourceDataCatalogFactory from './common/source-data-catalog';
-import {Add} from 'components/common/icons';
+import { Add } from 'components/common/icons';
 import ItemSelector from 'components/common/item-selector/item-selector';
 import {
   Button,
@@ -41,21 +41,61 @@ import {
   SidePanelSection
 } from 'components/common/styled-components';
 
-import {LAYER_BLENDINGS} from 'constants/default-settings';
+import { LAYER_BLENDINGS } from 'constants/default-settings';
 
 import $ from 'jquery';
 import 'gasparesganga-jquery-loading-overlay';
 
 import { gql } from '@apollo/client';
-import {getFieldsFromData} from 'processors';
-import {addDataToMap} from 'actions/index.js';
+import { getFieldsFromData } from 'processors';
+import { addDataToMap } from 'actions/index.js';
 import minionConfig from 'map-config/minion';
 
-const LayerBlendingSelector = ({layerBlending, updateLayerBlending, intl}) => {
+const GQL_SIGNAL_SAMPLE = gql`
+query MyQuery {
+  signal_db_signal_samples_view {
+    aux
+    bs_latitude
+    bs_longitude
+    cell_id
+    cell_name
+    connection_state
+    connection_type
+    cqi
+    date
+    dl_chan_bandwidth
+    duplex_mode
+    enodeb_id
+    freq_arfcn
+    freq_band
+    freq_mhz_dl
+    freq_mhz_ul
+    latitude
+    longitude
+    mcc_mnc
+    minion_dl_rate
+    minion_id
+    minion_module_firmware
+    minion_module_type
+    minion_state
+    minion_target_ping_ms
+    minion_ul_rate
+    pcid
+    rsrp_rscp
+    rsrq
+    rssi
+    session_id
+    sinr_ecio
+    ul_chan_bandwidth
+  }
+}
+`;
+
+const LayerBlendingSelector = ({ layerBlending, updateLayerBlending, intl }) => {
   const labeledLayerBlendings = Object.keys(LAYER_BLENDINGS).reduce(
     (acc, current) => ({
       ...acc,
-      [intl.formatMessage({id: LAYER_BLENDINGS[current].label})]: current
+      [intl.formatMessage({ id: LAYER_BLENDINGS[current].label })]: current
     }),
     {}
   );
@@ -71,7 +111,7 @@ const LayerBlendingSelector = ({layerBlending, updateLayerBlending, intl}) => {
         <FormattedMessage id="layerBlending.title" />
       </PanelLabel>
       <ItemSelector
-        selectedItems={intl.formatMessage({id: LAYER_BLENDINGS[layerBlending].label})}
+        selectedItems={intl.formatMessage({ id: LAYER_BLENDINGS[layerBlending].label })}
         options={Object.keys(labeledLayerBlendings)}
         multiSelect={false}
         searchable={false}
@@ -109,7 +149,7 @@ const SortableStyledItem = styled.div`
 `;
 
 export function AddDataButtonFactory() {
-  const AddDataButton = ({onClick, isInactive}) => (
+  const AddDataButton = ({ onClick, isInactive }) => (
     <Button
       className="add-data-button"
       onClick={onClick}
@@ -130,15 +170,15 @@ LayerManagerFactory.deps = [AddDataButtonFactory, LayerPanelFactory, SourceDataC
 function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
   // By wrapping layer panel using a sortable element we don't have to implement the drag and drop logic into the panel itself;
   // Developers can provide any layer panel implementation and it will still be sortable
-  const SortableItem = sortableElement(({children, isSorting}) => {
+  const SortableItem = sortableElement(({ children, isSorting }) => {
     return (
-      <SortableStyledItem className={classnames('sortable-layer-items', {sorting: isSorting})}>
+      <SortableStyledItem className={classnames('sortable-layer-items', { sorting: isSorting })}>
         {children}
       </SortableStyledItem>
     );
   });
 
-  const SortableContainer = sortableContainer(({children}) => {
+  const SortableContainer = sortableContainer(({ children }) => {
     return <div>{children}</div>;
   });
 
@@ -174,83 +214,14 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
     loadData() {
       $('#kepler-container').LoadingOverlay('show');
 
-      apolloClient.query({
-          query: gql`
-            query MyQuery {
-              signal_db_signal_samples_view {
-                aux
-                bs_latitude
-                bs_longitude
-                cell_id
-                cell_name
-                connection_state
-                connection_type
-                cqi
-                date
-                dl_chan_bandwidth
-                duplex_mode
-                enodeb_id
-                freq_arfcn
-                freq_band
-                freq_mhz_dl
-                freq_mhz_ul
-                latitude
-                longitude
-                mcc_mnc
-                minion_dl_rate
-                minion_id
-                minion_module_firmware
-                minion_module_type
-                minion_state
-                minion_target_ping_ms
-                minion_ul_rate
-                pcid
-                rsrp_rscp
-                rsrq
-                rssi
-                session_id
-                sinr_ecio
-                ul_chan_bandwidth
-              }
-            }
-          `
-        })
+      apolloClient.query({ query: GQL_SIGNAL_SAMPLE })
         .then(result => {
           const data = result.data.signal_db_signal_samples_view;
-          const order = [
-            'aux',
-            'bs_latitude',
-            'bs_longitude',
-            'cell_id',
-            'cell_name',
-            'connection_state',
-            'connection_type',
-            'cqi',
-            'date',
-            'dl_chan_bandwidth',
-            'duplex_mode',
-            'enodeb_id',
-            'freq_arfcn',
-            'freq_band',
-            'freq_mhz_dl',
-            'freq_mhz_ul',
-            'latitude',
-            'longitude',
-            'mcc_mnc',
-            'minion_dl_rate',
-            'minion_id',
-            'minion_module_firmware',
-            'minion_module_type',
-            'minion_state',
-            'minion_target_ping_ms',
-            'minion_ul_rate',
-            'pcid',
-            'rsrp_rscp',
-            'rsrq',
-            'rssi',
-            'session_id',
-            'sinr_ecio',
-            'ul_chan_bandwidth'
+          const order = ['aux', 'bs_latitude', 'bs_longitude', 'cell_id', 'cell_name', 'connection_state',
+            'connection_type', 'cqi', 'date', 'dl_chan_bandwidth', 'duplex_mode', 'enodeb_id', 'freq_arfcn',
+            'freq_band', 'freq_mhz_dl', 'freq_mhz_ul', 'latitude', 'longitude', 'mcc_mnc', 'minion_dl_rate',
+            'minion_id', 'minion_module_firmware', 'minion_module_type', 'minion_state', 'minion_target_ping_ms',
+            'minion_ul_rate', 'pcid', 'rsrp_rscp', 'rsrq', 'rssi', 'session_id', 'sinr_ecio', 'ul_chan_bandwidth'
           ];
           const fields = getFieldsFromData(data, order);
           const rows = new Array;
@@ -297,26 +268,26 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       this.props.addLayer();
     };
 
-    _handleSort = ({oldIndex, newIndex}) => {
+    _handleSort = ({ oldIndex, newIndex }) => {
       this.props.updateLayerOrder(arrayMove(this.props.layerOrder, oldIndex, newIndex));
-      this.setState({isSorting: false});
+      this.setState({ isSorting: false });
     };
 
     _onSortStart = () => {
-      this.setState({isSorting: true});
+      this.setState({ isSorting: true });
     };
 
-    _updateBeforeSortStart = ({index}) => {
+    _updateBeforeSortStart = ({ index }) => {
       // if layer config is active, close it
-      const {layerOrder, layers, layerConfigChange} = this.props;
+      const { layerOrder, layers, layerConfigChange } = this.props;
       const layerIdx = layerOrder[index];
       if (layers[layerIdx].config.isConfigActive) {
-        layerConfigChange(layers[layerIdx], {isConfigActive: false});
+        layerConfigChange(layers[layerIdx], { isConfigActive: false });
       }
     };
 
     render() {
-      const {layers, datasets, layerOrder, openModal, intl} = this.props;
+      const { layers, datasets, layerOrder, openModal, intl } = this.props;
       const defaultDataset = Object.keys(datasets)[0];
       const layerTypeOptions = this.layerTypeOptionsSelector(this.props);
 
@@ -394,9 +365,9 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
     }
   }
 
-  const dispatchToProps = dispatch => ({dispatch});
+  const dispatchToProps = dispatch => ({ dispatch });
 
-  return injectIntl(connect(dispatchToProps)(LayerManager));
+  return injectIntl(connect(null, dispatchToProps)(LayerManager));
 }
 
 export default LayerManagerFactory;

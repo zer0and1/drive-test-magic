@@ -331,8 +331,6 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     render() {
-      const {details} = this.state;
-
       return (
         <div className="minion-manager">
           <JqxSplitter
@@ -362,8 +360,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
               />
             </div>
             <StyledMinionGroup className={"splitter-panel"} id="minion-group">
-              <GPSGroup data={details} />
-              <MinionSignalSampleGroup data={details} />
+              <GPSGroup data={this.state.details} />
+              <MinionSignalSampleGroup data={this.state.details} />
               <CommandGroup />
             </StyledMinionGroup>
           </JqxSplitter>
@@ -371,8 +369,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       );
     }
   }
+  
   const dispatchToProps = dispatch => ({ dispatch });
   const mapToProps = state => state.main.keplerGl;
+
   return injectIntl(connect(mapToProps, dispatchToProps)(MinionManager));
 }
 
