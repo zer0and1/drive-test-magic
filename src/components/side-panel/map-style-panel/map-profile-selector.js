@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { Save2, Play } from 'components/common/icons';
+import { Save2, Play, Spinner } from 'components/common/icons';
 import { FormattedMessage } from 'localization';
 import {
   Button,
@@ -11,7 +11,7 @@ import {
   InlineInput
 } from 'components/common/styled-components';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
-import {Trash} from 'components/common/icons';
+import { Trash } from 'components/common/icons';
 
 const PanelWrapper = styled.div`
   font-size: 12px;
@@ -52,9 +52,9 @@ const HeaderActionSection = styled.div`
   display: flex;
 `;
 
-export const ProfileLabelEditor = ({profileId, label, onEdit}) => {
+export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
   const [value, setValue] = useState(label);
-  
+
   return (
     <InlineInput
       type="text"
@@ -86,7 +86,7 @@ export function ProfileTitleSectionFactory() {
       text-transform: capitalize;
     }
   `;
-  const ProfileTitleSection = ({profileId, label, onUpdateProfileLabel}) => (
+  const ProfileTitleSection = ({ profileId, label, onUpdateProfileLabel }) => (
     <StyledProfileTitleSection className="profile__title">
       <div>
         <ProfileLabelEditor profileId={profileId} label={label} onEdit={onUpdateProfileLabel} />
@@ -100,7 +100,8 @@ MapProfileSelectorFactory.deps = [ProfileTitleSectionFactory, PanelHeaderActionF
 
 const defaultActionIcons = {
   remove: Trash,
-  apply: Play
+  apply: Play,
+  spinner: Spinner
 };
 
 function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
@@ -112,6 +113,11 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
     updateProfileLabel,
     actionIcons = defaultActionIcons
   }) => {
+    const [removing, setRemoving] = useState({
+      id: '',
+      state: false
+    });
+
     return (
       <div>
         <PanelLabel>
@@ -120,30 +126,36 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
         {profiles.map(profile => (
           <PanelWrapper key={profile.id}>
             <StyledProfilePanelHeader>
-            <HeaderLabelSection className="profile-panel__header__content">
-              <ProfileTitleSection
-                profileId={profile.id}
-                label={profile.label}
-                onUpdateProfileLabel={(label) => updateProfileLabel(profile.id, label)}
-              />
-            </HeaderLabelSection>
-            <HeaderActionSection className="profile-panel__header__actions">
-              <PanelHeaderAction
-                className="profile__remove-profile"
-                id={profile.id}
-                tooltip={'tooltip.removeProfile'}
-                onClick={() => removeProfile(profile.id)}
-                tooltipType="error"
-                IconComponent={actionIcons.remove}
-              />
-              <PanelHeaderAction
-                className="profile__apply-profile"
-                id={profile.id}
-                tooltip={'tooltip.applyProfile'}
-                onClick={() => applyProfile(profile.id)}
-                IconComponent={actionIcons.apply}
-              />
-            </HeaderActionSection>
+              <HeaderLabelSection className="profile-panel__header__content">
+                <ProfileTitleSection
+                  profileId={profile.id}
+                  label={profile.label}
+                  onUpdateProfileLabel={(label) => updateProfileLabel(profile.id, label)}
+                />
+              </HeaderLabelSection>
+              <HeaderActionSection className="profile-panel__header__actions">
+                <PanelHeaderAction
+                  className="profile__remove-profile"
+                  id={profile.id}
+                  tooltip={'tooltip.removeProfile'}
+                  onClick={() => {
+                    removeProfile(profile.id);
+                    setRemoving({
+                      id: profile.id,
+                      state: true
+                    });
+                  }}
+                  tooltipType="error"
+                  IconComponent={removing.id !== profile.id ? actionIcons.remove : removing.state ? actionIcons.spinner : actionIcons.remove}
+                />
+                <PanelHeaderAction
+                  className="profile__apply-profile"
+                  id={profile.id}
+                  tooltip={'tooltip.applyProfile'}
+                  onClick={() => applyProfile(profile.id)}
+                  IconComponent={actionIcons.apply}
+                />
+              </HeaderActionSection>
             </StyledProfilePanelHeader>
           </PanelWrapper>
         ))}
