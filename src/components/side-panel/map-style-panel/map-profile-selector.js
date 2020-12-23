@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { Save2, Play, Spinner } from 'components/common/icons';
@@ -106,17 +106,14 @@ const defaultActionIcons = {
 
 function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
   const MapProfileSelector = ({
-    profiles,
+    mapProfile,
     saveProfile,
     applyProfile,
     removeProfile,
     updateProfileLabel,
     actionIcons = defaultActionIcons
   }) => {
-    const [removing, setRemoving] = useState({
-      id: '',
-      state: false
-    });
+    const { profiles, isLoading, isSaving } = mapProfile;
 
     return (
       <div>
@@ -138,22 +135,16 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
                   className="profile__remove-profile"
                   id={profile.id}
                   tooltip={'tooltip.removeProfile'}
-                  onClick={() => {
-                    removeProfile(profile.id);
-                    setRemoving({
-                      id: profile.id,
-                      state: true
-                    });
-                  }}
+                  onClick={() => removeProfile(profile.id)}
                   tooltipType="error"
-                  IconComponent={removing.id !== profile.id ? actionIcons.remove : removing.state ? actionIcons.spinner : actionIcons.remove}
+                  IconComponent={profile.isRemoving ? actionIcons.spinner : actionIcons.remove}
                 />
                 <PanelHeaderAction
                   className="profile__apply-profile"
                   id={profile.id}
                   tooltip={'tooltip.applyProfile'}
                   onClick={() => applyProfile(profile.id)}
-                  IconComponent={actionIcons.apply}
+                  IconComponent={profile.isApplying ? actionIcons.spinner : actionIcons.apply}
                 />
               </HeaderActionSection>
             </StyledProfilePanelHeader>
@@ -165,7 +156,7 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
             onClick={() => saveProfile()}
             primary
           >
-            <Save2 height="12px" />
+            {isLoading || isSaving ? <Spinner /> : <Save2 height="12px" />}
             <FormattedMessage id={'mapManager.saveMapProfile'} />
           </Button>
         </SidePanelSection>

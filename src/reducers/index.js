@@ -28,19 +28,22 @@ export {
   visStateLens,
   mapStateLens,
   uiStateLens,
-  mapStyleLens
+  mapStyleLens,
+  mapProfileLens
 } from './core';
 
 // Each individual reducer
 export {default as visStateReducer} from './vis-state';
 export {default as mapStateReducer} from './map-state';
 export {default as mapStyleReducer} from './map-style';
+export {default as mapProfileReducer} from './map-profile';
 
 // reducer updaters
 export * as visStateUpdaters from './vis-state-updaters';
 export * as mapStateUpdaters from './map-state-updaters';
 export * as mapStyleUpdaters from './map-style-updaters';
 export * as uiStateUpdaters from './ui-state-updaters';
+export * as mapProfileUpdaters from './map-profile-updaters';
 
 // This will be deprecated
 export * as combineUpdaters from './combined-updaters';

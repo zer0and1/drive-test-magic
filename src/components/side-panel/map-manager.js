@@ -41,7 +41,7 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
   class MapManager extends Component {
     static propTypes = {
       mapStyle: PropTypes.object.isRequired,
-      profiles: PropTypes.arrayOf(PropTypes.any).isRequired,
+      mapProfile: PropTypes.object.isRequired,
       onConfigChange: PropTypes.func.isRequired,
       onStyleChange: PropTypes.func.isRequired,
       showAddMapStyleModal: PropTypes.func.isRequired
@@ -84,7 +84,7 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
     }
 
     render() {
-      const {mapStyle, intl, profiles} = this.props;
+      const {mapStyle, intl, mapProfile} = this.props;
       const editableLayers = DEFAULT_LAYER_GROUPS.map(lg => lg.slug);
       const hasBuildingLayer = mapStyle.visibleLayerGroups['3d building'];
       const colorSetSelector = createSelector(
@@ -133,7 +133,7 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
               </Button>
             </SidePanelSection>
             <MapProfileSelector
-              profiles={profiles}
+              mapProfile={mapProfile}
               saveProfile={this._saveProfile}
               applyProfile={this._applyProfile}
               removeProfile={this._removeProfile}

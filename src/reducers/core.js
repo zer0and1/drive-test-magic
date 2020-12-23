@@ -25,6 +25,7 @@ import {mapStateReducerFactory} from './map-state';
 import {mapStyleReducerFactory} from './map-style';
 import {uiStateReducerFactory} from './ui-state';
 import {providerStateReducerFactory} from './provider-state';
+import {mapProfileReducerFactory} from './map-profile';
 
 import composers from './composers';
 
@@ -34,7 +35,8 @@ const combined = (initialState = {}) =>
     mapState: mapStateReducerFactory(initialState.mapState),
     mapStyle: mapStyleReducerFactory(initialState.mapStyle),
     uiState: uiStateReducerFactory(initialState.uiState),
-    providerState: providerStateReducerFactory(initialState.providerState)
+    providerState: providerStateReducerFactory(initialState.providerState),
+    mapProfile: mapProfileReducerFactory(initialState.mapProfile)
   });
 
 export const coreReducerFactory = (initialState = {}) => (state, action) => {
@@ -90,3 +92,5 @@ export const uiStateLens = reduxState => ({uiState: reduxState.uiState});
  * @public
  */
 export const providerStateLens = reduxState => ({providerState: reduxState.providerState});
+
+export const mapProfileLens = reduxState => ({mapState: reduxState.mapProfile});

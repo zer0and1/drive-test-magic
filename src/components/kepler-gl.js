@@ -248,6 +248,7 @@ function KeplerGlFactory(
         uiState,
         visState,
         providerState,
+        mapProfile,
 
         // actions,
         visStateActions,
@@ -277,8 +278,7 @@ function KeplerGlFactory(
         marked,
         mousePos,
         animationConfig,
-        mapInfo,
-        profiles
+        mapInfo
       } = visState;
 
       const notificationPanelFields = {
@@ -309,7 +309,7 @@ function KeplerGlFactory(
         height: this.props.height - DIMENSIONS.sidePanel.margin.top - DIMENSIONS.sidePanel.margin.bottom,
         availableProviders,
         mapSaved: providerState.mapSaved,
-        profiles
+        mapProfile
       };
 
       const mapFields = {
@@ -452,6 +452,7 @@ function mapStateToProps(state = {}, props) {
     mapState: state.mapState,
     uiState: state.uiState,
     providerState: state.providerState,
+    mapProfile: state.mapProfile,
     sidePanelWidth: DIMENSIONS.sidePanel.width[state.uiState.activeSidePanel]
   };
 }

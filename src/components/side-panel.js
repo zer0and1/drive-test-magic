@@ -107,7 +107,7 @@ export default function SidePanelFactory(
       interactionConfig: PropTypes.object.isRequired,
       layerBlending: PropTypes.string.isRequired,
       layers: PropTypes.arrayOf(PropTypes.any).isRequired,
-      profiles: PropTypes.arrayOf(PropTypes.any).isRequired,
+      mapProfile: PropTypes.object.isRequired,
       layerClasses: PropTypes.object.isRequired,
       mapStyle: PropTypes.object.isRequired,
       width: PropTypes.number.isRequired,
@@ -184,7 +184,7 @@ export default function SidePanelFactory(
         filters,
         minions,
         layers,
-        profiles,
+        mapProfile,
         layerBlending,
         layerClasses,
         uiState,
@@ -320,7 +320,7 @@ export default function SidePanelFactory(
                   />
                 )}
                 {activeSidePanel === 'map' && (
-                  <MapManager {...mapManagerActions} mapStyle={this.props.mapStyle} profiles={profiles} />
+                  <MapManager {...mapManagerActions} mapStyle={this.props.mapStyle} mapProfile={mapProfile} />
                 )}
                 {(customPanels || []).find(p => p.id === activeSidePanel) ? (
                   <CustomPanels
