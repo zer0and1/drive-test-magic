@@ -93,3 +93,4 @@ export {default as Warning} from './warning';
 export {default as DrawPolygon} from './draw-polygon';
 export {default as Polygon} from './polygon';
 export {default as Rectangle} from './rectangle';
+export {default as Spinner} from './spinner';
