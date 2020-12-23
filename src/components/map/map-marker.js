@@ -29,18 +29,18 @@ const MARKER_HEIGHT = 84;
 const LABLE_MAX_WIDTH = 150;
 
 const StyledMarker = styled(Place)`
-  left: ${props => props.x  - MARKER_WIDTH / 2}px;
-  top: ${props => props.y - MARKER_HEIGHT}px;
+  left: ${props => props.x  - MARKER_WIDTH * props.scale / 2}px;
+  top: ${props => props.y - MARKER_HEIGHT * props.scale}px;
   position: absolute;
 `;
 
 const StyledLabel = styled.div`
   position: absolute;
-  left: ${props => props.x  - LABLE_MAX_WIDTH / 2}px;
+  left: ${props => props.x  - LABLE_MAX_WIDTH * props.scale / 2}px;
   top: ${props => props.y}px;
-  width: ${LABLE_MAX_WIDTH}px;
+  width: ${props => LABLE_MAX_WIDTH * props.scale}px;
   color: ${props => props.color};
-  font-size: 15px;
+  font-size: ${props => Math.floor(15 * props.scale)}px;
   font-weight: bold;
   text-align: center;
   white-space: nowrap;
@@ -64,13 +64,15 @@ export default function MapMarkerFactory() {
     }
 
     render() {
-      const {color, x, y, info: {label}} = this.props;
-      
+      const {mapW, color, x, y, info: {label}} = this.props;
+      const scale = mapW / 1920;
+      console.log(mapW);
+
       return (
         <div>
-          <StyledMarker color={color} x={x} y={y} />
+          <StyledMarker color={color} x={x} y={y} scale={scale} />
           {label && (
-            <StyledLabel color={color} x={x} y={y}>
+            <StyledLabel color={color} x={x} y={y} scale={scale}>
               {label}
             </StyledLabel>
           )}

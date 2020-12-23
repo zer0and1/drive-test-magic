@@ -60,7 +60,6 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     };
 
     minionGridRef = createRef();
-    detailGridRef = createRef();
     timeoutId = 0;
     panelRatio = 0.2;
 
@@ -69,11 +68,9 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     };
 
     datetimeRenderer(row, columnproperties, value) {
-      const date = moment(value);
-      const now = moment.tz(new Date(), 'Europe/Paris');
-      const diff = now.diff(date, 'seconds');
-
-      console.log(now.format(), diff);
+      const date = moment(value).format('YYYY-MM-DD HH:mm:ss');
+      const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+      const diff = moment(now).diff(moment(date), 'seconds');
 
       if (diff < 120) {
         const mins = Math.floor(diff / 60);
@@ -82,11 +79,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         return this.strRenderer(row, columnproperties, mins ? `${mins}m ${secs}s ago` : `${secs}s ago`);
       }
 
-      return this.strRenderer(row, columnproperties, date.format("YYYY-MM-DD HH:mm:ss"));
+      return this.strRenderer(row, columnproperties, date);
     };
 
     state = {
-      trip: [],
       details: {},
     };
 
@@ -108,34 +104,6 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       { text: 'Last Fix', datafield: 'gps_fix_lastupdate', align: 'center', cellsalign: 'center', cellsrenderer: this.datetimeRenderer.bind(this), width: '35%' },
       { text: 'Fix', datafield: 'gps_fix', cellsalign: 'center', columntype: 'checkbox', align: 'center', width: '10%' },
       { datafield: 'id', hidden: true }
-    ];
-
-    detailSource = {
-      localdata: [],
-      datatype: 'array',
-      datafields: [
-        { name: 'id', type: 'string' },
-        { name: 'parentid', type: 'string' },
-        { name: 'field', type: 'string' },
-        { name: 'value', type: 'string' },
-      ],
-      hierarchy:
-      {
-        keyDataField: { name: 'id' },
-        parentDataField: { name: 'parentid' }
-      },
-      id: 'id',
-    };
-    detailAdapter = new jqx.dataAdapter(this.detailSource);
-    detailColumns = [
-      {
-        text: 'Group', datafield: 'id', cellsalign: 'center', align: 'center', width: '20%',
-        cellsrenderer: (...args) => {
-          return args[3].field == null ? args[0] : '';
-        }
-      },
-      { text: 'Field', datafield: 'field', cellsalign: 'center', align: 'center', width: '40%' },
-      { text: 'Value', datafield: 'value', cellsalign: 'center', align: 'center', width: '40%' },
     ];
 
     constructor(props) {

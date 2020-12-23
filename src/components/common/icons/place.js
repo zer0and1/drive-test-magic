@@ -26,7 +26,8 @@ export default class Place extends Component {
   static propTypes = {
     /** Set the height of the icon, ex. '16px' */
     height: PropTypes.string,
-    color: PropTypes.string
+    color: PropTypes.string,
+    scale: PropTypes.number
   };
 
   static defaultProps = {
@@ -35,12 +36,17 @@ export default class Place extends Component {
     predefinedClassName: 'data-ex-icons-place',
     viewBox: '0 0 56 84',
     color: 'yellow',
+    scale: 1
   };
 
   render() {
+    const {width, height, scale, color} = this.props;
+    const sw = parseInt(width) * scale;
+    const sh = parseInt(height) * scale;
+
     return (
-      <Base {...this.props}>
-        <path fill={this.props.color} d="M 28.0238 0 c -15.4644 0 -28 12.5356 -28 28 c 0 4.9728 1.3356 9.625 3.6092 13.671 c 0.378 0.672 0.7742 1.3342 1.204 1.9712 l 23.1882 40.3578 l 23.1882 -40.3578 c 0.357 -0.5292 0.665 -1.0878 0.9842 -1.6408 l 0.2212 -0.329 c 2.2722 -4.046 3.6078 -8.6968 3.6078 -13.671 c 0 -15.4644 -12.537 -28 -28 -28 z m 0 14 c 7.7322 0 14 6.2678 14 14 c 0 7.7322 -6.2678 14 -14 14 c -7.7322 0 -14 -6.2678 -14 -14 c 0 -7.7322 6.2678 -14 14 -14 z"/>
+      <Base {...{...this.props, width: `${sw}px`, height: `${sh}px`, viewBox: `0 0 ${sw} ${sh}`}}>
+        <path fill={color} transform={`scale(${scale})`} d="M 28.0238 0 c -15.4644 0 -28 12.5356 -28 28 c 0 4.9728 1.3356 9.625 3.6092 13.671 c 0.378 0.672 0.7742 1.3342 1.204 1.9712 l 23.1882 40.3578 l 23.1882 -40.3578 c 0.357 -0.5292 0.665 -1.0878 0.9842 -1.6408 l 0.2212 -0.329 c 2.2722 -4.046 3.6078 -8.6968 3.6078 -13.671 c 0 -15.4644 -12.537 -28 -28 -28 z m 0 14 c 7.7322 0 14 6.2678 14 14 c 0 7.7322 -6.2678 14 -14 14 c -7.7322 0 -14 -6.2678 -14 -14 c 0 -7.7322 6.2678 -14 14 -14 z"/>
       </Base>
     );
   }
