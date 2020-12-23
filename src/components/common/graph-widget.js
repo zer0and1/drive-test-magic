@@ -61,8 +61,6 @@ GraphWidgetFactory.deps = [LineChartFactory]
 function GraphWidgetFactory(LineChart) {
   class GraphWidget extends Component {
 
-    _onClose = () => this.props.showGraphState(this.props.name);
-
     render() {
       const {
         title,
@@ -80,7 +78,7 @@ function GraphWidgetFactory(LineChart) {
             </StyledTitle>
             <CenterFlexbox>
                 <IconRoundSmall>
-                  <Close height="12px" onClick={this._onClose} />
+                  <Close height="12px" onClick={this.props.showGraphState} />
                 </IconRoundSmall>
               </CenterFlexbox>
           </TopSectionWrapper>
