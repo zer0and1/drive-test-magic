@@ -66,7 +66,6 @@ export default function MapMarkerFactory() {
     render() {
       const {mapW, color, x, y, info: {label}} = this.props;
       const scale = mapW / 1920;
-      console.log(mapW);
 
       return (
         <div>

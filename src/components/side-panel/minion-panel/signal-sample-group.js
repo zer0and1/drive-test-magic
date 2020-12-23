@@ -43,7 +43,7 @@ function SignalSampleGroupFactory(MinionGroup) {
 
   const makeTimeLabel = (value) => {
     if (!value) {
-      return '';
+      return null;
     }
 
     const date = moment(value).format('YYYY-MM-DD HH:mm:ss');
@@ -57,11 +57,11 @@ function SignalSampleGroupFactory(MinionGroup) {
       return mins ? `${mins}m ${secs}s ago` : `${secs}s ago`;
     }
 
-    return '';
+    return null;
   };
 
   const SignalSampleGroup = ({ data }) => (
-    <MinionGroup groupIcon={Minion} label={`Signal Sample${makeTimeLabel(data.lastupdate) && ' - ' + makeTimeLabel(data.lastupdate)}`}>
+    <MinionGroup groupIcon={Minion} label={`Signal Sample${makeTimeLabel(data.lastupdate) ? ' - ' + makeTimeLabel(data.lastupdate) : ''}`}>
       <table style={{ tableLayout: 'fixed', width: '100%' }}>
         <tbody>
           <tr>
@@ -90,15 +90,15 @@ function SignalSampleGroupFactory(MinionGroup) {
           </tr>
           <tr>
             <td>DL Freq:</td>
-            <td>{data.freq_mhz_dl}{data.freq_mhz_dl && ' MHz'}</td>
+            <td>{data.freq_mhz_dl}{data.freq_mhz_dl != undefined && ' MHz'}</td>
             <td>UL Freq:</td>
-            <td>{data.freq_mhz_ul}{data.freq_mhz_ul && ' MHz'}</td>
+            <td>{data.freq_mhz_ul}{data.freq_mhz_ul != undefined && ' MHz'}</td>
           </tr>
           <tr>
             <td>DL Channel:</td>
-            <td>{data.dl_chan_bandwidth}{data.dl_chan_bandwidth && ' MHz'}</td>
+            <td>{data.dl_chan_bandwidth}{data.dl_chan_bandwidth != undefined && ' MHz'}</td>
             <td>UL Channel:</td>
-            <td>{data.ul_chan_bandwidth}{data.ul_chan_bandwidth && ' MHz'}</td>
+            <td>{data.ul_chan_bandwidth}{data.ul_chan_bandwidth != undefined && ' MHz'}</td>
           </tr>
           <tr>
             <td colSpan="4" style={{ height: '10px' }}></td>
@@ -111,7 +111,7 @@ function SignalSampleGroupFactory(MinionGroup) {
           </tr>
           <tr>
             <td>Target Ping:</td>
-            <td>{data.minion_target_ping_ms}{data.minion_target_ping_ms && ' ms'}</td>
+            <td>{data.minion_target_ping_ms}{data.minion_target_ping_ms != undefined && ' ms'}</td>
             <td></td>
             <td></td>
           </tr>
@@ -130,7 +130,7 @@ function SignalSampleGroupFactory(MinionGroup) {
             <td>{data.connection_type == 'LTE' ? 'SINR' : 'ECIO'}:</td>
             <td>{data.sinr_ecio != undefined && <ProgressBar value={data.sinr_ecio} prog={data.sinr_ecio_prog} level={data.sinr_ecio_level} />}</td>
           </tr>
-          {data.connection_type == 'LTE' && (
+          {data.connection_type == 'LTE' != undefined && (
             <tr>
               <td>CQI:</td>
               <td>{data.cqi != undefined && <ProgressBar value={data.cqi} prog={data.cqi_prog} level={data.cqi_level} />}</td>

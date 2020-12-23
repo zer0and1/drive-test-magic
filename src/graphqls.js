@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 
-export const GQL_GET_MINIONS = gql`
+export const GQL_GET_MINIONS = (minionId = '#') => gql`
 query MyQuery {
   signal_db_minions {
     id
@@ -8,37 +8,26 @@ query MyQuery {
     lastupdate
     gps_fix_lastupdate
     gps_fix
-  }
-}
-`;
-
-export const GQL_GET_MINION_DETAILS = row => gql`
-query MyQuery {
-  signal_db_minions(where: {id: {_eq: "${row.id}"}}) {
-    name
-    lastupdate
     session_id
     operation_mode
     longitude
     latitude
     gps_sat
     gps_precision
-    gps_fix_lastupdate
-    gps_fix
     command
     command_id
     command_id_ack
     sleep_interval
     aux
   }
-  signal_db_signal_samples(where:{minion_id: {_eq: "${row.name}"}, date: {}}, order_by: {date: desc}, limit: 1) {
+  signal_db_signal_samples(where:{minion_id: {_eq: "${minionId}"}, date: {}}, limit: 1) {
+    id
+    date
     minion_id
     mcc_mnc
     minion_dl_rate
     longitude
     latitude
-    id
-    date
     freq_mhz_ul
     freq_mhz_dl
     freq_band
@@ -65,8 +54,8 @@ query MyQuery {
     sinr_ecio
     ul_chan_bandwidth
   }
-}`;
-
+}
+`;
 
 export const GQL_GET_SIGNAL_SAMPLES = gql`
 query MyQuery {

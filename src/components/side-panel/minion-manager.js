@@ -52,7 +52,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
   class MinionManager extends Component {
     static propTypes = {
       updateVisData: PropTypes.func.isRequired,
-      removeDataset: PropTypes.func.isRequired,
+      onMouseMove: PropTypes.func.isRequired,
       updateMap: PropTypes.func.isRequired,
       addMarker: PropTypes.func.isRequired,
       removeMarker: PropTypes.func.isRequired,
@@ -62,13 +62,14 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     minionGridRef = createRef();
     timeoutId = 0;
     panelRatio = 0.2;
+    selectedMinionId = '#';
 
     strRenderer(row, columnproperties, value) {
       return `<div style='text-align: center; margin-top: 5px;'>${value}</div>`
     };
 
-    datetimeRenderer(row, columnproperties, value) {
-      const date = moment(value).format('YYYY-MM-DD HH:mm:ss');
+    convertToHRTime(dateString) {
+      const date = moment(dateString).format('YYYY-MM-DD HH:mm:ss');
       const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
       const diff = moment(now).diff(moment(date), 'seconds');
 
@@ -76,10 +77,14 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         const mins = Math.floor(diff / 60);
         const secs = diff % 60;
 
-        return this.strRenderer(row, columnproperties, mins ? `${mins}m ${secs}s ago` : `${secs}s ago`);
+        return mins ? `${mins}m ${secs}s ago` : `${secs}s ago`;
       }
 
-      return this.strRenderer(row, columnproperties, date);
+      return date;
+    }
+
+    datetimeRenderer(row, columnproperties, value) {
+      return this.strRenderer(row, columnproperties, this.convertToHRTime(value));
     };
 
     state = {
@@ -122,92 +127,104 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       this._mounted = false;
     }
 
-    loadMinions(looping) {
+    loadMinions(looping, loadingDetails) {
       looping || $('#minion-grid').LoadingOverlay('show');
-
+    
       apolloClient
-        .query({ query: GQL_GET_MINIONS, fetchPolicy: 'network-only' })
+        .query({ query: GQL_GET_MINIONS(this.selectedMinionId), fetchPolicy: 'network-only' })
         .then(result => {
           looping || $('#minion-grid').LoadingOverlay('hide', true);
+          loadingDetails && $('#minion-group').LoadingOverlay('hide', true);
 
-          this.minionSource.localdata = result.data.signal_db_minions;
-          this.refs.minionGrid.updatebounddata();
-          this.timeoutId = this._mounted && window.setTimeout(this.loadMinions.bind(this), 15000, true);
-
-          const idx = this.refs.minionGrid.getselectedrowindex();
-          if (idx < 0) {
+          if (this._mounted == false) {
             return;
           }
 
-          const row = this.refs.minionGrid.getrowdata(idx);
-          this._mounted && this.minionRowselect({ args: { row }, looping: true });
-        });
-    }
+          this.minionSource.localdata = result.data.signal_db_minions;
+          this.refs.minionGrid.updatebounddata();
+          // this.timeoutId = setTimeout(this.loadMinions.bind(this), 2000, true, false);
+          this.loadMinions(true, false);
+          
+          const idx = this.refs.minionGrid.getselectedrowindex();
+          const minionDetails = result.data.signal_db_minions?.[idx];
+          const sampleDetails = result.data.signal_db_signal_samples?.[0];
+          
+          if (idx < 0 || !sampleDetails) {
+            return;
+          }
 
-    minionRowselect({ args, looping }) {
-      looping || $('#minion-group').LoadingOverlay('show');
-
-      const { row } = args;
-      apolloClient
-        .query({
-          query: GQL_GET_MINION_DETAILS(row),
-          fetchPolicy: 'network-only'
-        })
-        .then(result => {
-          looping || $('#minion-group').LoadingOverlay('hide', true);
-
-          const minionData = result.data.signal_db_minions?.[0];
-          const sampleData = result.data.signal_db_signal_samples?.[0];
-
-          const calcLevel = (val, factor) => {
-            const map = factor == 'sinr_ecio' ? SIGNAL_QUALITY[sampleData.connection_type == 'LTE' ? 'sinr' : 'ecio'] : SIGNAL_QUALITY[factor];
-
-            for (let i = 1; i < 5; i++) {
-              if (parseInt(val) >= parseInt(map[i])) {
-                return {
-                  [factor + '_level']: i - 1,
-                  [factor + '_prog']: (4 - i) * 25 + 25 * (val - map[i]) / (map[i - 1] - map[i])
-                };
-              }
-            }
-
-            return {
-              [factor + '_level']: 4,
-              [factor + '_prog']: 0
-            };
-          };
-
+          const connectionType = sampleDetails.connection_type;
+          
           this.setState({
             details: {
-              ...minionData,
-              ...sampleData,
-              ...calcLevel(sampleData.rssi, 'rssi'),
-              ...calcLevel(sampleData.rsrq, 'rsrq'),
-              ...calcLevel(sampleData.rsrp_rscp, 'rsrp_rscp'),
-              ...calcLevel(sampleData.sinr_ecio, 'sinr_ecio'),
+              ...minionDetails,
+              ...sampleDetails,
+              ...this.calcLevel(sampleDetails.rssi, 'rssi', connectionType),
+              ...this.calcLevel(sampleDetails.rsrq, 'rsrq', connectionType),
+              ...this.calcLevel(sampleDetails.rsrp_rscp, 'rsrp_rscp', connectionType),
+              ...this.calcLevel(sampleDetails.sinr_ecio, 'sinr_ecio', connectionType),
               cqi: 0,
             }
           });
 
-          this.trackMinion(sampleData);
+          this.trackMinion();
         });
     }
 
-    trackMinion(data) {
-      const { latitude, longitude } = data;
-      this.props.addMarker({ center: true, lng: longitude, lat: latitude, color: 'red', info: { label: data.minion_id } });
+    calcLevel(val, factor, type) {
+      let quality = [];
+
+      if (factor == 'sinr_ecio') {
+        quality = SIGNAL_QUALITY[type == 'LTE' ? 'sinr' : 'ecio'];
+      }
+      else {
+        quality = SIGNAL_QUALITY[factor];
+      }
+      
+      const lvls = quality.length - 1;
+
+      for (let i = 1; i <= lvls; i++) {
+        if (parseInt(val) >= parseInt(quality[i])) {
+          return {
+            [factor + '_level']: i - 1,
+            [factor + '_prog']: (lvls - i) * 25 + 25 * (val - quality[i]) / (quality[i - 1] - quality[i])
+          };
+        }
+      }
+
+      return {
+        [factor + '_level']: lvls,
+        [factor + '_prog']: 0
+      };
+    };
+
+    trackMinion() {
+      const { latitude, longitude, minion_id } = this.state.details;
+      
+      this.props.onMouseMove({ point: [0, 0], lngLat: [longitude, latitude]});
+      this.props.addMarker({ 
+        center: true, 
+        lng: longitude, 
+        lat: latitude, 
+        color: 'red', 
+        info: { 
+          label: minion_id 
+        } 
+      });
       this.props.updateMap({
         latitude,
         longitude,
-        pitch: 0,
-        bearing: 0,
-        transitionDuration: 1000,
-        transitionInterpolator: new FlyToInterpolator()
       });
     }
 
     onPanelResize({ args }) {
       this.panelRatio = args.panels[0].size / this.props.height;
+    }
+
+    minionRowselect({args: {row: {name}}}) {
+      this.selectedMinionId = name;
+      $('#minion-group').LoadingOverlay('show');
+      this.loadMinions(true, true);
     }
 
     render() {

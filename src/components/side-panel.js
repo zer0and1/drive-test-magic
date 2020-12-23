@@ -286,7 +286,7 @@ export default function SidePanelFactory(
                     width={this.props.width}
                     height={this.props.height - 54/*header*/ - 30 /*toggler*/ - 16 /*top-padding*/ - 48/*title*/}
                     updateVisData={visStateActions.updateVisData}
-                    removeDataset={visStateActions.removeDataset}
+                    onMouseMove={visStateActions.onMouseMove}
                     updateMap={mapStateActions.updateMap}
                     transitionDuration={1000}
                     addMarker={visStateActions.addMarker}
