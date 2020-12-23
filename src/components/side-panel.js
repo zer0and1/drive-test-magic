@@ -107,6 +107,7 @@ export default function SidePanelFactory(
       interactionConfig: PropTypes.object.isRequired,
       layerBlending: PropTypes.string.isRequired,
       layers: PropTypes.arrayOf(PropTypes.any).isRequired,
+      profiles: PropTypes.arrayOf(PropTypes.any).isRequired,
       layerClasses: PropTypes.object.isRequired,
       mapStyle: PropTypes.object.isRequired,
       width: PropTypes.number.isRequired,
@@ -183,6 +184,7 @@ export default function SidePanelFactory(
         filters,
         minions,
         layers,
+        profiles,
         layerBlending,
         layerClasses,
         uiState,
@@ -287,6 +289,8 @@ export default function SidePanelFactory(
                     removeDataset={visStateActions.removeDataset}
                     updateMap={mapStateActions.updateMap}
                     transitionDuration={1000}
+                    addMarker={visStateActions.addMarker}
+                    removeMarker={visStateActions.removeMarker}
                   />
                 )}
                 {activeSidePanel === 'layer' && (
@@ -316,7 +320,7 @@ export default function SidePanelFactory(
                   />
                 )}
                 {activeSidePanel === 'map' && (
-                  <MapManager {...mapManagerActions} mapStyle={this.props.mapStyle} />
+                  <MapManager {...mapManagerActions} mapStyle={this.props.mapStyle} profiles={profiles} />
                 )}
                 {(customPanels || []).find(p => p.id === activeSidePanel) ? (
                   <CustomPanels

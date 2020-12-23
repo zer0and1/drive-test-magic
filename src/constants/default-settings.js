@@ -845,13 +845,6 @@ export const GEOCODER_GEO_OFFSET = 0.05;
 export const GEOCODER_ICON_COLOR = [255, 0, 0];
 export const GEOCODER_ICON_SIZE = 80;
 
-// Minion Tracker
-export const MINION_TRACKER_DATASET_NAME = 'minion_tracker_dataset';
-export const MINION_TRACKER_LAYER_ID = 'minion_tracker_layer';
-export const MINION_TRACKER_GEO_OFFSET = 0.05;
-export const MINION_TRACKER_ICON_COLOR = [255, 0, 0];
-export const MINION_TRACKER_ICON_SIZE = 80;
-
 // We could use directly react-map-gl-draw EditorMode but this would
 // create a direct dependency with react-map-gl-draw
 // Created this map to be independent from react-map-gl-draw
@@ -935,4 +928,14 @@ export const AUTH_TOKENS = {
   DROPBOX_CLIENT_ID: process.env.DropboxClientId, // eslint-disable-line
   EXPORT_MAPBOX_TOKEN: process.env.MapboxExportToken, // eslint-disable-line
   CARTO_CLIENT_ID: process.env.CartoClientId // eslint-disable-line
+};
+
+
+export const SIGNAL_QUALITY = {
+  rssi: [-44, -65, -75, -85, -100],
+  sinr: [30, 12.5, 10, 7, -12],
+  rsrq: [-3, -5, -9, -12, -20],
+  rsrp_rscp: [-44, -84, -102, -111, -130],
+  ecio: [0, -2, -5, -10, -20],
+  cqi: [0, 0, 0, 0, 0]
 };

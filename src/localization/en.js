@@ -167,6 +167,8 @@ export default {
   mapManager: {
     mapStyle: 'Map style',
     addMapStyle: 'Add Map Style',
+    mapProfile: 'Map profile',
+    saveMapProfile: 'Save Map Profile',
     '3dBuildingColor': '3D Building Color'
   },
   layerConfiguration: {
@@ -211,7 +213,9 @@ export default {
     speed: 'speed',
     play: 'play',
     pause: 'pause',
-    reset: 'reset'
+    reset: 'reset',
+    removeProfile: 'Remove profile',
+    applyProfile: 'Apply profile'
   },
   toolbar: {
     exportImage: 'Export Image',

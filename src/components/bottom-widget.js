@@ -25,6 +25,7 @@ import TimeWidgetFactory from './filters/time-widget';
 import GraphWidgetFactory from './common/graph-widget';
 import AnimationControlFactory from './common/animation-control/animation-control';
 import AnimationControllerFactory from './common/animation-control/animation-controller';
+import MinionSessionFactory from './minion-session';
 import {ANIMATION_WINDOW, FILTER_TYPES} from 'constants';
 
 const propTypes = {
@@ -131,14 +132,16 @@ BottomWidgetFactory.deps = [
   TimeWidgetFactory,
   AnimationControlFactory,
   FilterAnimationControllerFactory,
-  LayerAnimationControllerFactory
+  LayerAnimationControllerFactory,
+  MinionSessionFactory
 ];
 export default function BottomWidgetFactory(
   GraphWidget,
   TimeWidget,
   AnimationControl,
   FilterAnimationController,
-  LayerAnimationController
+  LayerAnimationController,
+  MinionSession
 ) {
   const BottomWidget = props => {
     const {
@@ -176,13 +179,18 @@ export default function BottomWidgetFactory(
     const showFloatingTimeDisplay = !animatableLayer.length;
     const showAnimationControl = animatableLayer.length && readyToAnimation;
     const showTimeWidget = enlargedFilterIdx > -1 && Object.keys(datasets).length > 0;
+    const showSessionWidget = uiState.activeSidePanel == 'minion';
 
     return (
       <BottomWidgetContainer
         width={Math.min(maxWidth, enlargedFilterWidth)}
         className="bottom-widget--container"
-        hasPadding={showAnimationControl || showTimeWidget || isGraphShow}
+        hasPadding={showTimeWidget || showAnimationControl || showSessionWidget || isGraphShow}
       >
+        {showSessionWidget ? (
+          <MinionSession />
+        ) : null}
+        
         <LayerAnimationController
           animationConfig={animationConfig}
           setLayerAnimationTime={visStateActions.setLayerAnimationTime}

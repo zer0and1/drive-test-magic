@@ -53,14 +53,10 @@ const KeplerGl = require('./components').injectComponents([
   replacePanelHeader()
 ]);
 
-// Sample data
-import minionConfig from './map-config/minion';
-import {addDataToMap, addNotification} from './actions/index.js';
-import {getFieldsFromData, processCsvData, processGeojson} from './processors';
+import {addNotification} from './actions/index.js';
 
 import { ApolloProvider } from '@apollo/client';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
-import { gql } from '@apollo/client';
 
 const client = new ApolloClient({
   uri: 'https://charming-hawk-93.hasura.app/v1/graphql',
@@ -124,8 +120,6 @@ class App extends Component {
       );
       return;
     }
-
-    // this._loadData();
   }
 
   _showBanner = () => {
@@ -161,115 +155,6 @@ class App extends Component {
         this._addNotifications(notifications.slice(1));
       }, timeout);
     }
-  }
-
-  _loadData() {
-    $('#kepler-container').LoadingOverlay('show');
-
-    client.query({
-        query: gql`
-          query MyQuery {
-            signal_db_signal_samples_view {
-              aux
-              bs_latitude
-              bs_longitude
-              cell_id
-              cell_name
-              connection_state
-              connection_type
-              cqi
-              date
-              dl_chan_bandwidth
-              duplex_mode
-              enodeb_id
-              freq_arfcn
-              freq_band
-              freq_mhz_dl
-              freq_mhz_ul
-              latitude
-              longitude
-              mcc_mnc
-              minion_dl_rate
-              minion_id
-              minion_module_firmware
-              minion_module_type
-              minion_state
-              minion_target_ping_ms
-              minion_ul_rate
-              pcid
-              rsrp_rscp
-              rsrq
-              rssi
-              session_id
-              sinr_ecio
-              ul_chan_bandwidth
-            }
-          }
-        `
-      })
-      .then(result => {
-        const data = result.data.signal_db_signal_samples_view;
-        const order = [
-          'aux',
-          'bs_latitude',
-          'bs_longitude',
-          'cell_id',
-          'cell_name',
-          'connection_state',
-          'connection_type',
-          'cqi',
-          'date',
-          'dl_chan_bandwidth',
-          'duplex_mode',
-          'enodeb_id',
-          'freq_arfcn',
-          'freq_band',
-          'freq_mhz_dl',
-          'freq_mhz_ul',
-          'latitude',
-          'longitude',
-          'mcc_mnc',
-          'minion_dl_rate',
-          'minion_id',
-          'minion_module_firmware',
-          'minion_module_type',
-          'minion_state',
-          'minion_target_ping_ms',
-          'minion_ul_rate',
-          'pcid',
-          'rsrp_rscp',
-          'rsrq',
-          'rssi',
-          'session_id',
-          'sinr_ecio',
-          'ul_chan_bandwidth'
-        ];
-        const fields = getFieldsFromData(data, order);
-        const rows = new Array;
-
-        data.forEach(item => {
-          rows.push(order.map(field => item[field]));
-        });
-
-        this.props.dispatch(
-          addDataToMap({
-            datasets: {
-              info: {
-                label: 'Signal Samples',
-                id: 'signal_sample_data'
-              },
-              data: { fields, rows }
-            },
-            options: {
-              centerMap: true,
-              readOnly: false
-            },
-            config: minionConfig
-          })
-        );
-
-        $('#kepler-container').LoadingOverlay('hide', true);
-      })
   }
 
   _toggleCloudModal = () => {

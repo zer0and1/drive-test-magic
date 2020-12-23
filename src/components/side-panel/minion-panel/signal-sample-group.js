@@ -1,13 +1,68 @@
 import React from 'react';
 import MinionGroupFactory from './minion-group';
 import { Minion } from 'components/common/icons';
+import styled from 'styled-components';
+import moment from 'moment-timezone';
+
+const StyledProgBarWrapper = styled.div`
+  display: block;
+  float: left;
+  background-color: ${props => props.theme.panelBackgroundHover};
+  height: 15px;
+  width: 50px;
+  margin-top: 1px;
+`;
+
+const COLOR_LEVEL_MAP = ['#22c521', '#cfd02e', '#de7a20', '#a82f31'];
+
+const StyledProgBar = styled.span`
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  width: ${props => props.prog}%;
+  background-color: ${props => COLOR_LEVEL_MAP[props.level]}
+`;
+
+const StyledLeftDiv = styled.div`
+  padding-left: 4px;
+  float: left;
+`;
+
+const ProgressBar = ({ value, prog, level }) => (
+  <>
+    <StyledProgBarWrapper>
+      <StyledProgBar prog={prog} level={level} />
+    </StyledProgBarWrapper>
+    <StyledLeftDiv>{value}</StyledLeftDiv>
+  </>
+);
 
 SignalSampleGroupFactory.deps = [MinionGroupFactory];
 
 function SignalSampleGroupFactory(MinionGroup) {
+
+  const makeTimeLabel = (value) => {
+    if (!value) {
+      return '';
+    }
+
+    const date = moment(value).format('YYYY-MM-DD HH:mm:ss');
+    const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+    const diff = moment(now).diff(moment(date), 'seconds');
+
+    if (diff < 120) {
+      const mins = Math.floor(diff / 60);
+      const secs = diff % 60;
+
+      return mins ? `${mins}m ${secs}s ago` : `${secs}s ago`;
+    }
+
+    return '';
+  };
+
   const SignalSampleGroup = ({ data }) => (
-    <MinionGroup groupIcon={Minion} label="Signal Sample">
-      <table style={{tableLayout: 'fixed', width: '100%'}}>
+    <MinionGroup groupIcon={Minion} label={`Signal Sample${makeTimeLabel(data.lastupdate) && ' - ' + makeTimeLabel(data.lastupdate)}`}>
+      <table style={{ tableLayout: 'fixed', width: '100%' }}>
         <tbody>
           <tr>
             <td>Con State:</td>
@@ -40,10 +95,10 @@ function SignalSampleGroupFactory(MinionGroup) {
             <td>{data.freq_mhz_ul}{data.freq_mhz_ul && ' MHz'}</td>
           </tr>
           <tr>
-            <td>DL Bandwidth:</td>
-            <td>{data.dl_chan_bandwidth}</td>
-            <td>UL Band:</td>
-            <td>{data.ul_chan_bandwidth}</td>
+            <td>DL Channel:</td>
+            <td>{data.dl_chan_bandwidth}{data.dl_chan_bandwidth && ' MHz'}</td>
+            <td>UL Channel:</td>
+            <td>{data.ul_chan_bandwidth}{data.ul_chan_bandwidth && ' MHz'}</td>
           </tr>
           <tr>
             <td colSpan="4" style={{ height: '10px' }}></td>
@@ -65,16 +120,23 @@ function SignalSampleGroupFactory(MinionGroup) {
           </tr>
           <tr>
             <td>RSRP:</td>
-            <td>{data.rsrp_rscp}</td>
+            <td>{data.rsrp_rscp != undefined && <ProgressBar value={data.rsrp_rscp} prog={data.rsrp_rscp_prog} level={data.rsrp_rscp_level} />}</td>
             <td>RSSI:</td>
-            <td>{data.rssi}</td>
+            <td>{data.rssi != undefined && <ProgressBar value={data.rssi} prog={data.rssi_prog} level={data.rssi_level} />}</td>
           </tr>
           <tr>
             <td>RSRQ:</td>
-            <td>{data.rsrq}</td>
-            <td>ECIO:</td>
-            <td>{data.sinr_ecio}</td>
+            <td>{data.rsrq != undefined && <ProgressBar value={data.rsrq} prog={data.rsrq_prog} level={data.rsrq_level} />}</td>
+            <td>{data.connection_type == 'LTE' ? 'SINR' : 'ECIO'}:</td>
+            <td>{data.sinr_ecio != undefined && <ProgressBar value={data.sinr_ecio} prog={data.sinr_ecio_prog} level={data.sinr_ecio_level} />}</td>
           </tr>
+          {data.connection_type == 'LTE' && (
+            <tr>
+              <td>CQI:</td>
+              <td>{data.cqi != undefined && <ProgressBar value={data.cqi} prog={data.cqi_prog} level={data.cqi_level} />}</td>
+              <td colSpan="2"></td>
+            </tr>
+          )}
           <tr>
             <td colSpan="4" style={{ height: '10px' }}></td>
           </tr>

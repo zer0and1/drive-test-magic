@@ -20,6 +20,8 @@
 
 // vis-state-reducer
 import ActionTypes from 'constants/action-types';
+import { gql } from '@apollo/client';
+import { receiveMapConfig } from 'actions';
 
 /**
  * Update layer base config: dataId, label, column, isVisible
@@ -820,6 +822,169 @@ export function processFileContent(payload) {
     payload
   };
 }
+
+export function loadProfile() {
+  const query = gql`
+    query {
+      signal_db_profiles (
+        where: {
+          removed: {
+            _eq: false
+          }
+        }
+      ) {
+        id
+        label
+        config
+        removed
+      }
+    }
+  `;
+  return (dispatch) => {
+    apolloClient.query({
+      query,
+      fetchPolicy: 'network-only'
+    }).then(res => dispatch({
+      type: ActionTypes.LOAD_PROFILE,
+     profiles: res.data.signal_db_profiles
+    }));
+  }
+}
+
+export function saveProfile() {
+  const mutation = gql`
+    mutation($label: String!, $config: jsonb) {
+      insert_signal_db_profiles_one(
+        object: {
+          label: $label,
+          config: $config
+        }
+      ) {
+        id
+        label
+        config
+      }
+    }
+  `;
+
+  return (dispatch, getState) => {
+    apolloClient.mutate({
+      variables: {
+        label: "New Profile",
+        config: getState().main.keplerGl.map.visState.schema.getConfigToSave(
+          getState().main.keplerGl.map
+        )
+      },
+      mutation
+    }).then(res => dispatch({
+      type: ActionTypes.SAVE_PROFILE,
+      newProfile: res.data.insert_signal_db_profiles_one
+    }));
+  }
+}
+
+export function applyProfile(id) {
+  return (dispatch, getState) => {
+    const profile = getState().main.keplerGl.map.visState.profiles.find(profile => profile.id === id);
+    Promise.resolve(
+      dispatch(receiveMapConfig(getState().main.keplerGl.map.visState.schema.parseSavedConfig(profile.config)))
+    ).then(() => dispatch(loadProfile()));
+  }
+}
+
+export function removeProfile(id) {
+  const mutation = gql`
+    mutation {
+      update_signal_db_profiles_by_pk (
+        pk_columns: {
+          id: "${id}"
+        },
+        _set: {
+          removed: true
+        }
+      ) {
+        id
+        label
+        config
+        removed
+      }
+    }
+  `;
+
+  return (dispatch) => {
+    apolloClient.mutate({
+      mutation
+    }).then(res => {
+      if (res.data.update_signal_db_profiles_by_pk.removed) {
+        return dispatch({
+          type: ActionTypes.REMOVE_PROFILE,
+          id
+        });
+      }
+    });
+  }
+}
+
+export function updateProfileLabel(id, label) {
+  const mutation = gql`
+    mutation {
+      update_signal_db_profiles_by_pk (
+        pk_columns: {
+          id: "${id}"
+        },
+        _set: {
+          label: "${label}"
+        }
+      ) {
+        id
+        label
+        config
+        removed
+      }
+    }
+  `;
+
+  return (dispatch) => {
+    apolloClient.mutate({
+      mutation
+    }).then(res => {
+      if (res.data.update_signal_db_profiles_by_pk.label === label) {
+        return dispatch({
+          type: ActionTypes.UPDATE_PROFILE_LABEL,
+          id,
+          label
+        });
+      }
+    });
+  }
+}
+
+/**
+ * Add Marker
+ * @memberof visStateActions
+ * @param payload - the marker data
+ * @type {typeof import('./vis-state-actions').addMarker}
+ * @return action
+ */
+export function addMarker(payload) {
+  return {
+    type: ActionTypes.ADD_MARKER,
+    payload
+  };
+}
+
+/**
+ * Remove Marker
+ * @memberof visStateActions
+ * @type {typeof import('./vis-state-actions').removeMarker}
+ * @return action
+ */
+export function removeMarker() {
+  return {
+    type: ActionTypes.REMOVE_MARKER
+  };
+}
+
 
 /**
  * This declaration is needed to group actions in docs

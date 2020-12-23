@@ -274,9 +274,11 @@ function KeplerGlFactory(
         layerData,
         hoverInfo,
         clicked,
+        marked,
         mousePos,
         animationConfig,
-        mapInfo
+        mapInfo,
+        profiles
       } = visState;
 
       const notificationPanelFields = {
@@ -306,7 +308,8 @@ function KeplerGlFactory(
         width: this.props.sidePanelWidth,
         height: this.props.height - DIMENSIONS.sidePanel.margin.top - DIMENSIONS.sidePanel.margin.bottom,
         availableProviders,
-        mapSaved: providerState.mapSaved
+        mapSaved: providerState.mapSaved,
+        profiles
       };
 
       const mapFields = {
@@ -327,6 +330,7 @@ function KeplerGlFactory(
         interactionConfig,
         hoverInfo,
         clicked,
+        marked,
         mousePos,
         readOnly: uiState.readOnly,
         onDeckInitialized,

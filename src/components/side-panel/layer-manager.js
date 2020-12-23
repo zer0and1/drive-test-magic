@@ -46,50 +46,9 @@ import { LAYER_BLENDINGS } from 'constants/default-settings';
 import $ from 'jquery';
 import 'gasparesganga-jquery-loading-overlay';
 
-import { gql } from '@apollo/client';
+import { GQL_GET_SIGNAL_SAMPLES } from 'graphqls';
 import { getFieldsFromData } from 'processors';
 import { addDataToMap } from 'actions/index.js';
-import minionConfig from 'map-config/minion';
-
-const GQL_SIGNAL_SAMPLE = gql`
-query MyQuery {
-  signal_db_signal_samples_view(limit: 10) {
-    aux
-    bs_latitude
-    bs_longitude
-    cell_id
-    cell_name
-    connection_state
-    connection_type
-    cqi
-    date
-    dl_chan_bandwidth
-    duplex_mode
-    enodeb_id
-    freq_arfcn
-    freq_band
-    freq_mhz_dl
-    freq_mhz_ul
-    latitude
-    longitude
-    mcc_mnc
-    minion_dl_rate
-    minion_id
-    minion_module_firmware
-    minion_module_type
-    minion_state
-    minion_target_ping_ms
-    minion_ul_rate
-    pcid
-    rsrp_rscp
-    rsrq
-    rssi
-    session_id
-    sinr_ecio
-    ul_chan_bandwidth
-  }
-}
-`;
 
 const LayerBlendingSelector = ({ layerBlending, updateLayerBlending, intl }) => {
   const labeledLayerBlendings = Object.keys(LAYER_BLENDINGS).reduce(
@@ -212,9 +171,13 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
     }
 
     loadData() {
+      if (this.props.datasets.signal_sample_data) {
+        return;
+      }
+      
       $('#kepler-container').LoadingOverlay('show');
 
-      apolloClient.query({ query: GQL_SIGNAL_SAMPLE })
+      apolloClient.query({ query: GQL_GET_SIGNAL_SAMPLES })
         .then(result => {
           const data = result.data.signal_db_signal_samples_view;
           const order = ['aux', 'bs_latitude', 'bs_longitude', 'cell_id', 'cell_name', 'connection_state',
@@ -243,10 +206,29 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
                 centerMap: true,
                 readOnly: false
               },
-              config: minionConfig
+              // config: {
+              //   version: 'v1',
+              //   config: {
+              //     visState: {
+              //       layers: [
+              //         {
+              //           type: 'point',
+              //           config: {
+              //             dataId: 'signal_sample_data',
+              //             columns: {
+              //               lat: 'latitude',
+              //               lng: 'longitude'
+              //             },
+              //             isVisible: true
+              //           }
+              //         }
+              //       ]
+              //     }
+              //   }
+              // }
             })
           );
-
+          
           $('#kepler-container').LoadingOverlay('hide', true);
         })
     }

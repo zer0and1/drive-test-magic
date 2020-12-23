@@ -23,67 +23,19 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import styled from 'styled-components';
-import moment from 'moment';
+import moment from 'moment-timezone';
+import { FlyToInterpolator } from '@deck.gl/core';
 
+import $ from 'jquery';
+import JqxGrid, { jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxgrid';
+import JqxSplitter from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxsplitter';
+import 'gasparesganga-jquery-loading-overlay';
+
+import { GQL_GET_MINIONS, GQL_GET_MINION_DETAILS } from 'graphqls';
+import {SIGNAL_QUALITY} from 'constants/default-settings';
 import GPSGroupFactory from './minion-panel/gps-group';
 import SignalSampleGroupFactory from './minion-panel/signal-sample-group';
 import CommandGroupFactory from './minion-panel/command-group';
-
-import JqxGrid, { jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxgrid';
-import JqxSplitter from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxsplitter';
-import { gql } from '@apollo/client';
-import $ from 'jquery';
-import 'gasparesganga-jquery-loading-overlay';
-
-import { FlyToInterpolator } from '@deck.gl/core';
-import KeplerGlSchema from 'schemas';
-import Processors from 'processors';
-
-import {
-  MINION_TRACKER_DATASET_NAME,
-  MINION_TRACKER_LAYER_ID,
-  MINION_TRACKER_ICON_COLOR,
-  MINION_TRACKER_ICON_SIZE
-} from 'constants/default-settings';
-
-const MINION_TRAKER_ICON_LAYER = {
-  id: MINION_TRACKER_LAYER_ID,
-  type: 'trip',
-  config: {
-    label: 'Minion Tracker Layer',
-    color: MINION_TRACKER_ICON_COLOR,
-    dataId: MINION_TRACKER_DATASET_NAME,
-    columns: {
-      geojson: '_geojson'
-    },
-    isVisible: true,
-    hidden: false,
-    visConfig: {
-      radius: MINION_TRACKER_ICON_SIZE
-    }
-  }
-};
-
-const PARSED_CONFIG = KeplerGlSchema.parseSavedConfig({
-  version: 'v1',
-  config: {
-    visState: {
-      layers: [MINION_TRAKER_ICON_LAYER],
-    }
-  }
-});
-
-const GQL_GET_MINIONS = gql`
-  query MyQuery {
-    signal_db_minions {
-      id
-      name
-      lastupdate
-      gps_fix_lastupdate
-      gps_fix
-    }
-  }
-  `;
 
 const StyledMinionGroup = styled.div`
   ${props => props.theme.sidePanelScrollBar};
@@ -102,14 +54,13 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       updateVisData: PropTypes.func.isRequired,
       removeDataset: PropTypes.func.isRequired,
       updateMap: PropTypes.func.isRequired,
+      addMarker: PropTypes.func.isRequired,
+      removeMarker: PropTypes.func.isRequired,
       transitionDuration: PropTypes.number,
     };
 
     minionGridRef = createRef();
-    detailGridRef = createRef();
     timeoutId = 0;
-    prevLatitude = 0;
-    prevLongitude = 0;
     panelRatio = 0.2;
 
     strRenderer(row, columnproperties, value) {
@@ -117,15 +68,21 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     };
 
     datetimeRenderer(row, columnproperties, value) {
-      const date = new Date(value);
-      const now = new Date();
-      const diff = now - date;
+      const date = moment(value).format('YYYY-MM-DD HH:mm:ss');
+      const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+      const diff = moment(now).diff(moment(date), 'seconds');
 
-      return this.strRenderer(row, columnproperties, moment(date).format("YYYY-MM-DD HH:mm:ss"));
+      if (diff < 120) {
+        const mins = Math.floor(diff / 60);
+        const secs = diff % 60;
+
+        return this.strRenderer(row, columnproperties, mins ? `${mins}m ${secs}s ago` : `${secs}s ago`);
+      }
+
+      return this.strRenderer(row, columnproperties, date);
     };
 
     state = {
-      trip: [],
       details: {},
     };
 
@@ -149,34 +106,6 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       { datafield: 'id', hidden: true }
     ];
 
-    detailSource = {
-      localdata: [],
-      datatype: 'array',
-      datafields: [
-        { name: 'id', type: 'string' },
-        { name: 'parentid', type: 'string' },
-        { name: 'field', type: 'string' },
-        { name: 'value', type: 'string' },
-      ],
-      hierarchy:
-      {
-        keyDataField: { name: 'id' },
-        parentDataField: { name: 'parentid' }
-      },
-      id: 'id',
-    };
-    detailAdapter = new jqx.dataAdapter(this.detailSource);
-    detailColumns = [
-      {
-        text: 'Group', datafield: 'id', cellsalign: 'center', align: 'center', width: '20%',
-        cellsrenderer: (...args) => {
-          return args[3].field == null ? args[0] : '';
-        }
-      },
-      { text: 'Field', datafield: 'field', cellsalign: 'center', align: 'center', width: '40%' },
-      { text: 'Value', datafield: 'value', cellsalign: 'center', align: 'center', width: '40%' },
-    ];
-
     constructor(props) {
       super(props);
       this.minionRowselect = this.minionRowselect.bind(this);
@@ -184,21 +113,26 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     componentDidMount() {
-      this.loadMinions();
+      this.loadMinions(false);
     }
 
     componentWillUnmount() {
+      this.props.removeMarker();
       window.clearTimeout(this.timeoutId);
       this._mounted = false;
     }
 
-    loadMinions() {
+    loadMinions(looping) {
+      looping || $('#minion-grid').LoadingOverlay('show');
+
       apolloClient
         .query({ query: GQL_GET_MINIONS, fetchPolicy: 'network-only' })
         .then(result => {
+          looping || $('#minion-grid').LoadingOverlay('hide', true);
+
           this.minionSource.localdata = result.data.signal_db_minions;
           this.refs.minionGrid.updatebounddata();
-          this.timeoutId = this._mounted && window.setTimeout(this.loadMinions.bind(this), 15000);
+          this.timeoutId = this._mounted && window.setTimeout(this.loadMinions.bind(this), 15000, true);
 
           const idx = this.refs.minionGrid.getselectedrowindex();
           if (idx < 0) {
@@ -216,117 +150,63 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       const { row } = args;
       apolloClient
         .query({
-          query: gql`
-            query MyQuery {
-              signal_db_minions(where: {id: {_eq: "${row.id}"}}) {
-                name
-                lastupdate
-                session_id
-                operation_mode
-                longitude
-                latitude
-                gps_sat
-                gps_precision
-                gps_fix_lastupdate
-                gps_fix
-                command
-                command_id
-                command_id_ack
-                sleep_interval
-                aux
-              }
-              signal_db_signal_samples(where:{minion_id: {_eq: "${row.name}"}, date: {}}, order_by: {date: desc}, limit: ${looping ? 1 : 1000}) {
-                minion_id
-                mcc_mnc
-                minion_dl_rate
-                longitude
-                latitude
-                id
-                date
-                freq_mhz_ul
-                freq_mhz_dl
-                freq_band
-                freq_arfcn
-                enodeb_id
-                duplex_mode
-                dl_chan_bandwidth
-                aux
-                cell_id
-                connection_state
-                connection_type
-                cqi
-                minion_module_firmware
-                minion_module_type
-                minion_state
-                minion_target_ping_ms
-                minion_target_ping_sucess
-                minion_ul_rate
-                pcid
-                rsrp_rscp
-                rsrq
-                rssi
-                session_id
-                sinr_ecio
-                ul_chan_bandwidth
-              }
-            }`,
+          query: GQL_GET_MINION_DETAILS(row),
           fetchPolicy: 'network-only'
         })
         .then(result => {
-          $('#minion-group').LoadingOverlay('hide', true);
+          looping || $('#minion-group').LoadingOverlay('hide', true);
 
           const minionData = result.data.signal_db_minions?.[0];
           const sampleData = result.data.signal_db_signal_samples?.[0];
-          this.setState({ details: { ...minionData, ...sampleData } });
+
+          const calcLevel = (val, factor) => {
+            const map = factor == 'sinr_ecio' ? SIGNAL_QUALITY[sampleData.connection_type == 'LTE' ? 'sinr' : 'ecio'] : SIGNAL_QUALITY[factor];
+
+            for (let i = 1; i < 5; i++) {
+              if (parseInt(val) >= parseInt(map[i])) {
+                return {
+                  [factor + '_level']: i - 1,
+                  [factor + '_prog']: (4 - i) * 25 + 25 * (val - map[i]) / (map[i - 1] - map[i])
+                };
+              }
+            }
+
+            return {
+              [factor + '_level']: 4,
+              [factor + '_prog']: 0
+            };
+          };
+
+          this.setState({
+            details: {
+              ...minionData,
+              ...sampleData,
+              ...calcLevel(sampleData.rssi, 'rssi'),
+              ...calcLevel(sampleData.rsrq, 'rsrq'),
+              ...calcLevel(sampleData.rsrp_rscp, 'rsrp_rscp'),
+              ...calcLevel(sampleData.sinr_ecio, 'sinr_ecio'),
+              cqi: 0,
+            }
+          });
+
+          this.trackMinion(sampleData);
         });
     }
 
     trackMinion(data) {
-      const now = (new Date).getTime();
-      const sampleAnimateTrip = {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            properties: {
-              vendor: 'A',
-              value: 10
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: data.map((item, idx) => [item.longitude, item.latitude, 0, now - idx * 100]).reverse()
-            }
-          }
-        ]
-      };
-      this.props.removeDataset(MINION_TRACKER_DATASET_NAME);
-      this.props.updateVisData(
-        [{
-          data: Processors.processGeojson(sampleAnimateTrip),
-          info: {
-            id: MINION_TRACKER_DATASET_NAME,
-            label: MINION_TRACKER_DATASET_NAME
-          }
-        }],
-        {
-          // keepExistingConfig: true,
-          centerMap: true,
-          readOnly: false
-        },
-        PARSED_CONFIG
-      );
-
+      const { latitude, longitude } = data;
+      this.props.addMarker({ center: true, lng: longitude, lat: latitude, color: 'red', info: { label: data.minion_id } });
       this.props.updateMap({
-        latitude: data[0].latitude,
-        longitude: data[0].longitude,
+        latitude,
+        longitude,
         pitch: 0,
         bearing: 0,
-        transitionDuration: this.props.transitionDuration,
+        transitionDuration: 1000,
         transitionInterpolator: new FlyToInterpolator()
       });
     }
 
-    onPanelResize({args}) {
+    onPanelResize({ args }) {
       this.panelRatio = args.panels[0].size / this.props.height;
     }
 
@@ -338,11 +218,11 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
             theme={'metrodark'}
             width={this.props.width}
             height={this.props.height}
-            panels={[{ size: this.props.height * this.panelRatio }, { size: this.props.height * (1 - this.panelRatio) }]}
+            panels={[{ size: this.props.height * this.panelRatio, collapsible: false }, { size: this.props.height * (1 - this.panelRatio), collapsible: true }]}
             orientation={"horizontal"}
             onResize={this.onPanelResize.bind(this)}
           >
-            <div className={"splitter-panel"}>
+            <div className={"splitter-panel"} id="minion-grid">
               <JqxGrid
                 ref={'minionGrid'}
                 width={'100%'}
@@ -369,7 +249,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       );
     }
   }
-  
+
   const dispatchToProps = dispatch => ({ dispatch });
   const mapToProps = state => state.main.keplerGl;
 
