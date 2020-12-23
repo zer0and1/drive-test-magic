@@ -580,24 +580,34 @@ export class InteractionSchemaV1 extends Schema {
       : {};
   }
   load(interactionConfig) {
-    const modifiedConfig = interactionConfig;
+    let modifiedConfig = interactionConfig;
     Object.keys(interactionConfig).forEach(configType => {
       if (configType === 'tooltip') {
-        const fieldsToShow = modifiedConfig[configType].fieldsToShow;
+        let fieldsToShow = modifiedConfig[configType].fieldsToShow;
         if (!notNullorUndefined(fieldsToShow)) {
           return {[this.key]: modifiedConfig};
         }
         Object.keys(fieldsToShow).forEach(key => {
-          fieldsToShow[key] = fieldsToShow[key].map(fieldData => {
-            if (!fieldData.name) {
-              return {
-                name: fieldData,
-                format: null
-              };
-            }
-            return fieldData;
-          });
+          fieldsToShow = {
+            ...fieldsToShow,
+            [key]: fieldsToShow[key].map(fieldData => {
+              if (!fieldData.name) {
+                return {
+                  name: fieldData,
+                  format: null
+                };
+              }
+              return fieldData;
+            })
+          };
         });
+        modifiedConfig = {
+          ...modifiedConfig,
+          [configType]: {
+            ...modifiedConfig[configType],
+            fieldsToShow
+          }
+        };
       }
       return;
     });

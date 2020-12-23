@@ -206,26 +206,26 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
                 centerMap: true,
                 readOnly: false
               },
-              config: {
-                version: 'v1',
-                config: {
-                  visState: {
-                    layers: [
-                      {
-                        type: 'point',
-                        config: {
-                          dataId: 'signal_sample_data',
-                          columns: {
-                            lat: 'latitude',
-                            lng: 'longitude'
-                          },
-                          isVisible: true
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
+              // config: {
+              //   version: 'v1',
+              //   config: {
+              //     visState: {
+              //       layers: [
+              //         {
+              //           type: 'point',
+              //           config: {
+              //             dataId: 'signal_sample_data',
+              //             columns: {
+              //               lat: 'latitude',
+              //               lng: 'longitude'
+              //             },
+              //             isVisible: true
+              //           }
+              //         }
+              //       ]
+              //     }
+              //   }
+              // }
             })
           );
           
