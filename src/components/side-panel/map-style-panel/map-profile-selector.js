@@ -29,6 +29,9 @@ const StyledProfilePanelHeader = styled(StyledPanelHeader)`
   .profile__remove-profile {
     opacity: 0;
   }
+  .profile__removing-profile {
+    opacity: 1;
+  }
   :hover {
     cursor: pointer;
     background-color: ${props => props.theme.panelBackgroundHover};
@@ -132,7 +135,7 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
               </HeaderLabelSection>
               <HeaderActionSection className="profile-panel__header__actions">
                 <PanelHeaderAction
-                  className="profile__remove-profile"
+                  className={profile.isRemoving ? "profile__removing-profile" : "profile__remove-profile"}
                   id={profile.id}
                   tooltip={'tooltip.removeProfile'}
                   onClick={() => removeProfile(profile.id)}
