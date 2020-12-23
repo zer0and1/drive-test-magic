@@ -73,21 +73,21 @@ module.exports = {
     new DotEnv()
   ],
 
-  optimization: {
-    runtimeChunk: 'single',
-    splitChunks: {
-      chunks: 'all',
-      maxInitialRequests: Infinity,
-      minSize: 200 * 1024,
-      cacheGroups: {
-        vender: {
-          test: /[\\/]node_modules[\\/]/,
-          name(module) {
-            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
-            return `npm.${packageName.replace('@', '')}`;
-          }
-        }
-      }
-    }
-  }
+  // optimization: {
+  //   runtimeChunk: 'single',
+  //   splitChunks: {
+  //     chunks: 'all',
+  //     maxInitialRequests: Infinity,
+  //     minSize: 200 * 1024,
+  //     cacheGroups: {
+  //       vender: {
+  //         test: /[\\/]node_modules[\\/]/,
+  //         name(module) {
+  //           const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+  //           return `npm.${packageName.replace('@', '')}`;
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 };
