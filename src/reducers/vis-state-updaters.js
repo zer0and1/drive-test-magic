@@ -164,9 +164,6 @@ export const INITIAL_VIS_STATE = {
   layerToBeMerged: [],
   layerOrder: [],
 
-  // profiles
-  profiles: [],
-
   // filters
   filters: [],
   filterToBeMerged: [],
@@ -1949,13 +1946,6 @@ export function toggleEditorVisibilityUpdater(state) {
  };
 }
 
-export const loadProfileUpdater = (state, {profiles}) => {
-  return {
-    ...state,
-    profiles
-  };
-}
-
 /**
  * Add marker with custom info on the map
  * @memberof visStateUpdaters
@@ -1985,60 +1975,3 @@ export function removeMarkerUpdater(state) {
     marked: null
   }
 }
-
-/**
- * Save a new profile
- * @memberof visStateUpdaters
- * @type {typeof import('./vis-state-updaters').saveProfileUpdater}
- * @public
- */
-export const saveProfileUpdater = (state, {newProfile}) => {
-  return {
-    ...state,
-    profiles: [
-      ...state.profiles,
-      newProfile
-    ]
-  }
-};
-
-/**
- * remove profile
- * @memberof visStateUpdaters
- * @type {typeof import('./vis-state-updaters').removeProfileUpdater}
- * @public
- */
-export const removeProfileUpdater = (state, {id}) => {
-  const {profiles} = state;
-
-  const newState = {
-    ...state,
-    profiles: profiles.filter(profile => profile.id !== id)
-  };
-
-  return updateAnimationDomain(newState);
-};
-
-/**
- * update profile label
- * @memberof visStateUpdaters
- * @type {typeof import('./vis-state-updaters').updateProfileLabelUpdater}
- * @public
- */
-
-export const updateProfileLabelUpdater = (state, action) => {
-  const {profiles} = state;
-
-  return {
-    ...state,
-    profiles: profiles.map(profile => {
-      if (profile.id === action.id) {
-        return {
-          ...profile,
-          label: action.label
-        };
-      }
-      return profile;
-    })
-  };
-};
