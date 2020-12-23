@@ -187,3 +187,8 @@ export function initUiStateUpdater(state: UiState, action: {
   type?: ActionTypes.INIT;
   payload: KeplerGlInitPayload;
 }): UiState;
+
+export function toggleGraphShowUpdater(
+  state: UiState,
+  action: UiStateActions.toggleGraphShowUpdaterAction
+): UiState;

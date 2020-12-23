@@ -36,6 +36,7 @@ const actionHandler = {
   [ActionTypes.TOGGLE_MAP_CONTROL]: uiStateUpdaters.toggleMapControlUpdater,
   [ActionTypes.ADD_NOTIFICATION]: uiStateUpdaters.addNotificationUpdater,
   [ActionTypes.REMOVE_NOTIFICATION]: uiStateUpdaters.removeNotificationUpdater,
+  [ActionTypes.TOGGLE_GRAPHSHOW_CONTROL]: uiStateUpdaters.toggleGraphShowUpdater,
 
   [ActionTypes.SET_EXPORT_IMAGE_SETTING]: uiStateUpdaters.setExportImageSettingUpdater,
   [ActionTypes.SET_EXPORT_IMAGE_DATA_URI]: uiStateUpdaters.setExportImageDataUriUpdater,

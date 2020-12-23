@@ -26,6 +26,7 @@ import PropTypes from 'prop-types';
 import {notNullorUndefined} from 'utils/data-utils';
 import {getTooltipDisplayValue, getTooltipDisplayDeltaValue} from 'utils/interaction-utils';
 
+
 export const StyledLayerName = styled(CenterFlexbox)`
   color: ${props => props.theme.textColorHl};
   font-size: 12px;
@@ -140,7 +141,7 @@ const CellInfo = ({data, layer}) => {
         <Row
           name={layer.getVisualChannelDescription('size').measure}
           key="size"
-          value={data.elevationValue || 'N/A'}
+          value={data.elevationValue.toFixed(2) || 'N/A'}
         />
       ) : null}
     </tbody>
@@ -172,7 +173,8 @@ const LayerHoverInfoFactory = () => {
     fields: PropTypes.arrayOf(PropTypes.any),
     fieldsToShow: PropTypes.arrayOf(PropTypes.any),
     layer: PropTypes.object,
-    data: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.any), PropTypes.object])
+    data: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.any), PropTypes.object]),
+    isGraphShow: PropTypes.bool
   };
   return LayerHoverInfo;
 };
