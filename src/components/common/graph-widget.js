@@ -28,12 +28,12 @@ import {
   BottomWidgetInner
 } from './styled-components';
 import {Close, LineChart} from './icons';
-import LineChartFactory from './line-chart';
+import LineChartLegendFactory from './line-chart-legend';
 
 const TOP_SECTION_HEIGHT = '36px';
 
 const GraphBottomWidgetInner = styled(BottomWidgetInner)`
-  padding: 6px 32px 24px 32px;
+  padding: 6px 16px 0px 16px;
 `;
 const TopSectionWrapper = styled.div`
   display: flex;
@@ -56,9 +56,9 @@ const StyledTitle = styled(CenterFlexbox)`
   }
 `;
 
-GraphWidgetFactory.deps = [LineChartFactory]
+GraphWidgetFactory.deps = [LineChartLegendFactory]
 
-function GraphWidgetFactory(LineChart) {
+function GraphWidgetFactory(LineChartLegend) {
   class GraphWidget extends Component {
 
     render() {
@@ -70,21 +70,22 @@ function GraphWidgetFactory(LineChart) {
       return (
         <GraphBottomWidgetInner className="bottom-widget--inner">
           <TopSectionWrapper>
+            <CenterFlexbox/>
             <StyledTitle className="bottom-widget__field">
               <CenterFlexbox className="bottom-widget__icon">
-                {/* <LineChart height="15px" /> */}
+                <LineChart height="15px" />
               </CenterFlexbox>
               <SelectTextBold>{title}</SelectTextBold>
             </StyledTitle>
             <CenterFlexbox>
-                <IconRoundSmall>
-                  <Close height="12px" onClick={this.props.showGraphState} />
-                </IconRoundSmall>
-              </CenterFlexbox>
+              <IconRoundSmall>
+                <Close height="12px" onClick={this.props.showGraphState} />
+              </IconRoundSmall>
+            </CenterFlexbox>
           </TopSectionWrapper>
-          {/* <LineChart
-
-          /> */}
+          <LineChartLegend
+            lineChart={lineChart}
+          />
         </GraphBottomWidgetInner>
       );
     }
