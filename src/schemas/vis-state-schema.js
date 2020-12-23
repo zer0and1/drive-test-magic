@@ -580,7 +580,7 @@ export class InteractionSchemaV1 extends Schema {
       : {};
   }
   load(interactionConfig) {
-    const modifiedConfig = interactionConfig;
+    let modifiedConfig = interactionConfig;
     Object.keys(interactionConfig).forEach(configType => {
       if (configType === 'tooltip') {
         let fieldsToShow = modifiedConfig[configType].fieldsToShow;
@@ -601,6 +601,13 @@ export class InteractionSchemaV1 extends Schema {
             })
           };
         });
+        modifiedConfig = {
+          ...modifiedConfig,
+          [configType]: {
+            ...modifiedConfig[configType],
+            fieldsToShow
+          }
+        };
       }
       return;
     });

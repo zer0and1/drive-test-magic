@@ -22,7 +22,6 @@
 import ActionTypes from 'constants/action-types';
 import { gql } from '@apollo/client';
 import { receiveMapConfig } from 'actions';
-import { parseSavedConfig } from 'schemas';
 
 /**
  * Update layer base config: dataId, label, column, isVisible
@@ -837,15 +836,17 @@ export function loadProfile() {
         id
         label
         config
+        removed
       }
     }
   `;
   return (dispatch) => {
     apolloClient.query({
-      query
+      query,
+      fetchPolicy: 'network-only'
     }).then(res => dispatch({
       type: ActionTypes.LOAD_PROFILE,
-      profiles: res.data.signal_db_profiles
+     profiles: res.data.signal_db_profiles
     }));
   }
 }
@@ -885,9 +886,9 @@ export function saveProfile() {
 export function applyProfile(id) {
   return (dispatch, getState) => {
     const profile = getState().main.keplerGl.map.visState.profiles.find(profile => profile.id === id);
-    console.log(getState().main.keplerGl.map.visState.schema.parseSavedConfig(profile.config));
-    dispatch(receiveMapConfig(getState().main.keplerGl.map.visState.schema.parseSavedConfig(profile.config)));
-    dispatch(loadProfile());
+    Promise.resolve(
+      dispatch(receiveMapConfig(getState().main.keplerGl.map.visState.schema.parseSavedConfig(profile.config)))
+    ).then(() => dispatch(loadProfile()));
   }
 }
 
@@ -913,10 +914,14 @@ export function removeProfile(id) {
   return (dispatch) => {
     apolloClient.mutate({
       mutation
-    }).then(res => dispatch({
-      type: ActionTypes.REMOVE_PROFILE,
-      id
-    }));
+    }).then(res => {
+      if (res.data.update_signal_db_profiles_by_pk.removed) {
+        return dispatch({
+          type: ActionTypes.REMOVE_PROFILE,
+          id
+        });
+      }
+    });
   }
 }
 
@@ -942,11 +947,15 @@ export function updateProfileLabel(id, label) {
   return (dispatch) => {
     apolloClient.mutate({
       mutation
-    }).then(res => dispatch({
-      type: ActionTypes.UPDATE_PROFILE_LABEL,
-      id,
-      label
-    }));
+    }).then(res => {
+      if (res.data.update_signal_db_profiles_by_pk.label === label) {
+        return dispatch({
+          type: ActionTypes.UPDATE_PROFILE_LABEL,
+          id,
+          label
+        });
+      }
+    });
   }
 }
 
