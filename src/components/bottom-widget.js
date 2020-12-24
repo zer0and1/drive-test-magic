@@ -22,6 +22,7 @@ import React, {useCallback, useMemo} from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import TimeWidgetFactory from './filters/time-widget';
+import GraphWidgetFactory from './common/graph-widget';
 import AnimationControlFactory from './common/animation-control/animation-control';
 import AnimationControllerFactory from './common/animation-control/animation-controller';
 import {ANIMATION_WINDOW, FILTER_TYPES} from 'constants';
@@ -126,12 +127,14 @@ export function LayerAnimationControllerFactory(AnimationController) {
 }
 
 BottomWidgetFactory.deps = [
+  GraphWidgetFactory,
   TimeWidgetFactory,
   AnimationControlFactory,
   FilterAnimationControllerFactory,
   LayerAnimationControllerFactory
 ];
 export default function BottomWidgetFactory(
+  GraphWidget,
   TimeWidget,
   AnimationControl,
   FilterAnimationController,
@@ -145,11 +148,12 @@ export default function BottomWidgetFactory(
       visStateActions,
       containerW,
       uiState,
+      uiStateActions,
       sidePanelWidth,
       layers
     } = props;
 
-    const {activeSidePanel, readOnly} = uiState;
+    const {activeSidePanel, readOnly, isGraphShow} = uiState;
     const isOpen = Boolean(activeSidePanel);
 
     const enlargedFilterIdx = useMemo(
@@ -177,7 +181,7 @@ export default function BottomWidgetFactory(
       <BottomWidgetContainer
         width={Math.min(maxWidth, enlargedFilterWidth)}
         className="bottom-widget--container"
-        hasPadding={showAnimationControl || showTimeWidget}
+        hasPadding={showAnimationControl || showTimeWidget || isGraphShow}
       >
         <LayerAnimationController
           animationConfig={animationConfig}
@@ -196,6 +200,14 @@ export default function BottomWidgetFactory(
             ) : null
           }
         </LayerAnimationController>
+        {isGraphShow ? (
+          <GraphWidget
+            title = {uiState.graphTitle}
+            showGraphState = {uiStateActions.toggleGraphShow}
+            lineChart = {uiState.lineChart}
+          />
+          ) : null
+        }
         <FilterAnimationController
           /* pass if filter is not animating, pass in 
            enlarged filter here because animation controller needs to call reset on it

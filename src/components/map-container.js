@@ -112,6 +112,7 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
       visStateActions: PropTypes.object.isRequired,
       mapStateActions: PropTypes.object.isRequired,
       uiStateActions: PropTypes.object.isRequired,
+      isGraphShow: PropTypes.bool,
 
       // optional
       readOnly: PropTypes.bool,
@@ -263,6 +264,8 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
         datasets,
         interactionConfig,
         layers,
+        uiState: {isGraphShow},
+        uiStateActions,
         mousePos: {mousePosition, coordinate, pinned}
       } = this.props;
 
@@ -280,7 +283,9 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
         hoverInfo,
         layers,
         layersToRender,
-        datasets
+        datasets,
+        isGraphShow,
+        uiStateActions
       });
 
       const compareMode = interactionConfig.tooltip.config
@@ -300,7 +305,9 @@ export default function MapContainerFactory(MapPopover, MapControl, Editor) {
           hoverInfo: clicked,
           layers,
           layersToRender,
-          datasets
+          datasets,
+          isGraphShow,
+          uiStateActions
         });
         if (layerHoverProp && layerPinnedProp) {
           layerHoverProp.primaryData = layerPinnedProp.data;

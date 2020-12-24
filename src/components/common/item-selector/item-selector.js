@@ -209,6 +209,8 @@ class ItemSelector extends Component {
 
     const previousSelected = toArray(this.props.selectedItems);
 
+    console.log(item)
+
     if (this.props.multiSelect) {
       const items = uniqBy(previousSelected.concat(toArray(item)), getValue);
       this.props.onChange(items);

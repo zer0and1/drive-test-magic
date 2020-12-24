@@ -402,6 +402,7 @@ function KeplerGlFactory(
                   layers={layers}
                   animationConfig={animationConfig}
                   visStateActions={visStateActions}
+                  uiStateActions={uiStateActions}
                   sidePanelWidth={
                     uiState.readOnly ? 0 : this.props.sidePanelWidth + theme.sidePanel.margin.left
                   }

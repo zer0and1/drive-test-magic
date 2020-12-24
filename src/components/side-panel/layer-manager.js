@@ -53,7 +53,7 @@ import minionConfig from 'map-config/minion';
 
 const GQL_SIGNAL_SAMPLE = gql`
 query MyQuery {
-  signal_db_signal_samples_view {
+  signal_db_signal_samples_view(limit: 10) {
     aux
     bs_latitude
     bs_longitude

@@ -27,6 +27,7 @@ import {Pin, ArrowLeft, ArrowRight} from 'components/common/icons';
 import ErrorBoundary from 'components/common/error-boundary';
 import {injectIntl} from 'react-intl';
 import {FormattedMessage} from 'localization';
+import Switch from 'components/common/switch';
 
 const MAX_WIDTH = 500;
 const MAX_HEIGHT = 600;
@@ -190,6 +191,16 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
 
       const style = Number.isFinite(x) && Number.isFinite(y) ? this._getPosition(x, y, isLeft) : {};
 
+      const _toggleGraphShow = () => {
+        const info = {
+          graphId: layerHoverProp.layer.id,
+          title : layerHoverProp.layer.getVisualChannelDescription('size').measure,
+          data: layerHoverProp.data.points
+        }
+
+        return layerHoverProp.toggleGraphShow(info)
+      }
+
       return (
         <ErrorBoundary>
           <StyledMapPopover
@@ -201,26 +212,37 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
             }}
           >
             {frozen ? (
-              <div className="map-popover__top">
-                <div className="gutter" />
-                {!isLeft && (
-                  <StyledIcon className="popover-arrow-left" onClick={this.moveLeft}>
-                    <ArrowLeft />
+              <div>
+                <div className="map-popover__top">
+                  <div className="gutter" />
+                  {!isLeft && (
+                    <StyledIcon className="popover-arrow-left" onClick={this.moveLeft}>
+                      <ArrowLeft />
+                    </StyledIcon>
+                  )}
+                  <StyledIcon className="popover-pin" onClick={this.props.onClose}>
+                    <Pin height="16px" />
                   </StyledIcon>
-                )}
-                <StyledIcon className="popover-pin" onClick={this.props.onClose}>
-                  <Pin height="16px" />
-                </StyledIcon>
-                {isLeft && (
-                  <StyledIcon className="popover-arrow-right" onClick={this.moveRight}>
-                    <ArrowRight />
-                  </StyledIcon>
-                )}
-                {isBase && (
-                  <div className="primary-label">
-                    <FormattedMessage id="mapPopover.primary" />
+                  {isLeft && (
+                    <StyledIcon className="popover-arrow-right" onClick={this.moveRight}>
+                      <ArrowRight />
+                    </StyledIcon>
+                  )}
+                  {isBase && (
+                    <div className="primary-label">
+                      <FormattedMessage id="mapPopover.primary" />
+                    </div>
+                  )}
+                </div>
+                {layerHoverProp.layer.isAggregated ? (
+                  <div className="primary-label gutter" style={{ paddingTop: 2, marginRight: -15 }}>
+                    <Switch
+                      checked={layerHoverProp.isGraphShow}
+                      id={layerHoverProp.layer.id}
+                      onChange={_toggleGraphShow}
+                    />
                   </div>
-                )}
+                ) : null}
               </div>
             ) : null}
             {Array.isArray(coordinate) && <CoordinateInfo coordinate={coordinate} zoom={zoom} />}
