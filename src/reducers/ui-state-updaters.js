@@ -375,11 +375,11 @@ export const toggleMapControlUpdater = (state, {payload: {panelId, index = 0}}) 
  * @type {typeof import('./ui-state-updaters').toggleGraphShowUpdater}
  * @public
  */
-export const toggleGraphShowUpdater = (state, {payload: {info}}) => ({
+export const toggleGraphShowUpdater = (state, {payload}) => ({
   ...state,
   isGraphShow: !state.isGraphShow,
-  graphTitle: info.title,
-  lineChart: info.data
+  graphTitle: payload?.info?.title,
+  lineChart: payload?.info?.data
 });
 
 /**
