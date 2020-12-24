@@ -57,6 +57,10 @@ function LineChartLegendFactory() {
       type: 'line',
       data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43]
     }, {
+      name: 'TEAM D',
+      type: 'line',
+      data: [20, 44, 55, 41, 67, 22, 43, 21, 41, 56, 27]
+    }, {
       name: 'TEAM C',
       type: 'line',
       data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39]
@@ -70,6 +74,9 @@ function LineChartLegendFactory() {
         foreColor: '#c3c3c3',
         toolbar: {
           show: false
+        },
+        zoom: {
+          enabled: false
         }
       },
       stroke: {
