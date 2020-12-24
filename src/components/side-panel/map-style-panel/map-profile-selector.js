@@ -159,7 +159,7 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
             onClick={() => saveProfile()}
             primary
           >
-            {isLoading || isSaving ? <Spinner /> : <Save2 height="12px" />}
+            {isLoading || isSaving ? <Spinner action /> : <Save2 height="12px" />}
             <FormattedMessage id={'mapManager.saveMapProfile'} />
           </Button>
         </SidePanelSection>

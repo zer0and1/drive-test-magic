@@ -21,6 +21,7 @@ const Spinner = styled.div`
   width: 16px;
   height: 16px;
   border-radius: 50%;
+  margin-right: ${props => props.action ? 8 : 0}px;
 `;
 
 export default Spinner;
