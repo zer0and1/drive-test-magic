@@ -36,6 +36,7 @@ export const SelectText = styled.span`
 
 export const SelectTextBold = styled(SelectText)`
   color: ${props => props.theme.textColor};
+  font-size: 14px;
   font-weight: 500;
 `;
 
