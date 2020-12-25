@@ -21,7 +21,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
-import {Trash} from 'components/common/icons';
+import {Trash, ArrowDown, ArrowUp} from 'components/common/icons';
 import {createLinearGradient} from 'utils/color-utils';
 import {StyledPanelHeader} from 'components/common/styled-components';
 
@@ -59,6 +59,8 @@ function FilterPanelHeaderFactory(PanelHeaderAction) {
     idx,
     filter,
     removeFilter,
+    moveUp,
+    moveDown,
     actionIcons = defaultActionIcons
   }) => (
     <StyledFilterHeader
@@ -73,6 +75,12 @@ function FilterPanelHeaderFactory(PanelHeaderAction) {
         onClick={removeFilter}
         hoverColor={'errorColor'}
         IconComponent={actionIcons.delete}
+      />
+      <PanelHeaderAction
+        IconComponent={ArrowDown}
+      />
+      <PanelHeaderAction
+        IconComponent={ArrowUp}
       />
     </StyledFilterHeader>
   );
