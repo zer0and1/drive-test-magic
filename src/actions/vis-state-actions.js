@@ -20,8 +20,6 @@
 
 // vis-state-reducer
 import ActionTypes from 'constants/action-types';
-import { gql } from '@apollo/client';
-import { receiveMapConfig } from 'actions';
 
 /**
  * Update layer base config: dataId, label, column, isVisible
