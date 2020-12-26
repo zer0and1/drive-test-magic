@@ -32,7 +32,7 @@ NewFilterPanelFactory.deps = [
 
 function NewFilterPanelFactory(FilterPanelHeader, SourceDataSelector, FieldSelector) {
   const NewFilterPanel = React.memo(
-    ({idx, filter, datasets, allAvailableFields, setFilter, removeFilter, enlargeFilter}) => {
+    ({idx, filter, datasets, allAvailableFields, setFilter, removeFilter, moveUpFilter, moveDownFilter, enlargeFilter}) => {
       const onFieldSelector = useCallback(field => setFilter(idx, 'name', field.name), [
         idx,
         setFilter
@@ -51,6 +51,8 @@ function NewFilterPanelFactory(FilterPanelHeader, SourceDataSelector, FieldSelec
             idx={idx}
             filter={filter}
             removeFilter={removeFilter}
+            moveUpFilter={moveUpFilter}
+            moveDownFilter={moveDownFilter}
             enlargeFilter={enlargeFilter}
             enlarged={filter.enlarged}
           >

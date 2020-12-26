@@ -46,6 +46,8 @@ function FieldPanelWithFieldSelectFactory(
       filter,
       idx,
       removeFilter,
+      moveUpFilter,
+      moveDownFilter,
       setFilter,
       panelActions = []
     }) => {
@@ -72,6 +74,8 @@ function FieldPanelWithFieldSelectFactory(
             idx={idx}
             filter={filter}
             removeFilter={removeFilter}
+            moveUpFilter={moveUpFilter}
+            moveDownFilter={moveDownFilter}
           >
             <FieldSelector
               inputTheme="secondary"

@@ -182,7 +182,7 @@ export default function SidePanelFactory(
         version,
         datasets,
         filters,
-        minions,
+        filterOrders,
         layers,
         mapProfile,
         layerBlending,
@@ -221,6 +221,8 @@ export default function SidePanelFactory(
       const filterManagerActions = {
         addFilter: visStateActions.addFilter,
         removeFilter: visStateActions.removeFilter,
+        moveUpFilter: visStateActions.moveUpFilter,
+        moveDownFilter: visStateActions.moveDownFilter,
         setFilter: visStateActions.setFilter,
         showDatasetTable: this._showDatasetTable,
         showAddDataModal: this._showAddDataModal,
@@ -310,6 +312,7 @@ export default function SidePanelFactory(
                     datasets={datasets}
                     layers={layers}
                     filters={filters}
+                    filterOrders={filterOrders}
                   />
                 )}
                 {activeSidePanel === 'interaction' && (

@@ -59,8 +59,8 @@ function FilterPanelHeaderFactory(PanelHeaderAction) {
     idx,
     filter,
     removeFilter,
-    moveUp,
-    moveDown,
+    moveUpFilter,
+    moveDownFilter,
     actionIcons = defaultActionIcons
   }) => (
     <StyledFilterHeader
@@ -77,10 +77,16 @@ function FilterPanelHeaderFactory(PanelHeaderAction) {
         IconComponent={actionIcons.delete}
       />
       <PanelHeaderAction
-        IconComponent={ArrowDown}
+        id={filter.id}
+        tooltip="tooltip.moveUp"
+        onClick={moveUpFilter}
+        IconComponent={ArrowUp}
       />
       <PanelHeaderAction
-        IconComponent={ArrowUp}
+        id={filter.id}
+        tooltip="tooltip.moveDown"
+        onClick={moveDownFilter}
+        IconComponent={ArrowDown}
       />
     </StyledFilterHeader>
   );

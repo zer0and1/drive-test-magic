@@ -133,7 +133,11 @@ const actionHandler = {
 
   [ActionTypes.ADD_MARKER]: visStateUpdaters.addMarkerUpdater,
 
-  [ActionTypes.REMOVE_MARKER]: visStateUpdaters.removeMarkerUpdater
+  [ActionTypes.REMOVE_MARKER]: visStateUpdaters.removeMarkerUpdater,
+
+  [ActionTypes.MOVE_UP_FILTER]: visStateUpdaters.moveUpFilterUpdater,
+
+  [ActionTypes.MOVE_DOWN_FILTER]: visStateUpdaters.moveDownFilterUpdater
 };
 
 // construct vis-state reducer

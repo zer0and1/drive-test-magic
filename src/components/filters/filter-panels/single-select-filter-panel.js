@@ -35,6 +35,8 @@ function SingleSelectFilterPanelFactory(FieldPanelWithFieldSelect, SingleSelectF
       enlargeFilter,
       setFilter,
       removeFilter,
+      moveUpFilter,
+      moveDownFilter,
       toggleAnimation
     }) => {
       const onSetFilter = useCallback(value => setFilter(idx, 'value', value), [idx, setFilter]);
@@ -47,6 +49,8 @@ function SingleSelectFilterPanelFactory(FieldPanelWithFieldSelect, SingleSelectF
             filter={filter}
             idx={idx}
             removeFilter={removeFilter}
+            moveUpFilter={moveUpFilter}
+            moveDownFilter={moveDownFilter}
             setFilter={setFilter}
           >
             {filter.type && !filter.enlarged && (

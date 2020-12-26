@@ -44,6 +44,8 @@ function PolygonFilterPanelFactory(FilterPanelHeader, PolygonFilter, PanelHeader
       allAvailableFields,
       filter,
       removeFilter,
+      moveUpFilter,
+      moveDownFilter,
       setFilter,
       toggleFilterFeature
     }) => {
@@ -62,6 +64,8 @@ function PolygonFilterPanelFactory(FilterPanelHeader, PolygonFilter, PanelHeader
             idx={idx}
             filter={filter}
             removeFilter={removeFilter}
+            moveUpFilter={moveUpFilter}
+            moveDownFilter={moveDownFilter}
           >
             <StyledFilterPanel>Geo - {featureType}</StyledFilterPanel>
             <PanelHeaderAction

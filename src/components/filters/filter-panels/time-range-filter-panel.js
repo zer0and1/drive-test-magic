@@ -41,6 +41,8 @@ function TimeRangeFilterPanelFactory(FieldPanelWithFieldSelect, TimeRangeFilter)
       enlargeFilter,
       setFilter,
       removeFilter,
+      moveUpFilter,
+      moveDownFilter,
       toggleAnimation
     }) => {
       const onSetFilter = useCallback(value => setFilter(idx, 'value', value), [idx, setFilter]);
@@ -66,6 +68,8 @@ function TimeRangeFilterPanelFactory(FieldPanelWithFieldSelect, TimeRangeFilter)
             filter={filter}
             idx={idx}
             removeFilter={removeFilter}
+            moveUpFilter={moveUpFilter}
+            moveDownFilter={moveDownFilter}
             setFilter={setFilter}
             panelActions={panelActions}
           >

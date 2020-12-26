@@ -229,6 +229,35 @@ export function addFilter(dataId) {
     dataId
   };
 }
+/**
+ * Move up a filter
+ * @memberof visStateActions
+ * @param filterId - filter `id`
+ * @returns action
+ * @type {typeof import('./vis-state-actions').moveUpFilter}
+ * @public
+ */
+export function moveUpFilter(filterId) {
+  return {
+    type: ActionTypes.MOVE_UP_FILTER,
+    filterId
+  };
+}
+
+/**
+ * Move up a filter
+ * @memberof visStateActions
+ * @param filterId - filter `id`
+ * @returns action
+ * @type {typeof import('./vis-state-actions').moveDownFilter}
+ * @public
+ */
+export function moveDownFilter(filterId) {
+  return {
+    type: ActionTypes.MOVE_DOWN_FILTER,
+    filterId
+  };
+}
 
 /**
  * Add a new layer

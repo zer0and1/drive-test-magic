@@ -31,12 +31,15 @@ FilterManagerFactory.deps = [SourceDataCatalogFactory, FilterPanelFactory];
 function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
   const FilterManager = ({
     filters = [],
+    filterOrders = [],
     datasets,
     layers,
     showDatasetTable,
     addFilter,
     setFilter,
     removeFilter,
+    moveUpFilter,
+    moveDownFilter,
     enlargeFilter,
     toggleAnimation,
     toggleFilterFeature
@@ -48,20 +51,19 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
       const defaultDataset = (Object.keys(datasets).length && Object.keys(datasets)[0]) || null;
       addFilter(defaultDataset);
     }, [datasets, addFilter]);
-    // render last added filter first
-    const reversedIndex = useMemo(() => {
-      return new Array(filters.length)
-        .fill(0)
-        .map((d, i) => i)
-        .reverse();
-    }, [filters.length]);
 
+    // render filters in reserved order
+    const orderedIndex = useMemo(() => {
+      console.log('filtering');
+      return filterOrders.map(filterId => filters.findIndex(filter => filter.id == filterId));
+    }, [filterOrders]);
+    
     return (
       <div className="filter-manager">
         <SourceDataCatalog datasets={datasets} showDatasetTable={showDatasetTable} />
         <SidePanelDivider />
         <SidePanelSection>
-          {reversedIndex.map(idx => (
+          {orderedIndex.map(idx => (
             <FilterPanel
               key={`${filters[idx].id}-${idx}`}
               idx={idx}
@@ -71,6 +73,8 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
               layers={layers}
               isAnyFilterAnimating={isAnyFilterAnimating}
               removeFilter={() => removeFilter(idx)}
+              moveUpFilter={() => moveUpFilter(filters[idx].id)}
+              moveDownFilter={() => moveDownFilter(filters[idx].id)}
               enlargeFilter={() => enlargeFilter(idx)}
               toggleAnimation={() => toggleAnimation(idx)}
               toggleFilterFeature={() => toggleFilterFeature(idx)}

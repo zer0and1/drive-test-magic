@@ -265,6 +265,7 @@ function KeplerGlFactory(
 
       const {
         filters,
+        filterOrders,
         layers,
         splitMaps, // this will store support for split map view is necessary
         layerOrder,
@@ -292,6 +293,7 @@ function KeplerGlFactory(
         appWebsite,
         datasets,
         filters,
+        filterOrders,
         layers,
         layerOrder,
         layerClasses,
