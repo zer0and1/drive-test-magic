@@ -76,18 +76,22 @@ function FilterPanelHeaderFactory(PanelHeaderAction) {
         hoverColor={'errorColor'}
         IconComponent={actionIcons.delete}
       />
-      <PanelHeaderAction
-        id={filter.id}
-        tooltip="tooltip.moveUp"
-        onClick={moveUpFilter}
-        IconComponent={ArrowUp}
-      />
-      <PanelHeaderAction
-        id={filter.id}
-        tooltip="tooltip.moveDown"
-        onClick={moveDownFilter}
-        IconComponent={ArrowDown}
-      />
+      {filter.first || (
+        <PanelHeaderAction
+          id={filter.id}
+          tooltip="tooltip.moveUp"
+          onClick={moveUpFilter}
+          IconComponent={ArrowUp}
+        />
+      )}
+      {filter.last || (
+        <PanelHeaderAction
+          id={filter.id}
+          tooltip="tooltip.moveDown"
+          onClick={moveDownFilter}
+          IconComponent={ArrowDown}
+        />
+      )}
     </StyledFilterHeader>
   );
 

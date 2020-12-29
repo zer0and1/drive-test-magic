@@ -54,7 +54,6 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
 
     // render filters in reserved order
     const orderedIndex = useMemo(() => {
-      console.log('filtering');
       return filterOrders.map(filterId => filters.findIndex(filter => filter.id == filterId));
     }, [filterOrders]);
     
@@ -63,21 +62,21 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
         <SourceDataCatalog datasets={datasets} showDatasetTable={showDatasetTable} />
         <SidePanelDivider />
         <SidePanelSection>
-          {orderedIndex.map(idx => (
+          {orderedIndex.map((ordIdx, idx) => (
             <FilterPanel
-              key={`${filters[idx].id}-${idx}`}
-              idx={idx}
+              key={`${filters[ordIdx].id}-${ordIdx}`}
+              idx={ordIdx}
               filters={filters}
-              filter={filters[idx]}
+              filter={{...filters[ordIdx], first: idx == 0, last: idx == filters.length - 1}}
               datasets={datasets}
               layers={layers}
               isAnyFilterAnimating={isAnyFilterAnimating}
-              removeFilter={() => removeFilter(idx)}
-              moveUpFilter={() => moveUpFilter(filters[idx].id)}
-              moveDownFilter={() => moveDownFilter(filters[idx].id)}
-              enlargeFilter={() => enlargeFilter(idx)}
-              toggleAnimation={() => toggleAnimation(idx)}
-              toggleFilterFeature={() => toggleFilterFeature(idx)}
+              removeFilter={() => removeFilter(ordIdx)}
+              moveUpFilter={() => moveUpFilter(filters[ordIdx].id)}
+              moveDownFilter={() => moveDownFilter(filters[ordIdx].id)}
+              enlargeFilter={() => enlargeFilter(ordIdx)}
+              toggleAnimation={() => toggleAnimation(ordIdx)}
+              toggleFilterFeature={() => toggleFilterFeature(ordIdx)}
               setFilter={setFilter}
             />
           ))}
@@ -100,6 +99,8 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
     layers: PropTypes.arrayOf(PropTypes.any).isRequired,
     addFilter: PropTypes.func.isRequired,
     removeFilter: PropTypes.func.isRequired,
+    moveUpFilter: PropTypes.func.isRequired,
+    moveDownFilter: PropTypes.func.isRequired,
     enlargeFilter: PropTypes.func.isRequired,
     toggleAnimation: PropTypes.func.isRequired,
     toggleFilterFeature: PropTypes.func.isRequired,
