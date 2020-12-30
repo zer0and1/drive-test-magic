@@ -22,49 +22,76 @@ import React, {useMemo} from 'react';
 import styled from 'styled-components';
 import ApexCharts from "react-apexcharts";
 import _ from 'lodash';
+import moment from 'moment';
 
 function LineChartLegendFactory() {
   const LineChartLegend = ({
-    lineChart
+    lineChart,
+    visState
   }) => {
-    // const {xDomain, series, yDomain} = lineChart;
-    // const hintFormatter = useMemo(() => {
-    //   return getTimeWidgetHintFormatter(xDomain);
-    // }, [xDomain]);
 
-    // const brushData = useMemo(() => {
-    //   return [{x: series[0].x, y: yDomain[1], customComponent: () => brushComponent}];
-    // }, [series, yDomain, brushComponent]);
+    const layerId = visState?.clickedLayer?.layer.id;
 
-    // const labelFormatter = (value) => {
-    //     let val = Math.abs(value);
-    //     if (val >= 1000000) {
-    //       val = (val / 1000000).toFixed(1) + " M";
-    //     }
-    //     return val;
-    //   };
+    const filterField = useMemo(() => {
+      let selectedLayer = visState.layers.find(layers => layers.id == layerId);
+      let filter = {
+        index: selectedLayer?.config.sizeField?.tableFieldIndex,
+        aggregate: selectedLayer?.config.visConfig.sizeAggregation
+      }
+      return filter
+    }, [layerId]);
 
-    console.log(lineChart)
-    const dataset = _.groupBy(lineChart, 'enodeb_id');
-    // console.log(dataset)
+    const data = lineChart.map((item) => {
+      item.value = item.data[filterField.index - 1]
+      // item.time = item.data[8]
+      item.time = moment(item.data[8]).format('YYYY-MM-dd HH:mm:ss');
+      // item.time = new Date(new Date(item.data[8]).setMilliseconds(0)).toString()
+      item.enodeb = item.data[11]
+      return {value: item.value, time: item.time, enodeb: item.enodeb}
+    });
 
-    const series = [{
-      name: 'TEAM A',
-      type: 'line',
-      data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30]
-    }, {
-      name: 'TEAM B',
-      type: 'line',
-      data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43]
-    }, {
-      name: 'TEAM D',
-      type: 'line',
-      data: [20, 44, 55, 41, 67, 22, 43, 21, 41, 56, 27]
-    }, {
-      name: 'TEAM C',
-      type: 'line',
-      data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39]
-    }];
+    const groups = data.reduce(function (r, o) {
+      var k = o.time + o.enodeb;
+      if (r[k]) {
+          if (o.value) (r[k].value += o.value) && ++r[k].average;
+      } else {
+          r[k] = o; 
+          r[k].average = 1; // taking 'Average' attribute as an items counter(on the first phase)
+      }
+      return r;
+    }, {});
+    
+    // getting "average of Points"    
+    const result = Object.keys(groups).map(function (k) {
+        const avg = groups[k].value/groups[k].average;
+        groups[k].average = avg.toFixed(2)
+        return groups[k];
+    });
+    
+    const labels = Object.keys(_.groupBy(result, 'time'))
+    console.log(labels)
+
+    const dataset = _.groupBy(result, 'enodeb');
+    const enodebIds = Object.keys(dataset)
+
+    const values = Object.values(dataset).map((item) => {
+      const val = Object.values(item).map((subitem) => {
+        return labels.includes(subitem.time) ? subitem.average : null
+      })
+      return val
+    });
+
+    const series = [];
+    for (var i = 0; i < enodebIds.length; i++)
+    {
+      const item = {
+        name: enodebIds[i],
+        type: 'line',
+        data: values[i]
+      }
+      series.push(item)
+    }
+
 
     const options = {
       chart: {
@@ -81,7 +108,7 @@ function LineChartLegendFactory() {
       },
       stroke: {
         width: 2,
-        curve: 'smooth'
+        curve: 'straight'
       },
       plotOptions: {
         bar: {
@@ -129,7 +156,7 @@ function LineChartLegendFactory() {
           stops: [0, 100, 100, 100]
         }
       },
-      labels: ['01/01/2003', '02/01/2003', '03/01/2003', '04/01/2003', '05/01/2003', '06/01/2003', '07/01/2003', '08/01/2003', '09/01/2003', '10/01/2003', '11/01/2003'],
+      labels: labels,
       markers: {
         size: 0
       },
@@ -141,7 +168,6 @@ function LineChartLegendFactory() {
       },
       tooltip: {
         shared: true,
-        intersect: false,
         theme: 'dark',
         x: {
           formatter: function (x) {
@@ -155,8 +181,8 @@ function LineChartLegendFactory() {
         },
         y: {
           formatter: function (y) {
-            if (typeof y !== "undefined") {
-              return y.toFixed(0) + " points";
+            if (typeof y != null && typeof y != undefined) {
+              return y.toFixed(2);
             }
             return y;
           }

@@ -148,6 +148,7 @@ export default function BottomWidgetFactory(
       datasets,
       filters,
       animationConfig,
+      visState,
       visStateActions,
       containerW,
       uiState,
@@ -213,6 +214,7 @@ export default function BottomWidgetFactory(
             title = {uiState.graphTitle}
             showGraphState = {uiStateActions.toggleGraphShow}
             lineChart = {uiState.lineChart}
+            visState = {visState}
           />
           ) : null
         }
