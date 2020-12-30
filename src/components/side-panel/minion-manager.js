@@ -99,15 +99,15 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         { name: 'name', type: 'string' },
         { name: 'lastupdate', type: 'date' },
         { name: 'gps_fix_lastupdate', type: 'date' },
-        { name: 'gps_fix', type: 'boolean' }
+        { name: 'operation_mode', type: 'string' }
       ]
     };
     minionAdapter = new jqx.dataAdapter(this.minionSource);
     minionColumns = [
-      { text: 'Name', datafield: 'name', cellsalign: 'center', align: 'center', width: '20%', cellsrenderer: this.strRenderer },
-      { text: 'Last Update', datafield: 'lastupdate', cellsalign: 'center', cellsrenderer: this.datetimeRenderer.bind(this), align: 'center', width: '35%' },
-      { text: 'Last Fix', datafield: 'gps_fix_lastupdate', align: 'center', cellsalign: 'center', cellsrenderer: this.datetimeRenderer.bind(this), width: '35%' },
-      { text: 'Fix', datafield: 'gps_fix', cellsalign: 'center', columntype: 'checkbox', align: 'center', width: '10%' },
+      { text: 'Name', datafield: 'name', cellsalign: 'center', align: 'center', width: '20%', cellsrenderer: this.strRenderer.bind(this) },
+      { text: 'Last Update', datafield: 'lastupdate', cellsalign: 'center', cellsrenderer: this.datetimeRenderer.bind(this), align: 'center', width: '34%' },
+      { text: 'Last Fix', datafield: 'gps_fix_lastupdate', align: 'center', cellsalign: 'center', cellsrenderer: this.datetimeRenderer.bind(this), width: '34%' },
+      { text: 'Mode', datafield: 'operation_mode', cellsalign: 'center', align: 'center', cellsrenderer: this.strRenderer.bind(this), width: '12%' },
       { datafield: 'id', hidden: true }
     ];
 
