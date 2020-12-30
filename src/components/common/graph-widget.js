@@ -64,7 +64,8 @@ function GraphWidgetFactory(LineChartLegend) {
     render() {
       const {
         title,
-        lineChart
+        lineChart,
+        visState
       } = this.props;
 
       return (
@@ -85,6 +86,7 @@ function GraphWidgetFactory(LineChartLegend) {
           </TopSectionWrapper>
           <LineChartLegend
             lineChart={lineChart}
+            visState={visState}
           />
         </GraphBottomWidgetInner>
       );
