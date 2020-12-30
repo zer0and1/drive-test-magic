@@ -182,7 +182,6 @@ export default function SidePanelFactory(
         version,
         datasets,
         filters,
-        filterOrders,
         layers,
         mapProfile,
         layerBlending,
@@ -312,7 +311,6 @@ export default function SidePanelFactory(
                     datasets={datasets}
                     layers={layers}
                     filters={filters}
-                    filterOrders={filterOrders}
                   />
                 )}
                 {activeSidePanel === 'interaction' && (

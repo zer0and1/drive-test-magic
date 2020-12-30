@@ -31,7 +31,6 @@ FilterManagerFactory.deps = [SourceDataCatalogFactory, FilterPanelFactory];
 function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
   const FilterManager = ({
     filters = [],
-    filterOrders = [],
     datasets,
     layers,
     showDatasetTable,
@@ -52,31 +51,26 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
       addFilter(defaultDataset);
     }, [datasets, addFilter]);
 
-    // render filters in reserved order
-    const orderedIndex = useMemo(() => {
-      return filterOrders.map(filterId => filters.findIndex(filter => filter.id == filterId));
-    }, [filterOrders]);
-    
     return (
       <div className="filter-manager">
         <SourceDataCatalog datasets={datasets} showDatasetTable={showDatasetTable} />
         <SidePanelDivider />
         <SidePanelSection>
-          {orderedIndex.map((ordIdx, idx) => (
+          {filters.map((filter, idx) => (
             <FilterPanel
-              key={`${filters[ordIdx].id}-${ordIdx}`}
-              idx={ordIdx}
+              key={`${filter.id}-${idx}`}
+              idx={idx}
               filters={filters}
-              filter={{...filters[ordIdx], first: idx == 0, last: idx == filters.length - 1}}
+              filter={{...filter, first: idx == 0, last: idx == filters.length - 1}}
               datasets={datasets}
               layers={layers}
               isAnyFilterAnimating={isAnyFilterAnimating}
-              removeFilter={() => removeFilter(ordIdx)}
-              moveUpFilter={() => moveUpFilter(filters[ordIdx].id)}
-              moveDownFilter={() => moveDownFilter(filters[ordIdx].id)}
-              enlargeFilter={() => enlargeFilter(ordIdx)}
-              toggleAnimation={() => toggleAnimation(ordIdx)}
-              toggleFilterFeature={() => toggleFilterFeature(ordIdx)}
+              removeFilter={() => removeFilter(idx)}
+              moveUpFilter={() => moveUpFilter(filter.id)}
+              moveDownFilter={() => moveDownFilter(filter.id)}
+              enlargeFilter={() => enlargeFilter(idx)}
+              toggleAnimation={() => toggleAnimation(idx)}
+              toggleFilterFeature={() => toggleFilterFeature(idx)}
               setFilter={setFilter}
             />
           ))}

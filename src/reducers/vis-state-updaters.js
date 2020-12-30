@@ -167,7 +167,6 @@ export const INITIAL_VIS_STATE = {
   // filters
   filters: [],
   filterToBeMerged: [],
-  filterOrders: [],
 
   // a collection of multiple dataset
   datasets: {},
@@ -724,8 +723,7 @@ export const addFilterUpdater = (state, action) => {
   const newFilter = getDefaultFilter(action.dataId);
   return {
     ...state,
-    filters: [...state.filters, newFilter],
-    filterOrders: [...state.filterOrders, newFilter.id]
+    filters: [...state.filters, newFilter]
   }
 };
 
@@ -736,19 +734,20 @@ export const addFilterUpdater = (state, action) => {
  * @public
  */
 export const moveUpFilterUpdater = (state, {filterId}) => {
-  const srcIdx = state.filterOrders.findIndex(id => id == filterId);
-  
+  const srcIdx = state.filters.findIndex(filter => filter.id == filterId);
+  const srcFilter = state.filters[srcIdx];
+
   if (srcIdx == 0) {
     return state;
   }
 
-  const newFilterOrders = [...state.filterOrders];
-  newFilterOrders[srcIdx] = newFilterOrders[srcIdx - 1];
-  newFilterOrders[srcIdx - 1] = filterId;
+  const newFilters = [...state.filters];
+  newFilters[srcIdx] = newFilters[srcIdx - 1];
+  newFilters[srcIdx - 1] = srcFilter;
 
   return {
     ...state,
-    filterOrders: newFilterOrders
+    filters: newFilters
   }
 };
 
@@ -759,19 +758,20 @@ export const moveUpFilterUpdater = (state, {filterId}) => {
  * @public
  */
 export const moveDownFilterUpdater = (state, {filterId}) => {
-  const srcIdx = state.filterOrders.findIndex(id => id == filterId);
-  
-  if (srcIdx == state.filterOrders.length - 1) {
+  const srcIdx = state.filters.findIndex(filter => filter.id == filterId);
+  const srcFilter = state.filters[srcIdx];
+
+  if (srcIdx == state.filters.length - 1) {
     return state;
   }
 
-  const newFilterOrders = [...state.filterOrders];
-  newFilterOrders[srcIdx] = newFilterOrders[srcIdx + 1];
-  newFilterOrders[srcIdx + 1] = filterId;
+  const newFilters = [...state.filters];
+  newFilters[srcIdx] = newFilters[srcIdx + 1];
+  newFilters[srcIdx + 1] = srcFilter;
 
   return {
     ...state,
-    filterOrders: newFilterOrders
+    filters: newFilters
   }
 };
 
@@ -914,12 +914,6 @@ export const removeFilterUpdater = (state, action) => {
     ...state.filters.slice(idx + 1, state.filters.length)
   ];
 
-  const orderIdx = state.filterOrders.findIndex(filterId => filterId == id);
-  const newFilterOrders = [
-    ...state.filterOrders.slice(0, orderIdx),
-    ...state.filterOrders.slice(orderIdx + 1, state.filterOrders.length)
-  ];
-
   const filteredDatasets = applyFiltersToDatasets(dataId, state.datasets, newFilters, state.layers);
   const newEditor =
     getFilterIdInFeature(state.editor.selectedFeature) === id
@@ -934,8 +928,7 @@ export const removeFilterUpdater = (state, action) => {
   newState = set(['editor'], newEditor, newState);
 
   return {
-    ...updateAllLayerDomainData(newState, dataId, undefined),
-    filterOrders: newFilterOrders
+    ...updateAllLayerDomainData(newState, dataId, undefined)
   };
 };
 
