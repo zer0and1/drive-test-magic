@@ -102,7 +102,9 @@ export function applyProfile(id) {
     });
     const profile = getState().main.keplerGl.map.mapProfile.profiles.find(profile => profile.id === id);
     Promise.resolve(
-      dispatch(receiveMapConfig(getState().main.keplerGl.map.visState.schema.parseSavedConfig(profile.config)))
+      dispatch(receiveMapConfig(getState().main.keplerGl.map.visState.schema.parseSavedConfig(profile.config), {
+        keepExistingConfig: false
+      }))
     ).then(() => dispatch({
       type: ActionTypes.SET_PROFILE_APPLYING,
       action: {
