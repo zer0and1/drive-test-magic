@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import { Save2, Play, Spinner } from 'components/common/icons';
+import { Save2, Add, Play, Spinner } from 'components/common/icons';
 import { FormattedMessage } from 'localization';
 import {
   Button,
@@ -32,6 +32,7 @@ const StyledProfilePanelHeader = styled(StyledPanelHeader)`
   .profile__removing-profile {
     opacity: 1;
   }
+  border-left: ${props => props.selected ? 3 : 0}px solid ${props => props.theme.activeColor};
   :hover {
     cursor: pointer;
     background-color: ${props => props.theme.panelBackgroundHover};
@@ -57,23 +58,40 @@ const HeaderActionSection = styled.div`
 
 export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
   const [value, setValue] = useState(label);
+  const [isEditing, setEditing] = useState(false);
 
   return (
-    <InlineInput
-      type="text"
-      className="profile__title__editor"
-      value={value}
-      onClick={e => {
-        e.stopPropagation();
-      }}
-      onChange={(e) => setValue(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.KeyCode === 13) {
-          onEdit(value);
-        }
-      }}
-      id={`${profileId}:input-profile-label`}
-    />
+    <>
+      {isEditing || (
+        <div
+          style={{ maxWidth: '185px', minWidth: '185px' }}
+          onClick={e => {
+            e.stopPropagation();
+            setEditing(true);
+          }}
+        >
+          {value}
+        </div>
+      )}
+      {isEditing && (
+        <InlineInput
+          type="text"
+          className="profile__title__editor"
+          value={value}
+          onClick={e => {
+            e.stopPropagation();
+          }}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.KeyCode === 13) {
+              onEdit(value);
+              setEditing(false);
+            }
+          }}
+          id={`${profileId}:input-profile-label`}
+        />
+      )}
+    </>
   );
 };
 
@@ -111,12 +129,13 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
   const MapProfileSelector = ({
     mapProfile,
     saveProfile,
+    updateProfile,
     applyProfile,
     removeProfile,
     updateProfileLabel,
     actionIcons = defaultActionIcons
   }) => {
-    const { profiles, isLoading, isSaving } = mapProfile;
+    const { profiles, isLoading, isSaving, isUpdating, selectedId } = mapProfile;
 
     return (
       <div>
@@ -125,12 +144,12 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
         </PanelLabel>
         {profiles.map(profile => (
           <PanelWrapper key={profile.id}>
-            <StyledProfilePanelHeader>
+            <StyledProfilePanelHeader selected={profile.id == selectedId}>
               <HeaderLabelSection className="profile-panel__header__content">
                 <ProfileTitleSection
                   profileId={profile.id}
                   label={profile.label}
-                  onUpdateProfileLabel={(label) => updateProfileLabel(profile.id, label)}
+                  onUpdateProfileLabel={label => updateProfileLabel(profile.id, label)}
                 />
               </HeaderLabelSection>
               <HeaderActionSection className="profile-panel__header__actions">
@@ -156,12 +175,24 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
         <SidePanelSection>
           <Button
             className="save-map-profile-button"
+            style={{ width: '45%', marginRight: '5%' }}
             onClick={() => saveProfile()}
             primary
           >
-            {isLoading || isSaving ? <Spinner type="ls" /> : <Save2 height="12px" />}
+            {isLoading || isSaving ? <Spinner type="ls" /> : <Add height="12px" />}
             <FormattedMessage id={'mapManager.saveMapProfile'} />
           </Button>
+          <Button
+            disabled={selectedId == null || isLoading || isSaving}
+            className="update-map-profile-button"
+            style={{ width: '50%' }}
+            onClick={() => saveProfile()}
+            secondary
+          >
+            {isUpdating ? <Spinner type="ls" /> : <Save2 height="12px" />}
+            <FormattedMessage id={'mapManager.updateMapProfile'} />
+          </Button>
+
         </SidePanelSection>
       </div>
     )

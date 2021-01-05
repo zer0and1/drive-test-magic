@@ -168,7 +168,8 @@ export default {
     mapStyle: 'Map style',
     addMapStyle: 'Add Map Style',
     mapProfile: 'Map profile',
-    saveMapProfile: 'Save Map Profile',
+    saveMapProfile: 'Add Profile',
+    updateMapProfile: 'Update Profile',
     '3dBuildingColor': '3D Building Color'
   },
   layerConfiguration: {

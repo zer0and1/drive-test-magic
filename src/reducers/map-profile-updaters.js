@@ -2,6 +2,7 @@ export const INITIAL_VIS_STATE = {
   // profiles
   isLoading: false,
   isSaving: false,
+  selectedId: null,
   profiles: []
 };
 
@@ -45,7 +46,8 @@ export const setApplyingUpdater = (state, { action }) => {
         };
       }
       return profile;
-    })
+    }),
+    selectedId: action.id
   };
 }
 
