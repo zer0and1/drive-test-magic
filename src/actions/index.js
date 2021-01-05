@@ -22,6 +22,7 @@
 export * from './actions';
 
 // kepler.gl actions accessible outside component
+export * from './minion-state-actions';
 export * from './vis-state-actions';
 export * from './ui-state-actions';
 export * from './map-state-actions';

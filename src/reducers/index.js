@@ -25,6 +25,7 @@ export {default as keplerGlReducer} from './root';
 // Core Reducer
 export {
   default as keplerGlReducerCore,
+  minionStateLens,
   visStateLens,
   mapStateLens,
   uiStateLens,

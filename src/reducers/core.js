@@ -20,6 +20,7 @@
 
 import {combineReducers} from 'redux';
 
+import {minionStateReducerFactory} from './minion-state';
 import {visStateReducerFactory} from './vis-state';
 import {mapStateReducerFactory} from './map-state';
 import {mapStyleReducerFactory} from './map-style';
@@ -31,6 +32,7 @@ import composers from './composers';
 
 const combined = (initialState = {}) =>
   combineReducers({
+    minionState: minionStateReducerFactory(initialState.minionState),
     visState: visStateReducerFactory(initialState.visState),
     mapState: mapStateReducerFactory(initialState.mapState),
     mapStyle: mapStyleReducerFactory(initialState.mapStyle),
@@ -74,6 +76,15 @@ export const mapStyleLens = reduxState => ({mapStyle: reduxState.mapStyle});
  * @public
  */
 export const visStateLens = reduxState => ({visState: reduxState.visState});
+
+/**
+ * Connect subreducer `minionState`, used with `injectComponents`. Learn more at
+ * [Replace UI Component](../advanced-usages/replace-ui-component.md#pass-custom-component-props)
+ *
+ * @param {*} reduxState
+ * @public
+ */
+export const minionStateLens = reduxState => ({minionState: reduxState.minionState});
 
 /**
  * Connect subreducer `uiState`, used with `injectComponents`. Learn more at

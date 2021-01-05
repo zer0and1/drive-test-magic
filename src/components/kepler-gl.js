@@ -28,6 +28,7 @@ import {IntlProvider} from 'react-intl';
 import {messages} from '../localization';
 import {RootContext} from 'components/context';
 
+import * as MinionStateActions from 'actions/minion-state-actions';
 import * as VisStateActions from 'actions/vis-state-actions';
 import * as MapStateActions from 'actions/map-state-actions';
 import * as MapStyleActions from 'actions/map-style-actions';
@@ -247,10 +248,12 @@ function KeplerGlFactory(
         mapState,
         uiState,
         visState,
+        minionState,
         providerState,
         mapProfile,
 
         // actions,
+        minionStateActions,
         visStateActions,
         mapStateActions,
         mapStyleActions,
@@ -301,10 +304,12 @@ function KeplerGlFactory(
         layerBlending,
         onSaveMap,
         uiState,
+        minionState,
         mapStyleActions,
         mapStateActions,
         visStateActions,
         uiStateActions,
+        minionStateActions,
         width: this.props.sidePanelWidth,
         height: this.props.height - DIMENSIONS.sidePanel.margin.top - DIMENSIONS.sidePanel.margin.bottom,
         availableProviders,
@@ -454,6 +459,7 @@ function KeplerGlFactory(
 function mapStateToProps(state = {}, props) {
   return {
     ...props,
+    minionState: state.minionState,
     visState: state.visState,
     mapStyle: state.mapStyle,
     mapState: state.mapState,
@@ -470,7 +476,8 @@ const getUserActions = (dispatch, props) => props.actions || defaultUserActions;
 
 function makeGetActionCreators() {
   return createSelector([getDispatch, getUserActions], (dispatch, userActions) => {
-    const [visStateActions, mapStateActions, mapStyleActions, uiStateActions, providerActions] = [
+    const [minionStateActions, visStateActions, mapStateActions, mapStyleActions, uiStateActions, providerActions] = [
+      MinionStateActions,
       VisStateActions,
       MapStateActions,
       MapStyleActions,
@@ -479,6 +486,7 @@ function makeGetActionCreators() {
     ].map(actions => bindActionCreators(mergeActions(actions, userActions), dispatch));
 
     return {
+      minionStateActions,
       visStateActions,
       mapStateActions,
       mapStyleActions,

@@ -18,16 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {console as Console} from 'global/window';
-import {disableStackCapturing, withTask} from 'react-palm/tasks';
+import { console as Console } from 'global/window';
+import { disableStackCapturing, withTask } from 'react-palm/tasks';
 import cloneDeep from 'lodash.clonedeep';
 import uniq from 'lodash.uniq';
 import get from 'lodash.get';
 import xor from 'lodash.xor';
 import copy from 'copy-to-clipboard';
-import {parseFieldValue} from 'utils/data-utils';
+import { parseFieldValue } from 'utils/data-utils';
 // Tasks
-import {LOAD_FILE_TASK, UNWRAP_TASK, PROCESS_FILE_DATA, DELAY_TASK} from 'tasks/tasks';
+import { LOAD_FILE_TASK, UNWRAP_TASK, PROCESS_FILE_DATA, DELAY_TASK } from 'tasks/tasks';
 // Actions
 import {
   loadFilesErr,
@@ -37,7 +37,7 @@ import {
   nextFileBatch
 } from 'actions/vis-state-actions';
 // Utils
-import {findFieldsToShow, getDefaultInteraction} from 'utils/interaction-utils';
+import { findFieldsToShow, getDefaultInteraction } from 'utils/interaction-utils';
 import {
   applyFilterFieldName,
   applyFiltersToDatasets,
@@ -53,13 +53,13 @@ import {
   LIMITED_FILTER_EFFECT_PROPS,
   updateFilterDataId
 } from 'utils/filter-utils';
-import {assignGpuChannel, setFilterGpuMode} from 'utils/gpu-filter-utils';
-import {createNewDataEntry, sortDatasetByColumn} from 'utils/dataset-utils';
-import {set, toArray} from 'utils/utils';
+import { assignGpuChannel, setFilterGpuMode } from 'utils/gpu-filter-utils';
+import { createNewDataEntry, sortDatasetByColumn } from 'utils/dataset-utils';
+import { set, toArray } from 'utils/utils';
 
-import {calculateLayerData, findDefaultLayer} from 'utils/layer-utils';
+import { calculateLayerData, findDefaultLayer } from 'utils/layer-utils';
 
-import {isValidMerger, VIS_STATE_MERGERS, validateLayerWithData} from './vis-state-merger';
+import { isValidMerger, VIS_STATE_MERGERS, validateLayerWithData } from './vis-state-merger';
 
 import {
   addNewLayersToSplitMap,
@@ -67,13 +67,13 @@ import {
   removeLayerFromSplitMaps
 } from 'utils/split-map-utils';
 
-import {Layer, LayerClasses} from 'layers';
-import {DEFAULT_TEXT_LABEL} from 'layers/layer-factory';
-import {EDITOR_MODES, SORT_ORDER} from 'constants/default-settings';
-import {pick_, merge_} from './composer-helpers';
-import {processFileContent} from 'actions/vis-state-actions';
+import { Layer, LayerClasses } from 'layers';
+import { DEFAULT_TEXT_LABEL } from 'layers/layer-factory';
+import { EDITOR_MODES, SORT_ORDER } from 'constants/default-settings';
+import { pick_, merge_ } from './composer-helpers';
+import { processFileContent } from 'actions/vis-state-actions';
 
-import KeplerGLSchema, {CURRENT_VERSION, visStateSchema} from 'schemas';
+import KeplerGLSchema, { CURRENT_VERSION, visStateSchema } from 'schemas';
 
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
@@ -157,7 +157,11 @@ export const INITIAL_VIS_STATE = {
   mapInfo: {
     title: '',
     description: ''
- },
+  },
+
+  // minions
+  command: {},
+
   // layers
   layers: [],
   layerData: [],
@@ -219,14 +223,14 @@ export const INITIAL_VIS_STATE = {
  * @type {typeof import('./vis-state-updaters').updateStateWithLayerAndData}
  *
  */
-export function updateStateWithLayerAndData(state, {layerData, layer, idx}) {
+export function updateStateWithLayerAndData(state, { layerData, layer, idx }) {
   return {
     ...state,
     layers: state.layers.map((lyr, i) => (i === idx ? layer : lyr)),
     layerData: layerData
       ? state.layerData.map((d, i) => (i === idx ? layerData : d))
       : state.layerData
- };
+  };
 }
 
 export function updateStateOnLayerVisibilityChange(state, layer) {
@@ -237,12 +241,12 @@ export function updateStateOnLayerVisibilityChange(state, layer) {
       splitMaps: layer.config.isVisible
         ? addNewLayersToSplitMap(state.splitMaps, layer)
         : removeLayerFromSplitMaps(state.splitMaps, layer)
-   };
- }
+    };
+  }
 
   if (layer.config.animation.enabled) {
     newState = updateAnimationDomain(state);
- }
+  }
 
   return newState;
 }
@@ -254,18 +258,18 @@ export function updateStateOnLayerVisibilityChange(state, layer) {
  * @returns nextState
  */
 export function layerConfigChangeUpdater(state, action) {
-  const {oldLayer} = action;
+  const { oldLayer } = action;
   const idx = state.layers.findIndex(l => l.id === oldLayer.id);
   const props = Object.keys(action.newConfig);
   if (typeof action.newConfig.dataId === 'string') {
-    const {dataId, ...restConfig} = action.newConfig;
+    const { dataId, ...restConfig } = action.newConfig;
     const stateWithDataId = layerDataIdChangeUpdater(state, {
       oldLayer,
-      newConfig: {dataId}
-   });
+      newConfig: { dataId }
+    });
     const nextLayer = stateWithDataId.layers.find(l => l.id === oldLayer.id);
-    return layerConfigChangeUpdater(state, {oldLayer: nextLayer, newConfig: restConfig});
- }
+    return layerConfigChangeUpdater(state, { oldLayer: nextLayer, newConfig: restConfig });
+  }
 
   let newLayer = oldLayer.updateLayerConfig(action.newConfig);
 
@@ -278,18 +282,18 @@ export function layerConfigChangeUpdater(state, action) {
 
     layerData = updateLayerDataResult.layerData;
     newLayer = updateLayerDataResult.layer;
- }
+  }
 
   let newState = state;
   if ('isVisible' in action.newConfig) {
     newState = updateStateOnLayerVisibilityChange(state, newLayer);
- }
+  }
 
   return updateStateWithLayerAndData(newState, {
     layer: newLayer,
     layerData,
     idx
- });
+  });
 }
 
 function addOrRemoveTextLabels(newFields, textLabel) {
@@ -310,7 +314,7 @@ function addOrRemoveTextLabels(newFields, textLabel) {
     ...addFields.map(af => ({
       ...DEFAULT_TEXT_LABEL,
       field: af
-   }))
+    }))
   ];
 
   return newTextLabel;
@@ -319,16 +323,16 @@ function addOrRemoveTextLabels(newFields, textLabel) {
 function updateTextLabelPropAndValue(idx, prop, value, textLabel) {
   if (!textLabel[idx].hasOwnProperty(prop)) {
     return textLabel;
- }
+  }
 
   let newTextLabel = textLabel.slice();
 
   if (prop && (value || textLabel.length === 1)) {
-    newTextLabel = textLabel.map((tl, i) => (i === idx ? {...tl, [prop]: value} : tl));
- } else if (prop === 'field' && value === null && textLabel.length > 1) {
+    newTextLabel = textLabel.map((tl, i) => (i === idx ? { ...tl, [prop]: value } : tl));
+  } else if (prop === 'field' && value === null && textLabel.length > 1) {
     // remove label when field value is set to null
     newTextLabel.splice(idx, 1);
- }
+  }
 
   return newTextLabel;
 }
@@ -340,26 +344,26 @@ function updateTextLabelPropAndValue(idx, prop, value, textLabel) {
  * @returns nextState
  */
 export function layerTextLabelChangeUpdater(state, action) {
-  const {oldLayer, idx, prop, value} = action;
-  const {textLabel} = oldLayer.config;
+  const { oldLayer, idx, prop, value } = action;
+  const { textLabel } = oldLayer.config;
 
   let newTextLabel = textLabel.slice();
   if (!textLabel[idx] && idx === textLabel.length) {
     // if idx is set to length, add empty text label
     newTextLabel = [...textLabel, DEFAULT_TEXT_LABEL];
- }
+  }
 
   if (idx === 'all' && prop === 'fields') {
     newTextLabel = addOrRemoveTextLabels(value, textLabel);
- } else {
+  } else {
     newTextLabel = updateTextLabelPropAndValue(idx, prop, value, newTextLabel);
- }
+  }
 
   // update text label prop and value
   return layerConfigChangeUpdater(state, {
     oldLayer,
-    newConfig: {textLabel: newTextLabel}
- });
+    newConfig: { textLabel: newTextLabel }
+  });
 }
 
 function validateExistingLayerWithData(dataset, layerClasses, layer) {
@@ -368,11 +372,11 @@ function validateExistingLayerWithData(dataset, layerClasses, layer) {
   const savedVisState = visStateSchema[CURRENT_VERSION].save({
     layers: [newLayer],
     layerOrder: [0]
- }).visState;
+  }).visState;
   const loadedLayer = visStateSchema[CURRENT_VERSION].load(savedVisState).visState.layers[0];
   newLayer = validateLayerWithData(dataset, loadedLayer, layerClasses, {
     allowEmptyColumn: true
- });
+  });
 
   return newLayer;
 }
@@ -384,33 +388,33 @@ function validateExistingLayerWithData(dataset, layerClasses, layer) {
  * @returns nextState
  */
 export function layerDataIdChangeUpdater(state, action) {
-  const {oldLayer, newConfig} = action;
-  const {dataId} = newConfig;
+  const { oldLayer, newConfig } = action;
+  const { dataId } = newConfig;
 
   if (!oldLayer || !state.datasets[dataId]) {
     return state;
- }
+  }
   const idx = state.layers.findIndex(l => l.id === oldLayer.id);
 
-  let newLayer = oldLayer.updateLayerConfig({dataId});
+  let newLayer = oldLayer.updateLayerConfig({ dataId });
   // this may happen when a layer is new (type: null and no columns) but it's not ready to be saved
   if (newLayer.isValidToSave()) {
     newLayer = validateExistingLayerWithData(state.datasets[dataId], state.layerClasses, newLayer);
     // if cant validate it with data create a new one
     if (!newLayer) {
-      newLayer = new state.layerClasses[oldLayer.type]({dataId, id: oldLayer.id});
-   }
- }
+      newLayer = new state.layerClasses[oldLayer.type]({ dataId, id: oldLayer.id });
+    }
+  }
 
   newLayer = newLayer.updateLayerConfig({
     isVisible: oldLayer.config.isVisible,
     isConfigActive: true
- });
+  });
 
   newLayer.updateLayerDomain(state.datasets);
-  const {layerData, layer} = calculateLayerData(newLayer, state, undefined);
+  const { layerData, layer } = calculateLayerData(newLayer, state, undefined);
 
-  return updateStateWithLayerAndData(state, {layerData, layer, idx});
+  return updateStateWithLayerAndData(state, { layerData, layer, idx });
 }
 
 /**
@@ -420,17 +424,17 @@ export function layerDataIdChangeUpdater(state, action) {
  * @public
  */
 export function layerTypeChangeUpdater(state, action) {
-  const {oldLayer, newType} = action;
+  const { oldLayer, newType } = action;
   if (!oldLayer) {
     return state;
- }
+  }
   const oldId = oldLayer.id;
   const idx = state.layers.findIndex(l => l.id === oldId);
 
   if (!state.layerClasses[newType]) {
     Console.error(`${newType} is not a valid layer type`);
     return state;
- }
+  }
 
   // get a mint layer, with new id and type
   // because deck.gl uses id to match between new and old layer.
@@ -440,31 +444,31 @@ export function layerTypeChangeUpdater(state, action) {
   newLayer.assignConfigToLayer(oldLayer.config, oldLayer.visConfigSettings);
 
   newLayer.updateLayerDomain(state.datasets);
-  const {layerData, layer} = calculateLayerData(newLayer, state);
-  let newState = updateStateWithLayerAndData(state, {layerData, layer, idx});
+  const { layerData, layer } = calculateLayerData(newLayer, state);
+  let newState = updateStateWithLayerAndData(state, { layerData, layer, idx });
 
   if (layer.config.animation.enabled || oldLayer.config.animation.enabled) {
     newState = updateAnimationDomain(newState);
- }
+  }
 
   // update splitMap layer id
   if (state.splitMaps.length) {
     newState = {
       ...newState,
       splitMaps: newState.splitMaps.map(settings => {
-        const {[oldId]: oldLayerMap, ...otherLayers} = settings.layers;
+        const { [oldId]: oldLayerMap, ...otherLayers } = settings.layers;
         return oldId in settings.layers
           ? {
             ...settings,
             layers: {
               ...otherLayers,
               [layer.id]: oldLayerMap
-           }
-         }
+            }
+          }
           : settings;
-     })
-   };
- }
+      })
+    };
+  }
 
   return newState;
 }
@@ -477,10 +481,10 @@ export function layerTypeChangeUpdater(state, action) {
  * @public
  */
 export function layerVisualChannelChangeUpdater(state, action) {
-  const {oldLayer, newConfig, channel} = action;
+  const { oldLayer, newConfig, channel } = action;
   if (!oldLayer.config.dataId) {
     return state;
- }
+  }
   const dataset = state.datasets[oldLayer.config.dataId];
 
   const idx = state.layers.findIndex(l => l.id === oldLayer.id);
@@ -489,9 +493,9 @@ export function layerVisualChannelChangeUpdater(state, action) {
   newLayer.updateLayerVisualChannel(dataset, channel);
 
   const oldLayerData = state.layerData[idx];
-  const {layerData, layer} = calculateLayerData(newLayer, state, oldLayerData);
+  const { layerData, layer } = calculateLayerData(newLayer, state, oldLayerData);
 
-  return updateStateWithLayerAndData(state, {layerData, layer, idx});
+  return updateStateWithLayerAndData(state, { layerData, layer, idx });
 }
 
 /**
@@ -501,23 +505,23 @@ export function layerVisualChannelChangeUpdater(state, action) {
  * @public
  */
 export function layerVisConfigChangeUpdater(state, action) {
-  const {oldLayer} = action;
+  const { oldLayer } = action;
   const idx = state.layers.findIndex(l => l.id === oldLayer.id);
   const props = Object.keys(action.newVisConfig);
   const newVisConfig = {
     ...oldLayer.config.visConfig,
     ...action.newVisConfig
- };
+  };
 
-  const newLayer = oldLayer.updateLayerConfig({visConfig: newVisConfig});
+  const newLayer = oldLayer.updateLayerConfig({ visConfig: newVisConfig });
 
   if (newLayer.shouldCalculateLayerData(props)) {
     const oldLayerData = state.layerData[idx];
-    const {layerData, layer} = calculateLayerData(newLayer, state, oldLayerData);
-    return updateStateWithLayerAndData(state, {layerData, layer, idx});
- }
+    const { layerData, layer } = calculateLayerData(newLayer, state, oldLayerData);
+    return updateStateWithLayerAndData(state, { layerData, layer, idx });
+  }
 
-  return updateStateWithLayerAndData(state, {layer: newLayer, idx});
+  return updateStateWithLayerAndData(state, { layer: newLayer, idx });
 }
 
 /**
@@ -536,7 +540,7 @@ export function setFilterAnimationTimeUpdater(state, action) {
  * @type {typeof import('./vis-state-updaters').setFilterAnimationWindowUpdater}
  * @public
  */
-export function setFilterAnimationWindowUpdater(state, {id, animationWindow}) {
+export function setFilterAnimationWindowUpdater(state, { id, animationWindow }) {
   return {
     ...state,
     filters: state.filters.map(f =>
@@ -544,10 +548,10 @@ export function setFilterAnimationWindowUpdater(state, {id, animationWindow}) {
         ? {
           ...f,
           animationWindow
-       }
+        }
         : f
     )
- };
+  };
 }
 /**
  * Update filter property
@@ -556,13 +560,13 @@ export function setFilterAnimationWindowUpdater(state, {id, animationWindow}) {
  * @public
  */
 export function setFilterUpdater(state, action) {
-  const {idx, prop, value, valueIndex = 0} = action;
+  const { idx, prop, value, valueIndex = 0 } = action;
 
   const oldFilter = state.filters[idx];
   let newFilter = set([prop], value, oldFilter);
   let newState = state;
 
-  const {dataId} = newFilter;
+  const { dataId } = newFilter;
 
   // Ensuring backward compatibility
   let datasetIds = toArray(dataId);
@@ -581,23 +585,23 @@ export function setFilterUpdater(state, action) {
       // TODO: Next PR for UI filter name will only update filter name but it won't have side effects
       // we are gonna use pair of datasets and fieldIdx to update the filter
       const datasetId = newFilter.dataId[valueIndex];
-      const {filter: updatedFilter, dataset: newDataset} = applyFilterFieldName(
+      const { filter: updatedFilter, dataset: newDataset } = applyFilterFieldName(
         newFilter,
         state.datasets[datasetId],
         value,
         valueIndex,
-        {mergeDomain: false}
+        { mergeDomain: false }
       );
       if (!updatedFilter) {
         return state;
-     }
+      }
 
       newFilter = updatedFilter;
 
       if (newFilter.gpu) {
         newFilter = setFilterGpuMode(newFilter, state.filters);
         newFilter = assignGpuChannel(newFilter, state.filters);
-     }
+      }
 
       newState = set(['datasets', datasetId], newDataset, state);
 
@@ -639,19 +643,19 @@ export function setFilterUpdater(state, action) {
       newFilter = {
         ...newFilter,
         dataId: newDataIds
-     };
+      };
 
       break;
     default:
       break;
- }
+  }
 
   const enlargedFilter = state.filters.find(f => f.enlarged);
 
   if (enlargedFilter && enlargedFilter.id !== newFilter.id) {
     // there should be only one enlarged filter
     newFilter.enlarged = false;
- }
+  }
 
   // save new filters to newState
   newState = set(['filters', idx], newFilter, newState);
@@ -685,8 +689,8 @@ export function setFilterUpdater(state, action) {
  * @type {typeof import('./vis-state-updaters').setFilterPlotUpdater}
  * @public
  */
-export const setFilterPlotUpdater = (state, {idx, newProp, valueIndex = 0}) => {
-  let newFilter = {...state.filters[idx], ...newProp};
+export const setFilterPlotUpdater = (state, { idx, newProp, valueIndex = 0 }) => {
+  let newFilter = { ...state.filters[idx], ...newProp };
   const prop = Object.keys(newProp)[0];
   if (prop === 'yAxis') {
     const plotType = getDefaultFilterPlotType(newFilter);
@@ -695,18 +699,18 @@ export const setFilterPlotUpdater = (state, {idx, newProp, valueIndex = 0}) => {
       newFilter = {
         ...newFilter,
         ...getFilterPlot(
-          {...newFilter, plotType},
+          { ...newFilter, plotType },
           state.datasets[newFilter.dataId[valueIndex]].allData
         ),
         plotType
-     };
-   }
- }
+      };
+    }
+  }
 
   return {
     ...state,
     filters: state.filters.map((f, i) => (i === idx ? newFilter : f))
- };
+  };
 };
 
 /**
@@ -719,7 +723,7 @@ export const addFilterUpdater = (state, action) => {
   if (!action.dataId) {
     return state;
   }
-  
+
   const newFilter = getDefaultFilter(action.dataId);
   return {
     ...state,
@@ -733,7 +737,7 @@ export const addFilterUpdater = (state, action) => {
  * @type {typeof import('./vis-state-updaters').moveUpFilterUpdater}
  * @public
  */
-export const moveUpFilterUpdater = (state, {filterId}) => {
+export const moveUpFilterUpdater = (state, { filterId }) => {
   const srcIdx = state.filters.findIndex(filter => filter.id == filterId);
   const srcFilter = state.filters[srcIdx];
 
@@ -757,7 +761,7 @@ export const moveUpFilterUpdater = (state, {filterId}) => {
  * @type {typeof import('./vis-state-updaters').moveDownFilterUpdater}
  * @public
  */
-export const moveDownFilterUpdater = (state, {filterId}) => {
+export const moveDownFilterUpdater = (state, { filterId }) => {
   const srcIdx = state.filters.findIndex(filter => filter.id == filterId);
   const srcFilter = state.filters[srcIdx];
 
@@ -781,15 +785,15 @@ export const moveDownFilterUpdater = (state, {filterId}) => {
  * @memberof visStateUpdaters
  * @type {typeof import('./vis-state-updaters').layerColorUIChangeUpdater}
  */
-export const layerColorUIChangeUpdater = (state, {oldLayer, prop, newConfig}) => {
+export const layerColorUIChangeUpdater = (state, { oldLayer, prop, newConfig }) => {
   const newLayer = oldLayer.updateLayerColorUI(prop, newConfig);
   if (prop === 'colorRange') {
-    return layerVisConfigChangeUpdater(state, {oldLayer, newVisConfig: newLayer.config.visConfig});
- }
+    return layerVisConfigChangeUpdater(state, { oldLayer, newVisConfig: newLayer.config.visConfig });
+  }
   return {
     ...state,
     layers: state.layers.map(l => (l.id === oldLayer.id ? newLayer : l))
- };
+  };
 };
 
 /**
@@ -800,7 +804,7 @@ export const layerColorUIChangeUpdater = (state, {oldLayer, prop, newConfig}) =>
  */
 export const toggleFilterAnimationUpdater = (state, action) => ({
   ...state,
-  filters: state.filters.map((f, i) => (i === action.idx ? {...f, isAnimating: !f.isAnimating} : f))
+  filters: state.filters.map((f, i) => (i === action.idx ? { ...f, isAnimating: !f.isAnimating } : f))
 });
 
 /**
@@ -813,7 +817,7 @@ export const toggleLayerAnimationUpdater = state => ({
   animationConfig: {
     ...state.animationConfig,
     isAnimating: !state.animationConfig.isAnimating
- }
+  }
 });
 /**
  * Change filter animation speed
@@ -823,7 +827,7 @@ export const toggleLayerAnimationUpdater = state => ({
  */
 export const updateFilterAnimationSpeedUpdater = (state, action) => ({
   ...state,
-  filters: state.filters.map((f, i) => (i === action.idx ? {...f, speed: action.speed} : f))
+  filters: state.filters.map((f, i) => (i === action.idx ? { ...f, speed: action.speed } : f))
 });
 
 /**
@@ -833,12 +837,12 @@ export const updateFilterAnimationSpeedUpdater = (state, action) => ({
  * @public
  *
  */
-export const setLayerAnimationTimeUpdater = (state, {value}) => ({
+export const setLayerAnimationTimeUpdater = (state, { value }) => ({
   ...state,
   animationConfig: {
     ...state.animationConfig,
     currentTime: value
- }
+  }
 });
 
 /**
@@ -848,14 +852,14 @@ export const setLayerAnimationTimeUpdater = (state, {value}) => ({
  * @public
  *
  */
-export const updateLayerAnimationSpeedUpdater = (state, {speed}) => {
+export const updateLayerAnimationSpeedUpdater = (state, { speed }) => {
   return {
     ...state,
     animationConfig: {
       ...state.animationConfig,
       speed
-   }
- };
+    }
+  };
 };
 
 /**
@@ -872,10 +876,10 @@ export const enlargeFilterUpdater = (state, action) => {
         ? {
           ...f,
           enlarged: !f.enlarged
-       }
+        }
         : f
     )
- };
+  };
 };
 
 /**
@@ -890,13 +894,13 @@ export const toggleFilterFeatureUpdater = (state, action) => {
     ...filter,
     value: featureToFilterValue(filter.value, filter.id, {
       isVisible: !isVisible
-   })
- };
+    })
+  };
 
   return {
     ...state,
-    filters: Object.assign([...state.filters], {[action.idx]: newFilter})
- };
+    filters: Object.assign([...state.filters], { [action.idx]: newFilter })
+  };
 };
 
 /**
@@ -906,8 +910,8 @@ export const toggleFilterFeatureUpdater = (state, action) => {
  * @public
  */
 export const removeFilterUpdater = (state, action) => {
-  const {idx} = action;
-  const {dataId, id} = state.filters[idx];
+  const { idx } = action;
+  const { dataId, id } = state.filters[idx];
 
   const newFilters = [
     ...state.filters.slice(0, idx),
@@ -920,7 +924,7 @@ export const removeFilterUpdater = (state, action) => {
       ? {
         ...state.editor,
         selectedFeature: null
-     }
+      }
       : state.editor;
 
   let newState = set(['filters'], newFilters, state);
@@ -945,7 +949,7 @@ export const addLayerUpdater = (state, action) => {
     isConfigActive: true,
     dataId: defaultDataset,
     ...action.props
- });
+  });
 
   return {
     ...state,
@@ -953,7 +957,7 @@ export const addLayerUpdater = (state, action) => {
     layerData: [...state.layerData, {}],
     layerOrder: [...state.layerOrder, state.layerOrder.length],
     splitMaps: addNewLayersToSplitMap(state.splitMaps, newLayer)
- };
+  };
 };
 
 /**
@@ -962,8 +966,8 @@ export const addLayerUpdater = (state, action) => {
  * @type {typeof import('./vis-state-updaters').removeLayerUpdater}
  * @public
  */
-export const removeLayerUpdater = (state, {idx}) => {
-  const {layers, layerData, clicked, hoverInfo} = state;
+export const removeLayerUpdater = (state, { idx }) => {
+  const { layers, layerData, clicked, hoverInfo } = state;
   const layerToRemove = state.layers[idx];
   const newMaps = removeLayerFromSplitMaps(state.splitMaps, layerToRemove);
 
@@ -976,7 +980,7 @@ export const removeLayerUpdater = (state, {idx}) => {
     hoverInfo: layerToRemove.isLayerHovered(hoverInfo) ? undefined : hoverInfo,
     splitMaps: newMaps
     // TODO: update filters, create helper to remove layer form filter (remove layerid and dataid) if mapped
- };
+  };
 
   return updateAnimationDomain(newState);
 };
@@ -987,7 +991,7 @@ export const removeLayerUpdater = (state, {idx}) => {
  * @type {typeof import('./vis-state-updaters').reorderLayerUpdater}
  * @public
  */
-export const reorderLayerUpdater = (state, {order}) => ({
+export const reorderLayerUpdater = (state, { order }) => ({
   ...state,
   layerOrder: order
 });
@@ -1000,57 +1004,57 @@ export const reorderLayerUpdater = (state, {order}) => ({
  */
 export const removeDatasetUpdater = (state, action) => {
   // extract dataset key
-  const {dataId: datasetKey} = action;
-  const {datasets} = state;
+  const { dataId: datasetKey } = action;
+  const { datasets } = state;
 
   // check if dataset is present
   if (!datasets[datasetKey]) {
     return state;
- }
+  }
 
   /* eslint-disable no-unused-vars */
   const {
     layers,
-    datasets: {[datasetKey]: dataset, ...newDatasets}
- } = state;
+    datasets: { [datasetKey]: dataset, ...newDatasets }
+  } = state;
   /* eslint-enable no-unused-vars */
 
   const indexes = layers.reduce((listOfIndexes, layer, index) => {
     if (layer.config.dataId === datasetKey) {
       listOfIndexes.push(index);
-   }
+    }
     return listOfIndexes;
- }, []);
+  }, []);
 
   // remove layers and datasets
-  const {newState} = indexes.reduce(
-    ({newState: currentState, indexCounter}, idx) => {
+  const { newState } = indexes.reduce(
+    ({ newState: currentState, indexCounter }, idx) => {
       const currentIndex = idx - indexCounter;
-      currentState = removeLayerUpdater(currentState, {idx: currentIndex});
+      currentState = removeLayerUpdater(currentState, { idx: currentIndex });
       indexCounter++;
-      return {newState: currentState, indexCounter};
-   },
-    {newState: {...state, datasets: newDatasets}, indexCounter: 0}
+      return { newState: currentState, indexCounter };
+    },
+    { newState: { ...state, datasets: newDatasets }, indexCounter: 0 }
   );
 
   // remove filters
   const filters = state.filters.filter(filter => !filter.dataId.includes(datasetKey));
 
   // update interactionConfig
-  let {interactionConfig} = state;
-  const {tooltip} = interactionConfig;
+  let { interactionConfig } = state;
+  const { tooltip } = interactionConfig;
   if (tooltip) {
-    const {config} = tooltip;
+    const { config } = tooltip;
     /* eslint-disable no-unused-vars */
-    const {[datasetKey]: fields, ...fieldsToShow} = config.fieldsToShow;
+    const { [datasetKey]: fields, ...fieldsToShow } = config.fieldsToShow;
     /* eslint-enable no-unused-vars */
     interactionConfig = {
       ...interactionConfig,
-      tooltip: {...tooltip, config: {...config, fieldsToShow}}
-   };
- }
+      tooltip: { ...tooltip, config: { ...config, fieldsToShow } }
+    };
+  }
 
-  return {...newState, filters, interactionConfig};
+  return { ...newState, filters, interactionConfig };
 };
 
 /**
@@ -1074,7 +1078,7 @@ export const showDatasetTableUpdater = (state, action) => {
   return {
     ...state,
     editingDataset: action.dataId
- };
+  };
 };
 
 /**
@@ -1095,20 +1099,20 @@ export const resetMapConfigUpdater = state => ({
  * @type {typeof import('./vis-state-updaters').receiveMapConfigUpdater}
  * @public
  */
-export const receiveMapConfigUpdater = (state, {payload: {config = {}, options = {}}}) => {
+export const receiveMapConfigUpdater = (state, { payload: { config = {}, options = {} } }) => {
   if (!config.visState) {
     return state;
- }
+  }
 
-  const {keepExistingConfig} = options;
+  const { keepExistingConfig } = options;
 
   // reset config if keepExistingConfig is falsy
   let mergedState = !keepExistingConfig ? resetMapConfigUpdater(state) : state;
   for (const merger of state.mergers) {
     if (isValidMerger(merger) && config.visState[merger.prop]) {
       mergedState = merger.merge(mergedState, config.visState[merger.prop], true);
-   }
- }
+    }
+  }
 
   return mergedState;
 };
@@ -1133,12 +1137,12 @@ export const layerHoverUpdater = (state, action) => ({
  * @public
  */
 export function interactionConfigChangeUpdater(state, action) {
-  const {config} = action;
+  const { config } = action;
 
   const interactionConfig = {
     ...state.interactionConfig,
-    ...{[config.id]: config}
- };
+    ...{ [config.id]: config }
+  };
 
   // Don't enable tooltip and brush at the same time
   // but coordinates can be shown at all time
@@ -1152,19 +1156,19 @@ export function interactionConfigChangeUpdater(state, action) {
     // only enable one interaction at a time
     contradict.forEach(k => {
       if (k !== config.id) {
-        interactionConfig[k] = {...interactionConfig[k], enabled: false};
-     }
-   });
- }
+        interactionConfig[k] = { ...interactionConfig[k], enabled: false };
+      }
+    });
+  }
 
   const newState = {
     ...state,
     interactionConfig
- };
+  };
 
   if (config.id === 'geocoder' && !config.enabled) {
-    return removeDatasetUpdater(newState, {dataId: 'geocoder_dataset'});
- }
+    return removeDatasetUpdater(newState, { dataId: 'geocoder_dataset' });
+  }
 
   return newState;
 }
@@ -1181,7 +1185,7 @@ export const layerClickUpdater = (state, action) => ({
     ? {
       ...state.mousePos,
       pinned: state.mousePos.pinned ? null : cloneDeep(state.mousePos)
-   }
+    }
     : state.mousePos,
   clicked: action.info && action.info.picked ? action.info : null
 });
@@ -1196,7 +1200,7 @@ export const mapClickUpdater = state => {
   return {
     ...state,
     clicked: null
- };
+  };
 };
 
 /**
@@ -1205,7 +1209,7 @@ export const mapClickUpdater = state => {
  * @type {typeof import('./vis-state-updaters').mouseMoveUpdater}
  * @public
  */
-export const mouseMoveUpdater = (state, {evt}) => {
+export const mouseMoveUpdater = (state, { evt }) => {
   if (Object.values(state.interactionConfig).some(config => config.enabled)) {
     return {
       ...state,
@@ -1213,9 +1217,9 @@ export const mouseMoveUpdater = (state, {evt}) => {
         ...state.mousePos,
         mousePosition: [...evt.point],
         coordinate: [...evt.lngLat]
-     }
-   };
- }
+      }
+    };
+  }
 
   return state;
 };
@@ -1232,7 +1236,7 @@ export const toggleSplitMapUpdater = (state, action) =>
       // maybe we should use an array to store state for a single map as well
       // if current maps length is equal to 0 it means that we are about to split the view
       splitMaps: computeSplitMapLayers(state.layers)
-   }
+    }
     : closeSpecificMapAtIndex(state, action);
 
 /**
@@ -1241,8 +1245,8 @@ export const toggleSplitMapUpdater = (state, action) =>
  * @type {typeof import('./vis-state-updaters').toggleLayerForMapUpdater}
  * @public
  */
-export const toggleLayerForMapUpdater = (state, {mapIndex, layerId}) => {
-  const {splitMaps} = state;
+export const toggleLayerForMapUpdater = (state, { mapIndex, layerId }) => {
+  const { splitMaps } = state;
 
   return {
     ...state,
@@ -1254,11 +1258,11 @@ export const toggleLayerForMapUpdater = (state, {mapIndex, layerId}) => {
             ...splitMaps[i].layers,
             // if layerId not in layers, set it to visible
             [layerId]: !splitMaps[i].layers[layerId]
-         }
-       }
+          }
+        }
         : sm
     )
- };
+  };
 };
 
 /**
@@ -1271,14 +1275,14 @@ export const toggleLayerForMapUpdater = (state, {mapIndex, layerId}) => {
 // eslint-disable-next-line complexity
 export const updateVisDataUpdater = (state, action) => {
   // datasets can be a single data entries or an array of multiple data entries
-  const {config, options} = action;
+  const { config, options } = action;
   const datasets = toArray(action.datasets);
 
   const newDataEntries = datasets.reduce(
-    (accu, {info = {}, data, metadata} = {}) => ({
+    (accu, { info = {}, data, metadata } = {}) => ({
       ...accu,
-      ...(createNewDataEntry({info, data, metadata}, state.datasets) || {})
-   }),
+      ...(createNewDataEntry({ info, data, metadata }, state.datasets) || {})
+    }),
     {}
   );
 
@@ -1287,8 +1291,8 @@ export const updateVisDataUpdater = (state, action) => {
   // apply config if passed from action
   const previousState = config
     ? receiveMapConfigUpdater(state, {
-      payload: {config, options}
-   })
+      payload: { config, options }
+    })
     : state;
 
   let mergedState = {
@@ -1296,8 +1300,8 @@ export const updateVisDataUpdater = (state, action) => {
     datasets: {
       ...previousState.datasets,
       ...newDataEntries
-   }
- };
+    }
+  };
 
   // merge state with config to be merged
   for (const merger of mergedState.mergers) {
@@ -1305,8 +1309,8 @@ export const updateVisDataUpdater = (state, action) => {
       const toMerge = mergedState[merger.toMergeProp];
       mergedState[merger.toMergeProp] = INITIAL_VIS_STATE[merger.toMergeProp];
       mergedState = merger.merge(mergedState, toMerge);
-   }
- }
+    }
+  }
 
   let newLayers = !dataEmpty
     ? mergedState.layers.filter(l => l.config.dataId in newDataEntries)
@@ -1317,7 +1321,7 @@ export const updateVisDataUpdater = (state, action) => {
     const result = addDefaultLayers(mergedState, newDataEntries);
     mergedState = result.state;
     newLayers = result.newLayers;
- }
+  }
 
   if (mergedState.splitMaps.length) {
     // if map is split, add new layers to splitMaps
@@ -1325,16 +1329,16 @@ export const updateVisDataUpdater = (state, action) => {
     mergedState = {
       ...mergedState,
       splitMaps: addNewLayersToSplitMap(mergedState.splitMaps, newLayers)
-   };
- }
+    };
+  }
 
   // if no tooltips merged add default tooltips
   Object.keys(newDataEntries).forEach(dataId => {
     const tooltipFields = mergedState.interactionConfig.tooltip.config.fieldsToShow[dataId];
     if (!Array.isArray(tooltipFields) || !tooltipFields.length) {
       mergedState = addDefaultTooltips(mergedState, newDataEntries[dataId]);
-   }
- });
+    }
+  });
 
   let updatedState = updateAllLayerDomainData(
     mergedState,
@@ -1363,7 +1367,7 @@ function closeSpecificMapAtIndex(state, action) {
   // retrieve layers meta data from the remaining map that we need to keep
   const indexToRetrieve = 1 - action.payload;
   const mapLayers = state.splitMaps[indexToRetrieve].layers;
-  const {layers} = state;
+  const { layers } = state;
 
   // update layer visibility
   const newLayers = layers.map(layer =>
@@ -1371,7 +1375,7 @@ function closeSpecificMapAtIndex(state, action) {
       ? layer.updateLayerConfig({
         // if layer.id is not in mapLayers, it should be inVisible
         isVisible: false
-     })
+      })
       : layer
   );
 
@@ -1380,7 +1384,7 @@ function closeSpecificMapAtIndex(state, action) {
     ...state,
     layers: newLayers,
     splitMaps: []
- };
+  };
 }
 
 /**
@@ -1390,10 +1394,10 @@ function closeSpecificMapAtIndex(state, action) {
  * @public
  */
 export const loadFilesUpdater = (state, action) => {
-  const {files, onFinish = loadFilesSuccess} = action;
+  const { files, onFinish = loadFilesSuccess } = action;
   if (!files.length) {
     return state;
- }
+  }
 
   const fileLoadingProgress = Array.from(files).reduce(
     (accu, f, i) => merge_(initialFileLoadingProgress(f, i))(accu),
@@ -1404,9 +1408,9 @@ export const loadFilesUpdater = (state, action) => {
     fileCache: [],
     filesToLoad: files,
     onFinish
- };
+  };
 
-  const nextState = merge_({fileLoadingProgress, fileLoading})(state);
+  const nextState = merge_({ fileLoadingProgress, fileLoading })(state);
 
   return loadNextFileUpdater(nextState);
 };
@@ -1420,16 +1424,16 @@ export const loadFilesUpdater = (state, action) => {
 export function loadFileStepSuccessUpdater(state, action) {
   if (!state.fileLoading) {
     return state;
- }
-  const {fileName, fileCache} = action;
-  const {filesToLoad, onFinish} = state.fileLoading;
+  }
+  const { fileName, fileCache } = action;
+  const { filesToLoad, onFinish } = state.fileLoading;
   const stateWithProgress = updateFileLoadingProgressUpdater(state, {
     fileName,
-    progress: {percent: 1, message: 'Done'}
- });
+    progress: { percent: 1, message: 'Done' }
+  });
 
   // save processed file to fileCache
-  const stateWithCache = pick_('fileLoading')(merge_({fileCache}))(stateWithProgress);
+  const stateWithCache = pick_('fileLoading')(merge_({ fileCache }))(stateWithProgress);
 
   return withTask(
     stateWithCache,
@@ -1448,19 +1452,19 @@ export function loadFileStepSuccessUpdater(state, action) {
 export function loadNextFileUpdater(state) {
   if (!state.fileLoading) {
     return state;
- }
-  const {filesToLoad} = state.fileLoading;
+  }
+  const { filesToLoad } = state.fileLoading;
   const [file, ...remainingFilesToLoad] = filesToLoad;
 
   // save filesToLoad to state
-  const nextState = pick_('fileLoading')(merge_({filesToLoad: remainingFilesToLoad}))(state);
+  const nextState = pick_('fileLoading')(merge_({ filesToLoad: remainingFilesToLoad }))(state);
 
   const stateWithProgress = updateFileLoadingProgressUpdater(nextState, {
     fileName: file.name,
-    progress: {percent: 0, message: 'loading...'}
- });
+    progress: { percent: 0, message: 'loading...' }
+  });
 
-  const {loaders, loadOptions} = state;
+  const { loaders, loadOptions } = state;
   return withTask(
     stateWithProgress,
     makeLoadFileTask(file, nextState.fileLoading.fileCache, loaders, loadOptions)
@@ -1468,7 +1472,7 @@ export function loadNextFileUpdater(state) {
 }
 
 export function makeLoadFileTask(file, fileCache, loaders = [], loadOptions = {}) {
-  return LOAD_FILE_TASK({file, fileCache, loaders, loadOptions}).bimap(
+  return LOAD_FILE_TASK({ file, fileCache, loaders, loadOptions }).bimap(
     // prettier ignore
     // success
     gen =>
@@ -1479,8 +1483,8 @@ export function makeLoadFileTask(file, fileCache, loaders = [], loadOptions = {}
           processFileContent({
             content: result,
             fileCache
-         })
-     }),
+          })
+      }),
 
     // error
     err => loadFilesErr(file.name, err)
@@ -1494,17 +1498,17 @@ export function makeLoadFileTask(file, fileCache, loaders = [], loadOptions = {}
  * @public
  */
 export function processFileContentUpdater(state, action) {
-  const {content, fileCache} = action.payload;
+  const { content, fileCache } = action.payload;
 
   const stateWithProgress = updateFileLoadingProgressUpdater(state, {
     fileName: content.fileName,
-    progress: {percent: 1, message: 'processing...'}
- });
+    progress: { percent: 1, message: 'processing...' }
+  });
 
   return withTask(
     stateWithProgress,
-    PROCESS_FILE_DATA({content, fileCache}).bimap(
-      result => loadFileStepSuccess({fileName: content.fileName, fileCache: result}),
+    PROCESS_FILE_DATA({ content, fileCache }).bimap(
+      result => loadFileStepSuccess({ fileName: content.fileName, fileCache: result }),
       err => loadFilesErr(content.fileName, err)
     )
   );
@@ -1515,11 +1519,11 @@ export function parseProgress(prevProgress = {}, progress) {
   // have an update for the user.
   if (!progress || !progress.percent) {
     return {};
- }
+  }
 
   return {
     percent: progress.percent
- };
+  };
 }
 
 /**
@@ -1530,16 +1534,16 @@ export function parseProgress(prevProgress = {}, progress) {
  */
 export const nextFileBatchUpdater = (
   state,
-  {payload: {gen, fileName, progress, accumulated, onFinish}}
+  { payload: { gen, fileName, progress, accumulated, onFinish } }
 ) => {
   const stateWithProgress = updateFileLoadingProgressUpdater(state, {
     fileName,
     progress: parseProgress(state.fileLoadingProgress[fileName], progress)
- });
+  });
   return withTask(
     stateWithProgress,
     UNWRAP_TASK(gen.next()).bimap(
-      ({value, done}) => {
+      ({ value, done }) => {
         return done
           ? onFinish(accumulated)
           : nextFileBatch({
@@ -1548,8 +1552,8 @@ export const nextFileBatchUpdater = (
             progress: value.progress,
             accumulated: value,
             onFinish
-         });
-     },
+          });
+      },
       err => loadFilesErr(fileName, err)
     )
   );
@@ -1561,18 +1565,18 @@ export const nextFileBatchUpdater = (
  * @type {typeof import('./vis-state-updaters').loadFilesErrUpdater}
  * @public
  */
-export const loadFilesErrUpdater = (state, {error, fileName}) => {
+export const loadFilesErrUpdater = (state, { error, fileName }) => {
   // update ui with error message
   Console.warn(error);
   if (!state.fileLoading) {
     return state;
- }
-  const {filesToLoad, onFinish, fileCache} = state.fileLoading;
+  }
+  const { filesToLoad, onFinish, fileCache } = state.fileLoading;
 
   const nextState = updateFileLoadingProgressUpdater(state, {
     fileName,
-    progress: {error}
- });
+    progress: { error }
+  });
 
   // kick off next file or finish
   return withTask(
@@ -1587,7 +1591,7 @@ export const loadFilesErrUpdater = (state, {error, fileName}) => {
  * @type {typeof import('./vis-state-updaters').applyCPUFilterUpdater}
  * @public
  */
-export const applyCPUFilterUpdater = (state, {dataId}) => {
+export const applyCPUFilterUpdater = (state, { dataId }) => {
   // apply cpuFilter
   const dataIds = toArray(dataId);
 
@@ -1605,7 +1609,7 @@ export const setMapInfoUpdater = (state, action) => ({
   mapInfo: {
     ...state.mapInfo,
     ...action.info
- }
+  }
 });
 /**
  * Helper function to update All layer domain and layer data of state
@@ -1617,7 +1621,7 @@ export function addDefaultLayers(state, datasets) {
   const defaultLayers = Object.values(datasets).reduce((accu, dataset) => {
     const foundLayers = findDefaultLayer(dataset, state.layerClasses);
     return foundLayers && foundLayers.length ? accu.concat(foundLayers) : accu;
- }, empty);
+  }, empty);
 
   return {
     state: {
@@ -1628,9 +1632,9 @@ export function addDefaultLayers(state, datasets) {
         ...defaultLayers.map((_, i) => state.layers.length + i),
         ...state.layerOrder
       ]
-   },
+    },
     newLayers: defaultLayers
- };
+  };
 }
 
 /**
@@ -1644,7 +1648,7 @@ export function addDefaultTooltips(state, dataset) {
   const merged = {
     ...state.interactionConfig.tooltip.config.fieldsToShow,
     ...tooltipFields
- };
+  };
 
   return set(['interactionConfig', 'tooltip', 'config', 'fieldsToShow'], merged, state);
 }
@@ -1658,11 +1662,11 @@ export function initialFileLoadingProgress(file, index) {
       message: '',
       fileName,
       error: null
-   }
- };
+    }
+  };
 }
 
-export function updateFileLoadingProgressUpdater(state, {fileName, progress}) {
+export function updateFileLoadingProgressUpdater(state, { fileName, progress }) {
   return pick_('fileLoadingProgress')(pick_(fileName)(merge_(progress)))(state);
 }
 /**
@@ -1682,21 +1686,21 @@ export function updateAllLayerDomainData(state, dataId, updatedFilter) {
           ? oldLayer
           : oldLayer.updateLayerDomain(state.datasets, updatedFilter);
 
-      const {layerData, layer} = calculateLayerData(newLayer, state, state.layerData[i]);
+      const { layerData, layer } = calculateLayerData(newLayer, state, state.layerData[i]);
 
       newLayers.push(layer);
       newLayerData.push(layerData);
-   } else {
+    } else {
       newLayers.push(oldLayer);
       newLayerData.push(state.layerData[i]);
-   }
- });
+    }
+  });
 
   const newState = {
     ...state,
     layers: newLayers,
     layerData: newLayerData
- };
+  };
 
   return newState;
 }
@@ -1715,8 +1719,8 @@ export function updateAnimationDomain(state) {
     return {
       ...state,
       animationConfig: DEFAULT_ANIMATION_CONFIG
-   };
- }
+    };
+  }
 
   const mergedDomain = animatableLayers.reduce(
     (accu, layer) => [
@@ -1734,8 +1738,8 @@ export function updateAnimationDomain(state) {
         ? state.animationConfig.currentTime
         : mergedDomain[0],
       domain: mergedDomain
-   }
- };
+    }
+  };
 }
 
 /**
@@ -1743,13 +1747,13 @@ export function updateAnimationDomain(state) {
  * @memberof visStateUpdaters
  * @type {typeof import('./vis-state-updaters').setEditorModeUpdater}
  */
-export const setEditorModeUpdater = (state, {mode}) => ({
+export const setEditorModeUpdater = (state, { mode }) => ({
   ...state,
   editor: {
     ...state.editor,
     mode,
     selectedFeature: null
- }
+  }
 });
 
 // const featureToFilterValue = (feature) => ({...feature, id: feature.id});
@@ -1758,7 +1762,7 @@ export const setEditorModeUpdater = (state, {mode}) => ({
  * @memberof visStateUpdaters
  * @type {typeof import('./vis-state-updaters').setFeaturesUpdater}
  */
-export function setFeaturesUpdater(state, {features = []}) {
+export function setFeaturesUpdater(state, { features = [] }) {
   const lastFeature = features.length && features[features.length - 1];
 
   const newState = {
@@ -1768,16 +1772,16 @@ export function setFeaturesUpdater(state, {features = []}) {
       // only save none filter features to editor
       features: features.filter(f => !getFilterIdInFeature(f)),
       mode: lastFeature && lastFeature.properties.isClosed ? EDITOR_MODES.EDIT : state.editor.mode
-   }
- };
+    }
+  };
 
   // Retrieve existing feature
-  const {selectedFeature} = state.editor;
+  const { selectedFeature } = state.editor;
 
   // If no feature is selected we can simply return since no operations
   if (!selectedFeature) {
     return newState;
- }
+  }
 
   // TODO: check if the feature has changed
   const feature = features.find(f => f.id === selectedFeature.id);
@@ -1791,8 +1795,8 @@ export function setFeaturesUpdater(state, {features = []}) {
       idx: filterIdx,
       prop: 'value',
       value: featureValue
-   });
- }
+    });
+  }
 
   return newState;
 }
@@ -1802,12 +1806,12 @@ export function setFeaturesUpdater(state, {features = []}) {
  * @memberof uiStateUpdaters
  * @type {typeof import('./vis-state-updaters').setSelectedFeatureUpdater}
  */
-export const setSelectedFeatureUpdater = (state, {feature}) => ({
+export const setSelectedFeatureUpdater = (state, { feature }) => ({
   ...state,
   editor: {
     ...state.editor,
     selectedFeature: feature
- }
+  }
 });
 
 /**
@@ -1815,36 +1819,36 @@ export const setSelectedFeatureUpdater = (state, {feature}) => ({
  * @memberof visStateUpdaters
  * @type {typeof import('./vis-state-updaters').deleteFeatureUpdater}
  */
-export function deleteFeatureUpdater(state, {feature}) {
+export function deleteFeatureUpdater(state, { feature }) {
   if (!feature) {
     return state;
- }
+  }
 
   const newState = {
     ...state,
     editor: {
       ...state.editor,
       selectedFeature: null
-   }
- };
+    }
+  };
 
   if (getFilterIdInFeature(feature)) {
     const filterIdx = newState.filters.findIndex(f => f.id === getFilterIdInFeature(feature));
 
-    return filterIdx > -1 ? removeFilterUpdater(newState, {idx: filterIdx}) : newState;
- }
+    return filterIdx > -1 ? removeFilterUpdater(newState, { idx: filterIdx }) : newState;
+  }
 
   // modify editor object
   const newEditor = {
     ...state.editor,
     features: state.editor.features.filter(f => f.id !== feature.id),
     selectedFeature: null
- };
+  };
 
   return {
     ...state,
     editor: newEditor
- };
+  };
 }
 
 /**
@@ -1853,7 +1857,7 @@ export function deleteFeatureUpdater(state, {feature}) {
  * @type {typeof import('./vis-state-updaters').setPolygonFilterLayerUpdater}
  */
 export function setPolygonFilterLayerUpdater(state, payload) {
-  const {layer, feature} = payload;
+  const { layer, feature } = payload;
   const filterId = getFilterIdInFeature(feature);
 
   // let newFilter = null;
@@ -1873,8 +1877,8 @@ export function setPolygonFilterLayerUpdater(state, payload) {
         properties: {
           ...feature.properties,
           filterId: null
-       }
-     };
+        }
+      };
 
       return {
         ...state,
@@ -1882,18 +1886,18 @@ export function setPolygonFilterLayerUpdater(state, payload) {
           ...state.editor,
           features: [...state.editor.features, noneFilterFeature],
           selectedFeature: noneFilterFeature
-       }
-     };
-   }
+        }
+      };
+    }
     const filter = state.filters[filterIdx];
-    const {layerId = []} = filter;
+    const { layerId = [] } = filter;
     const isLayerIncluded = layerId.includes(layer.id);
 
     newLayerId = isLayerIncluded
       ? // if layer is included, remove it
       layerId.filter(l => l !== layer.id)
       : [...layerId, layer.id];
- } else {
+  } else {
     // if we haven't create the polygon filter, create it
     const newFilter = generatePolygonFilter([], feature);
     filterIdx = state.filters.length;
@@ -1906,15 +1910,15 @@ export function setPolygonFilterLayerUpdater(state, payload) {
         ...state.editor,
         features: state.editor.features.filter(f => f.id !== feature.id),
         selectedFeature: newFilter.value
-     }
-   };
- }
+      }
+    };
+  }
 
   return setFilterUpdater(newState, {
     idx: filterIdx,
     prop: 'layerId',
     value: newLayerId
- });
+  });
 }
 
 /**
@@ -1922,17 +1926,17 @@ export function setPolygonFilterLayerUpdater(state, payload) {
  * @type {typeof import('./vis-state-updaters').sortTableColumnUpdater}
  * @public
  */
-export function sortTableColumnUpdater(state, {dataId, column, mode}) {
+export function sortTableColumnUpdater(state, { dataId, column, mode }) {
   const dataset = state.datasets[dataId];
   if (!dataset) {
     return state;
- }
+  }
   if (!mode) {
     const currentMode = get(dataset, ['sortColumn', column]);
     mode = currentMode
       ? Object.keys(SORT_ORDER).find(m => m !== currentMode)
       : SORT_ORDER.ASCENDING;
- }
+  }
 
   const sorted = sortDatasetByColumn(dataset, column, mode);
   return set(['datasets', dataId], sorted, state);
@@ -1943,23 +1947,23 @@ export function sortTableColumnUpdater(state, {dataId, column, mode}) {
  * @type {typeof import('./vis-state-updaters').pinTableColumnUpdater}
  * @public
  */
-export function pinTableColumnUpdater(state, {dataId, column}) {
+export function pinTableColumnUpdater(state, { dataId, column }) {
   const dataset = state.datasets[dataId];
   if (!dataset) {
     return state;
- }
+  }
   const field = dataset.fields.find(f => f.name === column);
   if (!field) {
     return state;
- }
+  }
 
   let pinnedColumns;
   if (Array.isArray(dataset.pinnedColumns) && dataset.pinnedColumns.includes(field.name)) {
     // unpin it
     pinnedColumns = dataset.pinnedColumns.filter(co => co !== field.name);
- } else {
+  } else {
     pinnedColumns = (dataset.pinnedColumns || []).concat(field.name);
- }
+  }
 
   return set(['datasets', dataId, 'pinnedColumns'], pinnedColumns, state);
 }
@@ -1970,16 +1974,16 @@ export function pinTableColumnUpdater(state, {dataId, column}) {
  * @type {typeof import('./vis-state-updaters').copyTableColumnUpdater}
  * @public
  */
-export function copyTableColumnUpdater(state, {dataId, column}) {
+export function copyTableColumnUpdater(state, { dataId, column }) {
   const dataset = state.datasets[dataId];
   if (!dataset) {
     return state;
- }
+  }
   const fieldIdx = dataset.fields.findIndex(f => f.name === column);
   if (fieldIdx < 0) {
     return state;
- }
-  const {type} = dataset.fields[fieldIdx];
+  }
+  const { type } = dataset.fields[fieldIdx];
   const text = dataset.allData.map(d => parseFieldValue(d[fieldIdx], type)).join('\n');
 
   copy(text);
@@ -1997,8 +2001,8 @@ export function toggleEditorVisibilityUpdater(state) {
     editor: {
       ...state.editor,
       visible: !state.editor.visible
-   }
- };
+    }
+  };
 }
 
 /**
@@ -2007,7 +2011,7 @@ export function toggleEditorVisibilityUpdater(state) {
  * @type {typeof import('./vis-state-updaters').addMarkerUpdater}
  * @public
  */
-export function addMarkerUpdater(state, {payload: {color, lng, lat, info}}) {  
+export function addMarkerUpdater(state, { payload: { color, lng, lat, info } }) {
   return {
     ...state,
     marked: {

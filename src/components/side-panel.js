@@ -112,6 +112,7 @@ export default function SidePanelFactory(
       mapStyle: PropTypes.object.isRequired,
       width: PropTypes.number.isRequired,
       datasets: PropTypes.object.isRequired,
+      minionStateActions: PropTypes.object.isRequired,
       visStateActions: PropTypes.object.isRequired,
       mapStyleActions: PropTypes.object.isRequired,
       availableProviders: PropTypes.object,
@@ -122,6 +123,8 @@ export default function SidePanelFactory(
     static defaultProps = {
       panels: SIDEBAR_PANELS,
       uiState: {},
+      minionState: {},
+      minionStateActions: {},
       visStateActions: {},
       mapStyleActions: {},
       uiStateActions: {},
@@ -187,8 +190,10 @@ export default function SidePanelFactory(
         layerBlending,
         layerClasses,
         uiState,
+        minionState,
         layerOrder,
         interactionConfig,
+        minionStateActions,
         visStateActions,
         mapStyleActions,
         mapStateActions,
@@ -199,6 +204,21 @@ export default function SidePanelFactory(
       const {activeSidePanel} = uiState;
       const isOpen = Boolean(activeSidePanel);
       const panels = [...this.props.panels, ...customPanels];
+
+      const minionManagerActions = {
+        updateVisData: visStateActions.updateVisData,
+        onMouseMove: visStateActions.onMouseMove,
+        updateMap: mapStateActions.updateMap,
+        addMarker: visStateActions.addMarker,
+        removeMarker: visStateActions.removeMarker,
+
+        loadMinions: minionStateActions.loadMinions,
+        setSelectedMinion: minionStateActions.setSelectedMinion,
+        setOperationMode: minionStateActions.setOperationMode,
+        setSleepInterval: minionStateActions.setSleepInterval,
+        increaseSessionId: minionStateActions.increaseSessionId,
+        sendCommand: minionStateActions.sendCommand
+      };
 
       const layerManagerActions = {
         addLayer: visStateActions.addLayer,
@@ -242,7 +262,7 @@ export default function SidePanelFactory(
         set3dBuildingColor: mapStyleActions.set3dBuildingColor,
         showAddMapStyleModal: this._showAddMapStyleModal
       };
-
+      
       return (
         <div>
           <Sidebar
@@ -284,14 +304,10 @@ export default function SidePanelFactory(
                 </PanelTitle>
                 {activeSidePanel === 'minion' && (
                   <MinionManager
+                    {...minionManagerActions}
+                    {...minionState}
                     width={this.props.width}
                     height={this.props.height - 54/*header*/ - 30 /*toggler*/ - 16 /*top-padding*/ - 48/*title*/}
-                    updateVisData={visStateActions.updateVisData}
-                    onMouseMove={visStateActions.onMouseMove}
-                    updateMap={mapStateActions.updateMap}
-                    transitionDuration={1000}
-                    addMarker={visStateActions.addMarker}
-                    removeMarker={visStateActions.removeMarker}
                   />
                 )}
                 {activeSidePanel === 'layer' && (

@@ -65,6 +65,12 @@ export const LOAD_CLOUD_MAP_TASK = Task.fromPromise(
   'LOAD_CLOUD_MAP_TASK'
 );
 
+export const EXECUTE_GRAPH_QL_TASK = Task.fromPromise(
+  (query) => apolloClient.query(query),
+
+  'EXECUTE_GRAPH_QL_TASK'
+);
+
 export const GET_SAVED_MAPS_TASK = Task.fromPromise(
   provider => provider.listMaps(),
 

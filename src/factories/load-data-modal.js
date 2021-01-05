@@ -35,12 +35,6 @@ const CustomLoadDataModalFactory = (...deps) => {
       label: 'modal.loadData.remote',
       elementType: LoadRemoteMap
     },
-    sample: {
-      id: LOADING_METHODS.sample,
-      label: 'modal.loadData.sample',
-      elementType: SampleMapGallery,
-      tabElementType: SampleMapsTab
-    }
   };
 
   // add more loading methods
@@ -49,8 +43,7 @@ const CustomLoadDataModalFactory = (...deps) => {
     loadingMethods: [
       defaultLoadingMethods.find(lm => lm.id === 'upload'),
       additionalMethods.remote,
-      defaultLoadingMethods.find(lm => lm.id === 'storage'),
-      additionalMethods.sample
+      defaultLoadingMethods.find(lm => lm.id === 'storage')
     ]
   };
 
