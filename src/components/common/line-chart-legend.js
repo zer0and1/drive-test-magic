@@ -22,61 +22,82 @@ import React, {useMemo} from 'react';
 import styled from 'styled-components';
 import ApexCharts from "react-apexcharts";
 import _ from 'lodash';
+// import { create, all } from 'mathjs'
+import {mean, min, max, median, deviation, variance, sum} from 'd3-array';
 import moment from 'moment';
 
 function LineChartLegendFactory() {
   const LineChartLegend = ({
-    lineChart,
-    visState
+    visState,
+    index,
+    aggregation
   }) => {
 
-    const layerId = visState?.clickedLayer?.layer.id;
+    const lineChart = visState?.object?.points;
 
-    const filterField = useMemo(() => {
-      let selectedLayer = visState.layers.find(layers => layers.id == layerId);
-      let filter = {
-        index: selectedLayer?.config.sizeField?.tableFieldIndex,
-        aggregate: selectedLayer?.config.visConfig.sizeAggregation
-      }
-      return filter
-    }, [layerId]);
-
+    // const config = { }
+    // const math = create(all, config)
+    
     const data = lineChart.map((item) => {
-      item.value = item.data[filterField.index - 1]
-      // item.time = item.data[8]
-      item.time = moment(item.data[8]).format('YYYY-MM-dd HH:mm:ss');
+      item.value = item.data[index-1]
+      item.time = item.data[8]
+      // item.time = moment(item.data[8]).format('YYYY-MM-dd HH:mm:ss');
       // item.time = new Date(new Date(item.data[8]).setMilliseconds(0)).toString()
       item.enodeb = item.data[11]
       return {value: item.value, time: item.time, enodeb: item.enodeb}
     });
 
-    const groups = data.reduce(function (r, o) {
+    const result = data.reduce(function (r, o) {
       var k = o.time + o.enodeb;
       if (r[k]) {
-          if (o.value) (r[k].value += o.value) && ++r[k].average;
+        if (o.value) r[k].values.push(o.value);
       } else {
-          r[k] = o; 
-          r[k].average = 1; // taking 'Average' attribute as an items counter(on the first phase)
+          r[k] = o;
+          r[k].values = [o.value]; 
+          r[k].average = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
+          r[k].sum = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
+          r[k].max = o.value; // taking 'Maximum' attribute as an items counter(on the first phase)
+          r[k].min = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
+          r[k].median = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
+          r[k].stdev = 0; // taking 'Stdev' attribute as an items counter(on the first phase)
+          r[k].v = 0; // taking 'variance' attribute as an items counter(on the first phase)
       }
       return r;
     }, {});
-    
-    // getting "average of Points"    
-    const result = Object.keys(groups).map(function (k) {
-        const avg = groups[k].value/groups[k].average;
-        groups[k].average = avg.toFixed(2)
-        return groups[k];
-    });
-    
-    const labels = Object.keys(_.groupBy(result, 'time'))
-    console.log(labels)
+
+    Object.keys(result).forEach(function(k) {
+      result[k].average = mean(result[k].values).toFixed(2);
+      result[k].max = max(result[k].values).toFixed(2);
+      result[k].min = min(result[k].values).toFixed(2);
+      result[k].median = median(result[k].values).toFixed(2);
+      result[k].sum = sum(result[k].values).toFixed(2);
+      result[k].stdev = result[k].values.length > 1 ? deviation(result[k].values).toFixed(2) : 0;
+      result[k].v = result[k].values.length > 1 ? variance(result[k].values).toFixed(2) : 0;
+    })
+
+    const labels = Object.keys(_.groupBy(result, 'time'));
 
     const dataset = _.groupBy(result, 'enodeb');
     const enodebIds = Object.keys(dataset)
 
     const values = Object.values(dataset).map((item) => {
       const val = Object.values(item).map((subitem) => {
-        return labels.includes(subitem.time) ? subitem.average : null
+        switch (aggregation) {
+          case 'maximum':
+            return labels.includes(subitem.time) ? subitem.max : null;
+          case 'minimum':
+            return labels.includes(subitem.time) ? subitem.min : null;
+          case 'median':
+            return labels.includes(subitem.time) ? subitem.median : null;
+          case 'sum':
+            return labels.includes(subitem.time) ? subitem.sum : null;
+          case 'stdev':
+            return labels.includes(subitem.time) ? subitem.stdev : null;
+          case 'variance':
+            return labels.includes(subitem.time) ? subitem.v : null;
+          default:
+            return labels.includes(subitem.time) ? subitem.average : null;
+          }
       })
       return val
     });

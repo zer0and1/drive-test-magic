@@ -211,9 +211,7 @@ export default function BottomWidgetFactory(
         </LayerAnimationController>
         {isGraphShow ? (
           <GraphWidget
-            title = {uiState.graphTitle}
             showGraphState = {uiStateActions.toggleGraphShow}
-            lineChart = {uiState.lineChart}
             visState = {visState}
           />
           ) : null

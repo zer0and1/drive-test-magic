@@ -347,10 +347,7 @@ function KeplerGlFactory(
         deckGlProps
       };
 
-      const graphInfo = {
-        clickedLayer: visState.clicked,
-        layers: visState.layers
-      };
+      const graphInfo = visState.clicked;
 
       const isSplit = splitMaps && splitMaps.length > 1;
       const containerW = mapState.width * (Number(isSplit) + 1);

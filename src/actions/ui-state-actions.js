@@ -242,13 +242,10 @@ export const setLocale = createAction(ActionTypes.SET_LOCALE, locale => ({
 /**
  * Toggle active graph control panel
  * @memberof uiStateActions
- * @param info - graph control panel id
  * @type {typeof import('./ui-state-actions').toggleGraphShow}
  * @public
  */
-export const toggleGraphShow = createAction(ActionTypes.TOGGLE_GRAPHSHOW_CONTROL, info => ({
-  info
-}));
+export const toggleGraphShow = createAction(ActionTypes.TOGGLE_GRAPHSHOW_CONTROL);
 
 /**
  * This declaration is needed to group actions in docs
