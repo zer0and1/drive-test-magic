@@ -65,12 +65,14 @@ function LineChartLegendFactory() {
       return r;
     }, {});
 
+    console.log(result)
+
     Object.keys(result).forEach(function(k) {
-      result[k].average = mean(result[k].values).toFixed(2);
-      result[k].max = max(result[k].values).toFixed(2);
-      result[k].min = min(result[k].values).toFixed(2);
-      result[k].median = median(result[k].values).toFixed(2);
-      result[k].sum = sum(result[k].values).toFixed(2);
+      result[k].average = result[k].value != undefined ? mean(result[k].values).toFixed(2) : null;
+      result[k].max = result[k].value != undefined ? max(result[k].values).toFixed(2) : null;
+      result[k].min = result[k].value != undefined ? min(result[k].values).toFixed(2) : null;
+      result[k].median = result[k].value != undefined ? median(result[k].values).toFixed(2) : null;
+      result[k].sum = result[k].value != undefined ? sum(result[k].values).toFixed(2) : null;
       result[k].stdev = result[k].values.length > 1 ? deviation(result[k].values).toFixed(2) : 0;
       result[k].v = result[k].values.length > 1 ? variance(result[k].values).toFixed(2) : 0;
     })
