@@ -81,6 +81,7 @@ export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
           onClick={e => {
             e.stopPropagation();
           }}
+          style={{fontSize: '12px'}}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.KeyCode === 13) {
