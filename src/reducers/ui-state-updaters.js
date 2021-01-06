@@ -258,11 +258,7 @@ export const INITIAL_UI_STATE = {
   // Locale of the UI
   locale: LOCALE_CODES.en,
   // Graph for Hexbin
-  isGraphShow: false,
-  // Title of Graph for Hexbin
-  graphTitle: null,
-  // LineChart data
-  lineChart: null
+  isGraphShow: false
 };
 
 /* Updaters */
@@ -369,17 +365,13 @@ export const toggleMapControlUpdater = (state, {payload: {panelId, index = 0}}) 
  * Toggle active graphshow control panel
  * @memberof uiStateUpdaters
  * @param state `uiState`
- * @param action action
- * @param action.payload map control graph id, one of the keys of: [`DEFAULT_MAP_CONTROLS`](#default_map_controls)
- * @returns nextState
+ * @returns toggle graph state
  * @type {typeof import('./ui-state-updaters').toggleGraphShowUpdater}
  * @public
  */
-export const toggleGraphShowUpdater = (state, {payload}) => ({
+export const toggleGraphShowUpdater = state => ({
   ...state,
-  isGraphShow: !state.isGraphShow,
-  graphTitle: payload?.info?.title,
-  lineChart: payload?.info?.data
+  isGraphShow: !state.isGraphShow
 });
 
 /**

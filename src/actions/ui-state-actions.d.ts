@@ -194,11 +194,4 @@ export function setLocale(
 ): Merge<SetLocaleUpdaterAction, {type: ActionTypes.SET_LOCALE}>;
 
 /** TOGGLE_MAP_CONTROL */
-export type toggleGraphShowUpdaterAction = {
-  payload: {
-    info: object;
-  };
-};
-export function toggleGraphShow(
-  info
-): Merge<toggleGraphShowUpdaterAction, {type: ActionTypes.TOGGLE_GRAPHSHOW_CONTROL}>;
+export function toggleGraphShow(): {type: ActionTypes.TOGGLE_GRAPHSHOW_CONTROL};

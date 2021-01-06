@@ -191,16 +191,6 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
 
       const style = Number.isFinite(x) && Number.isFinite(y) ? this._getPosition(x, y, isLeft) : {};
 
-      const _toggleGraphShow = () => {
-        const info = {
-          graphId: layerHoverProp.layer.id,
-          title : layerHoverProp.layer.getVisualChannelDescription('size').measure,
-          data: layerHoverProp.data.points
-        }
-
-        return layerHoverProp.toggleGraphShow(info)
-      }
-
       return (
         <ErrorBoundary>
           <StyledMapPopover
@@ -239,7 +229,7 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
                     <Switch
                       checked={layerHoverProp.isGraphShow}
                       id={layerHoverProp.layer.id}
-                      onChange={_toggleGraphShow}
+                      onChange={layerHoverProp.toggleGraphShow}
                     />
                   </div>
                 ) : null}
