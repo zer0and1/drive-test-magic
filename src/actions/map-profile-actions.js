@@ -21,7 +21,8 @@
 // vis-state-reducer
 import ActionTypes from 'constants/action-types';
 import { gql } from '@apollo/client';
-import { receiveMapConfig } from 'actions';
+import { addDataToMap } from 'actions/actions';
+import KeplerGlSchema from 'schemas';
 
 export function loadProfile() {
   const query = gql`
@@ -50,7 +51,7 @@ export function loadProfile() {
       fetchPolicy: 'network-only'
     }).then(res => dispatch({
       type: ActionTypes.LOAD_PROFILE,
-     profiles: res.data.signal_db_profiles
+      profiles: res.data.signal_db_profiles
     }));
   }
 }
@@ -134,11 +135,13 @@ export function applyProfile(id) {
         value: true
       }
     });
-    const profile = getState().main.keplerGl.map.mapProfile.profiles.find(profile => profile.id === id);
+    const map = getState().main.keplerGl.map;
+    const {config} = map.mapProfile.profiles.find(profile => profile.id === id);
+    const {datasets} = KeplerGlSchema.save(map);
+    const mapToLoad = KeplerGlSchema.load(datasets, config);
+        
     Promise.resolve(
-      dispatch(receiveMapConfig(getState().main.keplerGl.map.visState.schema.parseSavedConfig(profile.config), {
-        keepExistingConfig: false
-      }))
+      dispatch(addDataToMap({...mapToLoad, options: { centerMap: false }}))
     ).then(() => dispatch({
       type: ActionTypes.SET_PROFILE_APPLYING,
       action: {

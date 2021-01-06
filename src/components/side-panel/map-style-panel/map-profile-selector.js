@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { Save2, Add, Play, Spinner } from 'components/common/icons';
@@ -59,6 +59,15 @@ const HeaderActionSection = styled.div`
 export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
   const [value, setValue] = useState(label);
   const [isEditing, setEditing] = useState(false);
+  const [isClicked, setClicked] = useState(false);
+  
+  useEffect(() => {
+    if (isClicked) {
+      document.getElementById(`${profileId}:input-profile-label`).focus();
+      document.execCommand("selectall", null, false);
+      setClicked(false);
+    }
+  });
 
   return (
     <>
@@ -68,6 +77,7 @@ export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
           onClick={e => {
             e.stopPropagation();
             setEditing(true);
+            setClicked(true);
           }}
         >
           {value}
@@ -81,8 +91,12 @@ export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
           onClick={e => {
             e.stopPropagation();
           }}
-          style={{fontSize: '12px'}}
+          style={{ fontSize: '12px' }}
           onChange={(e) => setValue(e.target.value)}
+          onBlur={() => {
+            onEdit(value);
+            setEditing(false);
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.KeyCode === 13) {
               onEdit(value);

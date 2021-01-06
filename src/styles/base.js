@@ -454,7 +454,6 @@ const input = css`
         ? props.theme.errorColor
         : props.theme.inputBgd};
   border-radius: 2px;
-  caret-color: ${props => props.theme.inputBorderActiveColor};
   color: ${props => props.theme.inputColor};
   display: flex;
   font-size: ${props =>
