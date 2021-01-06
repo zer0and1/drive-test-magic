@@ -181,6 +181,7 @@ export default function BottomWidgetFactory(
     const showAnimationControl = animatableLayer.length && readyToAnimation;
     const showTimeWidget = enlargedFilterIdx > -1 && Object.keys(datasets).length > 0;
     const showSessionWidget = uiState.activeSidePanel == 'minion';
+    const selectedField = visState?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
 
     return (
       <BottomWidgetContainer
@@ -209,7 +210,7 @@ export default function BottomWidgetFactory(
             ) : null
           }
         </LayerAnimationController>
-        {isGraphShow ? (
+        {isGraphShow && selectedField != undefined && selectedField != 'count' ? (
           <GraphWidget
             showGraphState = {uiStateActions.toggleGraphShow}
             visState = {visState}

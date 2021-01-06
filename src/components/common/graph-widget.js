@@ -63,11 +63,11 @@ function GraphWidgetFactory(LineChartLegend) {
 
     render() {
 
-      const title = this.props.visState.layer?.props?.colorAggregation + " of " + 
-                    this.props.visState.layer?.props?.updateTriggers?.getColorValue?.colorField?.name;
+      const title = this.props.visState?.layer?.props?.colorAggregation + " of " + 
+                    this.props.visState?.layer?.props?.updateTriggers?.getColorValue?.colorField?.name;
 
-      const index = this.props.visState.layer?.props?.updateTriggers?.getColorValue?.colorField?.tableFieldIndex;
-      const aggregation = this.props.visState.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
+      const index = this.props.visState?.layer?.props?.updateTriggers?.getColorValue?.colorField?.tableFieldIndex;
+      const aggregation = this.props.visState?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
 
       return (
         <GraphBottomWidgetInner className="bottom-widget--inner">

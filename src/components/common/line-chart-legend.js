@@ -22,7 +22,6 @@ import React, {useMemo} from 'react';
 import styled from 'styled-components';
 import ApexCharts from "react-apexcharts";
 import _ from 'lodash';
-// import { create, all } from 'mathjs'
 import {mean, min, max, median, deviation, variance, sum} from 'd3-array';
 import moment from 'moment';
 
@@ -35,17 +34,14 @@ function LineChartLegendFactory() {
 
     const lineChart = visState?.object?.points;
 
-    // const config = { }
-    // const math = create(all, config)
-    
-    const data = lineChart.map((item) => {
-      item.value = item.data[index-1]
+    const data = (lineChart != undefined) ? lineChart.map((item) => {
+      item.value = item.data[index-1];
       item.time = item.data[8]
       // item.time = moment(item.data[8]).format('YYYY-MM-dd HH:mm:ss');
       // item.time = new Date(new Date(item.data[8]).setMilliseconds(0)).toString()
       item.enodeb = item.data[11]
       return {value: item.value, time: item.time, enodeb: item.enodeb}
-    });
+    }) : [];
 
     const result = data.reduce(function (r, o) {
       var k = o.time + o.enodeb;
@@ -64,8 +60,6 @@ function LineChartLegendFactory() {
       }
       return r;
     }, {});
-
-    console.log(result)
 
     Object.keys(result).forEach(function(k) {
       result[k].average = result[k].value != undefined ? mean(result[k].values).toFixed(2) : null;
