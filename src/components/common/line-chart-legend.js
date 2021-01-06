@@ -76,40 +76,48 @@ function LineChartLegendFactory() {
     const dataset = _.groupBy(result, 'enodeb');
     const enodebIds = Object.keys(dataset)
 
-    const values = Object.values(dataset).map((item) => {
-      const val = Object.values(item).map((subitem) => {
+    const yvalues = [];
+    for (var i of enodebIds) {
+      yvalues[i] = []
+      for (var k of labels) {
+        const v = null;
         switch (aggregation) {
           case 'maximum':
-            return labels.includes(subitem.time) ? subitem.max : null;
+            v = result[k+i] !== undefined ? result[k+i]?.max : null;
+            break;
           case 'minimum':
-            return labels.includes(subitem.time) ? subitem.min : null;
+            v = result[k+i] !== undefined ? result[k+i]?.min : null;
+            break;
           case 'median':
-            return labels.includes(subitem.time) ? subitem.median : null;
+            v = result[k+i] !== undefined ? result[k+i]?.median : null;
+            break;
           case 'sum':
-            return labels.includes(subitem.time) ? subitem.sum : null;
+            v = result[k+i] !== undefined ? result[k+i]?.sum : null;
+            break;
           case 'stdev':
-            return labels.includes(subitem.time) ? subitem.stdev : null;
+            v = result[k+i] !== undefined ? result[k+i]?.stdev : null;
+            break;
           case 'variance':
-            return labels.includes(subitem.time) ? subitem.v : null;
+            v = result[k+i] !== undefined ? result[k+i]?.v : null;
+            break;
           default:
-            return labels.includes(subitem.time) ? subitem.average : null;
+            v = result[k+i] !== undefined ? result[k+i]?.average : null;
           }
-      })
-      return val
-    });
+        yvalues[i].push(v);
+      }
+    }
 
     const series = [];
-    for (var i = 0; i < enodebIds.length; i++)
+    for (var ids of enodebIds)
     {
       const item = {
-        name: enodebIds[i],
+        name: ids,
         type: 'line',
-        data: values[i]
+        data: yvalues[ids]
       }
       series.push(item)
     }
-
-
+  
     const options = {
       chart: {
         height: 350,
