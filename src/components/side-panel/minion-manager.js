@@ -103,7 +103,6 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     constructor(props) {
       super(props);
       this.minionRowselect = this.minionRowselect.bind(this);
-      this._mounted = true;
     }
 
     componentDidMount() {
@@ -113,19 +112,23 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
     componentWillUnmount() {
       this.props.removeMarker();
+      this.props.setSelectedMinion({ name: null, idx: -1 });
       window.clearTimeout(this.timeoutId);
-      this._mounted = false;
     }
 
-    onMinionsLoaded() {
+    onMinionsLoaded(selectedMinionData) {
       $('#minion-grid').LoadingOverlay('hide', true);
+      $('#minion-group').LoadingOverlay('hide', true)
       this.timeoutId = setTimeout(this.props.loadMinions.bind(this), 3000, this.onMinionsLoaded.bind(this));
-      // this.props.selectedMinionName && this.trackMinion();
+      this.props.selectedMinionName && this.trackMinion(selectedMinionData);
     }   
 
-    trackMinion() {
-      const { latitude, longitude, minion_id } = this.props.details;
-      
+    trackMinion({ latitude, longitude, name: minionName }) {    
+      if (!latitude || !longitude || !minionName) {
+        this.props.removeMarker();
+        return;
+      }  
+
       this.props.onMouseMove({ point: [0, 0], lngLat: [longitude, latitude]});
       this.props.addMarker({ 
         center: true, 
@@ -133,7 +136,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         lat: latitude, 
         color: 'red', 
         info: { 
-          label: minion_id 
+          label: minionName 
         } 
       });
       this.props.updateMap({
@@ -149,7 +152,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     minionRowselect({args: {row: {name}, rowindex}}) {
       $('#minion-group').LoadingOverlay('show');
       this.props.setSelectedMinion({ name, idx: rowindex });
-      this.props.loadMinions(() => $('#minion-group').LoadingOverlay('hide', true));
+      this.props.loadMinions(this.onMinionsLoaded.bind(this));
     }
 
     render() {

@@ -91,6 +91,40 @@ export function saveProfile() {
   }
 }
 
+export function updateProfile() {
+  const mutation = gql`
+    mutation($id: uuid!, $config: jsonb) {
+      update_signal_db_profiles_by_pk (
+        pk_columns: {id: $id}
+        _set: {config: $config}
+      ) {
+        id
+        label
+        config
+      }
+    }
+  `;
+
+  return (dispatch, getState) => {
+    dispatch({
+      type: ActionTypes.SET_UPDATING,
+      value: true
+    });
+    apolloClient.mutate({
+      variables: {
+        id: getState().main.keplerGl.map.mapProfile.selectedId,
+        config: getState().main.keplerGl.map.visState.schema.getConfigToSave(
+          getState().main.keplerGl.map
+        )
+      },
+      mutation
+    }).then(res => dispatch({
+      type: ActionTypes.UPDATE_PROFILE,
+      profile: res.data.update_signal_db_profiles_by_pk
+    }));
+  }
+}
+
 export function applyProfile(id) {
   return (dispatch, getState) => {
     dispatch({

@@ -136,6 +136,8 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
     actionIcons = defaultActionIcons
   }) => {
     const { profiles, isLoading, isSaving, isUpdating, selectedId } = mapProfile;
+    const { isRemoving } = profiles.reduce((acc, profile) => ({ isRemoving: acc.isRemoving || profile.isRemoving }), { isRemoving: false });
+    const btnDisabled = isLoading || isSaving || isUpdating || isRemoving;
 
     return (
       <div>
@@ -175,18 +177,19 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
         <SidePanelSection>
           <Button
             className="save-map-profile-button"
-            style={{ width: '45%', marginRight: '5%' }}
+            style={{ width: '45%', marginRight: '10%' }}
             onClick={() => saveProfile()}
+            disabled={btnDisabled}
             primary
           >
             {isLoading || isSaving ? <Spinner type="ls" /> : <Add height="12px" />}
             <FormattedMessage id={'mapManager.saveMapProfile'} />
           </Button>
           <Button
-            disabled={selectedId == null || isLoading || isSaving}
+            disabled={selectedId == null || btnDisabled}
             className="update-map-profile-button"
-            style={{ width: '50%' }}
-            onClick={() => saveProfile()}
+            style={{ width: '45%' }}
+            onClick={() => updateProfile()}
             secondary
           >
             {isUpdating ? <Spinner type="ls" /> : <Save2 height="12px" />}

@@ -2,6 +2,7 @@ export const INITIAL_VIS_STATE = {
   // profiles
   isLoading: false,
   isSaving: false,
+  isUpdating: false,
   selectedId: null,
   profiles: []
 };
@@ -17,6 +18,13 @@ export const setSavingUpdater = (state, { value }) => {
   return {
     ...state,
     isSaving: value
+  };
+}
+
+export const setUpdatingUpdater = (state, { value }) => {
+  return {
+    ...state,
+    isUpdating: value
   };
 }
 
@@ -70,12 +78,21 @@ export const saveProfileUpdater = (state, { newProfile }) => {
   }
 };
 
+export const updateProfileUpdater = (state, { profile }) => {
+  return {
+    ...state,
+    profiles: state.profiles.map(p => p.id == profile.id ? profile : p),
+    isUpdating: false
+  }
+};
+
 export const removeProfileUpdater = (state, { id }) => {
   const { profiles } = state;
 
   return {
     ...state,
-    profiles: profiles.filter(profile => profile.id !== id)
+    profiles: profiles.filter(profile => profile.id !== id),
+    selectedId: state.selectedId == id ? null : state.selectedId
   };
 };
 

@@ -21,7 +21,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {loadProfile, saveProfile, removeProfile, applyProfile, updateProfileLabel} from 'actions';
+import {loadProfile, saveProfile, updateProfile, removeProfile, applyProfile, updateProfileLabel} from 'actions';
 
 import {Button, SidePanelSection} from 'components/common/styled-components';
 import MapStyleSelectorFactory from 'components/side-panel/map-style-panel/map-style-selector';
@@ -71,6 +71,10 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
       this.props.dispatch(saveProfile());
     }
 
+    _updateProfile = () => {
+      this.props.dispatch(updateProfile());
+    }
+    
     _removeProfile = (id) => {
       this.props.dispatch(removeProfile(id));
     }
@@ -135,6 +139,7 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
             <MapProfileSelector
               mapProfile={mapProfile}
               saveProfile={this._saveProfile}
+              updateProfile={this._updateProfile}
               applyProfile={this._applyProfile}
               removeProfile={this._removeProfile}
               updateProfileLabel={this._updateProfileLabel}

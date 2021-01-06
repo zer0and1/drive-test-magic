@@ -6,7 +6,9 @@ const actionHandler = {
   [ActionTypes.LOAD_PROFILE]: mapProfileUpdaters.loadProfileUpdater,
 
   [ActionTypes.SAVE_PROFILE]: mapProfileUpdaters.saveProfileUpdater,
-  
+
+  [ActionTypes.UPDATE_PROFILE]: mapProfileUpdaters.updateProfileUpdater,
+
   [ActionTypes.REMOVE_PROFILE]: mapProfileUpdaters.removeProfileUpdater,
   
   [ActionTypes.UPDATE_PROFILE_LABEL]: mapProfileUpdaters.updateProfileLabelUpdater,
@@ -14,6 +16,8 @@ const actionHandler = {
   [ActionTypes.SET_LOADING]: mapProfileUpdaters.setLoadingUpdater,
 
   [ActionTypes.SET_SAVING]: mapProfileUpdaters.setSavingUpdater,
+
+  [ActionTypes.SET_UPDATING]: mapProfileUpdaters.setUpdatingUpdater,
 
   [ActionTypes.SET_PROFILE_REMOVING]: mapProfileUpdaters.setRemovingUpdater,
 

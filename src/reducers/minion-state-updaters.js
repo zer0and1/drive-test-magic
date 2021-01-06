@@ -97,9 +97,11 @@ export function loadMinionsUpdater(state, { onLoaded }) {
   const query = GQL_GET_MINIONS(state.selectedMinionName)
   const loadMinionTask = EXECUTE_GRAPH_QL_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     result => {
-      onLoaded();
       const minions = result.data.signal_db_minions;
       const sample = result.data.signal_db_signal_samples?.[0];
+      
+      onLoaded(minions?.[state.selectedMinionIdx]);
+      
       return loadMinionsSuccess(minions, sample);
     },
     error => loadMinionsError(error)

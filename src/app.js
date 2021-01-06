@@ -57,13 +57,32 @@ import {addNotification} from './actions/index.js';
 
 import { ApolloProvider } from '@apollo/client';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
+import mqtt from 'mqtt';
 
-const client = new ApolloClient({
+const apolloClient = new ApolloClient({
   uri: 'https://charming-hawk-93.hasura.app/v1/graphql',
   cache: new InMemoryCache()
 });
 
-global.apolloClient = client;
+global.apolloClient = apolloClient;
+
+// const mqttClient  = mqtt.connect('mqtt://test.mosquitto.org')
+ 
+// mqttClient.on('connect', function () {
+//   mqttClient.subscribe('presence', function (err) {
+//     if (!err) {
+//       mqttClient.publish('presence', 'Hello mqtt')
+//     }
+//   })
+// });
+ 
+// mqttClient.on('message', function (topic, message) {
+//   // message is Buffer
+//   console.log(message.toString())
+//   mqttClient.end()
+// });
+
+// global.mqttClient = mqttClient;
 
 const BannerHeight = 48;
 const BannerKey = `banner-${FormLink}`;
@@ -211,7 +230,7 @@ class App extends Component {
           >
             <AutoSizer>
               {({height, width}) => (
-                <ApolloProvider client={client}>
+                <ApolloProvider client={apolloClient}>
                   <KeplerGl
                     appName={KEPLER_GL_NAME}
                     mapboxApiAccessToken={AUTH_TOKENS.MAPBOX_TOKEN}
