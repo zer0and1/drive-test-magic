@@ -203,14 +203,6 @@ function LineChartLegendFactory() {
             }
             return x;
           }
-        },
-        y: {
-          formatter: function (y) {
-            if (typeof y != null && typeof y != undefined) {
-              return y.toFixed(2);
-            }
-            return y;
-          }
         }
       },
       legend: {
