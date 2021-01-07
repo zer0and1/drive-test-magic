@@ -212,8 +212,9 @@ export default function BottomWidgetFactory(
         </LayerAnimationController>
         {isGraphShow && selectedField != undefined && selectedField != 'count' ? (
           <GraphWidget
-            showGraphState = {uiStateActions.toggleGraphShow}
-            visState = {visState}
+            showGraphState={uiStateActions.toggleGraphShow}
+            visState={visState}
+            layers={layers}
           />
           ) : null
         }

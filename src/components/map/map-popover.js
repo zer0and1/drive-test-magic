@@ -191,6 +191,8 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
 
       const style = Number.isFinite(x) && Number.isFinite(y) ? this._getPosition(x, y, isLeft) : {};
 
+      const dsc = layerHoverProp?.layer.getVisualChannelDescription('color').measure;
+
       return (
         <ErrorBoundary>
           <StyledMapPopover
@@ -224,7 +226,7 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
                     </div>
                   )}
                 </div>
-                {layerHoverProp.layer.isAggregated ? (
+                {layerHoverProp.layer.isAggregated && dsc != undefined && dsc != 'property.pointCount' ? (
                   <div className="primary-label gutter" style={{ paddingTop: 2, marginRight: -15 }}>
                     <Switch
                       checked={layerHoverProp.isGraphShow}

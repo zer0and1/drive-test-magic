@@ -62,12 +62,11 @@ function GraphWidgetFactory(LineChartLegend) {
   class GraphWidget extends Component {
 
     render() {
-
-      const title = this.props.visState?.layer?.props?.colorAggregation + " of " + 
-                    this.props.visState?.layer?.props?.updateTriggers?.getColorValue?.colorField?.name;
-
-      const index = this.props.visState?.layer?.props?.updateTriggers?.getColorValue?.colorField?.tableFieldIndex;
-      const aggregation = this.props.visState?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
+      const layerId = this.props.visState?.layer?.id;
+      const layer = this.props.layers.find(item => item.id === layerId);
+      const fieldName = layer?.config?.colorField?.name;
+      const fieldIndex = layer?.config?.colorField?.tableFieldIndex;
+      const aggregation = layer?.config?.visConfig?.colorAggregation;
 
       return (
         <GraphBottomWidgetInner className="bottom-widget--inner">
@@ -77,7 +76,7 @@ function GraphWidgetFactory(LineChartLegend) {
               <CenterFlexbox className="bottom-widget__icon">
                 <LineChart height="15px" />
               </CenterFlexbox>
-              <SelectTextBold>{title}</SelectTextBold>
+              <SelectTextBold>{aggregation + " of " + fieldName}</SelectTextBold>
             </StyledTitle>
             <CenterFlexbox>
               <IconRoundSmall>
@@ -87,7 +86,7 @@ function GraphWidgetFactory(LineChartLegend) {
           </TopSectionWrapper>
           <LineChartLegend
             visState={this.props.visState}
-            index={index}
+            index={fieldIndex}
             aggregation={aggregation}
           />
         </GraphBottomWidgetInner>
