@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
 
 import { Save2, Add, Play, Spinner } from 'components/common/icons';
 import { FormattedMessage } from 'localization';
@@ -8,10 +9,12 @@ import {
   PanelLabel,
   SidePanelSection,
   StyledPanelHeader,
-  InlineInput
+  TextArea,
 } from 'components/common/styled-components';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
 import { Trash } from 'components/common/icons';
+import KeplerGlSchema from 'schemas';
+import {addDataToMap} from 'actions/actions';
 
 const PanelWrapper = styled.div`
   font-size: 12px;
@@ -25,7 +28,7 @@ const PanelWrapper = styled.div`
 `;
 
 const StyledProfilePanelHeader = styled(StyledPanelHeader)`
-  height: ${props => props.theme.profilePanelHeaderHeight}px;
+  height: fit-content;
   .profile__remove-profile {
     opacity: 0;
   }
@@ -56,11 +59,19 @@ const HeaderActionSection = styled.div`
   display: flex;
 `;
 
+const StyledTextArea = styled(TextArea)`
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  font-size: 12px;
+  width: 190px;
+  height: 40px;
+`;
+
 export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
   const [value, setValue] = useState(label);
   const [isEditing, setEditing] = useState(false);
   const [isClicked, setClicked] = useState(false);
-  
+
   useEffect(() => {
     if (isClicked) {
       document.getElementById(`${profileId}:input-profile-label`).focus();
@@ -84,14 +95,15 @@ export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
         </div>
       )}
       {isEditing && (
-        <InlineInput
+        <StyledTextArea
           type="text"
           className="profile__title__editor"
           value={value}
+          rows="2"
+          cols="25"
           onClick={e => {
             e.stopPropagation();
           }}
-          style={{ fontSize: '12px' }}
           onChange={(e) => setValue(e.target.value)}
           onBlur={() => {
             onEdit(value);
@@ -143,16 +155,18 @@ const defaultActionIcons = {
 function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
   const MapProfileSelector = ({
     mapProfile,
-    saveProfile,
+    addProfile,
     updateProfile,
     applyProfile,
     removeProfile,
     updateProfileLabel,
+    map,
+    dispatch,
     actionIcons = defaultActionIcons
   }) => {
-    const { profiles, isLoading, isSaving, isUpdating, selectedId } = mapProfile;
+    const { profiles, isLoading, isAdding, isUpdating, selectedId } = mapProfile;
     const { isRemoving } = profiles.reduce((acc, profile) => ({ isRemoving: acc.isRemoving || profile.isRemoving }), { isRemoving: false });
-    const btnDisabled = isLoading || isSaving || isUpdating || isRemoving;
+    const btnDisabled = isLoading || isAdding || isUpdating || isRemoving;
 
     return (
       <div>
@@ -182,7 +196,13 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
                   className="profile__apply-profile"
                   id={profile.id}
                   tooltip={'tooltip.applyProfile'}
-                  onClick={() => applyProfile(profile.id)}
+                  onClick={() => {
+                    const { config } = profiles.find(p => p.id == profile.id);
+                    const { datasets } = KeplerGlSchema.save(map);
+                    const mapToLoad = KeplerGlSchema.load(datasets, config);
+                    dispatch(addDataToMap({ ...mapToLoad, options: { centerMap: false } }));
+                    applyProfile(profile.id);
+                  }}
                   IconComponent={profile.isApplying ? actionIcons.spinner : actionIcons.apply}
                 />
               </HeaderActionSection>
@@ -192,19 +212,19 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
         <SidePanelSection>
           <Button
             className="save-map-profile-button"
-            style={{ width: '45%', marginRight: '10%' }}
-            onClick={() => saveProfile()}
+            style={{ width: '30%', marginRight: '5%' }}
+            onClick={() => addProfile(map)}
             disabled={btnDisabled}
             primary
           >
-            {isLoading || isSaving ? <Spinner type="ls" /> : <Add height="12px" />}
+            {isAdding ? <Spinner type="ls" /> : <Add height="12px" />}
             <FormattedMessage id={'mapManager.saveMapProfile'} />
           </Button>
           <Button
             disabled={selectedId == null || btnDisabled}
             className="update-map-profile-button"
-            style={{ width: '45%' }}
-            onClick={() => updateProfile()}
+            style={{ width: '35%' }}
+            onClick={() => updateProfile(map)}
             secondary
           >
             {isUpdating ? <Spinner type="ls" /> : <Save2 height="12px" />}
@@ -216,7 +236,10 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
     )
   };
 
-  return MapProfileSelector;
+  const mapStateToProps = state => state.main.keplerGl;
+  const dispatchToProps = dispatch => ({ dispatch });
+
+  return connect(mapStateToProps, dispatchToProps)(MapProfileSelector)
 }
 
 export default MapProfileSelectorFactory;

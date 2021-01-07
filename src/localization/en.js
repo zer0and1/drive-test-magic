@@ -348,7 +348,7 @@ export default {
     },
     loadData: {
       upload: 'Load Files',
-      storage: 'Load from Storage'
+      database: 'Database Layers'
     },
     tripInfo: {
       title: 'How to enable trip animation',

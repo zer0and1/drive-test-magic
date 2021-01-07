@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import React, { Component, createRef } from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -233,10 +232,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
   }
 
-  const dispatchToProps = dispatch => ({ dispatch });
-  const mapToProps = state => state.main.keplerGl;
-
-  return injectIntl(connect(mapToProps, dispatchToProps)(MinionManager));
+  return injectIntl(MinionManager);
 }
 
 export default MinionManagerFactory;

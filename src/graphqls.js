@@ -97,3 +97,76 @@ query MyQuery {
 }
 `;
 
+export const GQL_GET_PROFILES = () => gql`
+query {
+  signal_db_profiles (
+    where: {
+      removed: {
+        _eq: false
+      }
+    }
+  ) {
+    id
+    label
+    config
+    removed
+  }
+}
+`;
+
+export const GQL_INSERT_PROFILE = () => gql`
+mutation($label: String!, $config: jsonb) {
+  insert_signal_db_profiles_one(
+    object: {
+      label: $label,
+      config: $config
+    }
+  ) {
+    id
+    label
+    config
+  }
+}
+`;
+
+export const GQL_UPDATE_PROFILE = () => gql`
+mutation($id: uuid!, $config: jsonb) {
+  update_signal_db_profiles_by_pk (
+    pk_columns: {id: $id}
+    _set: {config: $config}
+  ) {
+    id
+    label
+    config
+  }
+}
+`;
+
+export const GQL_REMOVE_PROFILE = () => gql`
+mutation($id: uuid!) {
+  update_signal_db_profiles_by_pk (
+    pk_columns: {id: $id},
+    _set: {
+      removed: true
+    }
+  ) {
+    id
+  }
+}
+`;
+
+export const GQL_UPDATE_PROFILE_LABEL = () => gql`
+mutation($id: uuid!, $label: String!) {
+  update_signal_db_profiles_by_pk (
+    pk_columns: {
+      id: $id
+    },
+    _set: {
+      label: $label
+    }
+  ) {
+    id
+    label
+  }
+}
+`;

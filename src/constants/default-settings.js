@@ -880,7 +880,7 @@ export const MAP_INFO_CHARACTER = {
 // Load data
 export const LOADING_METHODS = keyMirror({
   upload: null,
-  storage: null
+  database: null
 });
 
 export const DATASET_FORMATS = keyMirror({

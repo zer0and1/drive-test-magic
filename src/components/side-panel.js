@@ -115,6 +115,7 @@ export default function SidePanelFactory(
       minionStateActions: PropTypes.object.isRequired,
       visStateActions: PropTypes.object.isRequired,
       mapStyleActions: PropTypes.object.isRequired,
+      mapProfileActions: PropTypes.object.isRequired,
       availableProviders: PropTypes.object,
       mapSaved: PropTypes.string,
       panels: PropTypes.arrayOf(PropTypes.object)
@@ -127,9 +128,14 @@ export default function SidePanelFactory(
       minionStateActions: {},
       visStateActions: {},
       mapStyleActions: {},
+      mapProfileActions: {},
       uiStateActions: {},
       availableProviders: {}
     };
+
+    componentDidMount() {
+      this.props.mapProfileActions.loadProfile();
+    }
 
     /* component private functions */
     _onOpenOrClose = () => {
@@ -197,6 +203,7 @@ export default function SidePanelFactory(
         visStateActions,
         mapStyleActions,
         mapStateActions,
+        mapProfileActions,
         uiStateActions,
         availableProviders
       } = this.props;
@@ -260,6 +267,12 @@ export default function SidePanelFactory(
         onStyleChange: mapStyleActions.mapStyleChange,
         onBuildingChange: mapStyleActions.mapBuildingChange,
         set3dBuildingColor: mapStyleActions.set3dBuildingColor,
+        loadProfile: mapProfileActions.loadProfile,
+        addProfile: mapProfileActions.addProfile,
+        updateProfile: mapProfileActions.updateProfile,
+        removeProfile: mapProfileActions.removeProfile,
+        applyProfile: mapProfileActions.applyProfile,
+        updateProfileLabel: mapProfileActions.updateProfileLabel,
         showAddMapStyleModal: this._showAddMapStyleModal
       };
       
@@ -337,7 +350,7 @@ export default function SidePanelFactory(
                   />
                 )}
                 {activeSidePanel === 'map' && (
-                  <MapManager {...mapManagerActions} mapStyle={this.props.mapStyle} mapProfile={mapProfile} />
+                  <MapManager {...mapManagerActions} mapStyle={this.props.mapStyle} mapProfile={this.props.mapProfile} />
                 )}
                 {(customPanels || []).find(p => p.id === activeSidePanel) ? (
                   <CustomPanels

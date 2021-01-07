@@ -1,84 +1,126 @@
-export const INITIAL_VIS_STATE = {
-  // profiles
+import { disableStackCapturing, withTask } from 'react-palm/tasks';
+import { EXECUTE_GRAPH_QL_TASK } from 'tasks/tasks';
+
+import { 
+  GQL_GET_PROFILES, 
+  GQL_INSERT_PROFILE, 
+  GQL_UPDATE_PROFILE, 
+  GQL_REMOVE_PROFILE, 
+  GQL_UPDATE_PROFILE_LABEL 
+} from 'graphqls';
+
+import { 
+  loadProfileSuccess, 
+  loadProfileError,
+  addProfileSuccess,
+  addProfileError,
+  updateProfileSuccess,
+  updateProfileError,
+  removeProfileSuccess,
+  removeProfileError,
+  updateProfileLabelSuccess,
+  updateProfileLabelError
+} from 'actions/map-profile-actions';
+
+import { GRAPHQL_MUTATION_TASK } from '../tasks/tasks';
+import KeplerGlSchema from 'schemas';
+
+// react-palm
+// disable capture exception for react-palm call to withTask
+disableStackCapturing();
+
+export const INITIAL_MAP_PROFILE_STATE = {
   isLoading: false,
-  isSaving: false,
+  isAdding: false,
   isUpdating: false,
+  isLabelUpdating: false,
   selectedId: null,
   profiles: []
 };
 
-export const setLoadingUpdater = (state, { value }) => {
+
+export const loadProfileUpdater = (state) => {
+  const query = GQL_GET_PROFILES();
+  const loadProfileTask = EXECUTE_GRAPH_QL_TASK({ query }).bimap(
+    res => loadProfileSuccess(res.data.signal_db_profiles),
+    err => loadProfileError(err)
+  );
+  const newState = { ...state, isLoading: true };
+
+  return withTask(newState, loadProfileTask);
+};
+
+export const loadProfileSuccessUpdater = (state, { profiles }) => {
   return {
     ...state,
-    isLoading: value
-  };
-}
+    isLoading: false,
+    profiles
+  }
+};
 
-export const setSavingUpdater = (state, { value }) => {
+
+export const loadProfileErrorUpdater = (state, { error }) => {
   return {
     ...state,
-    isSaving: value
-  };
-}
+    isLoading: false,
+    error
+  }
+};
 
-export const setUpdatingUpdater = (state, { value }) => {
-  return {
-    ...state,
-    isUpdating: value
-  };
-}
+export const addProfileUpdater = (state, { map }) => {
+  const mutation = GQL_INSERT_PROFILE();
+  const insertProfileTask = GRAPHQL_MUTATION_TASK({
+    variables: {
+      label: "New Profile",
+      config: KeplerGlSchema.getConfigToSave(map)
+    },
+    mutation
+  }).bimap(
+    res => addProfileSuccess(res.data.insert_signal_db_profiles_one),
+    err => addProfileError(err)
+  );
+  const newState = { ...state, isAdding: true };
 
-export const setRemovingUpdater = (state, { action }) => {
-  return {
-    ...state,
-    profiles: state.profiles.map(profile => {
-      if (profile.id === action.id) {
-        return {
-          ...profile,
-          isRemoving: action.value
-        };
-      }
-      return profile;
-    })
-  };
-}
+  return withTask(newState, insertProfileTask);
+};
 
-export const setApplyingUpdater = (state, { action }) => {
-  return {
-    ...state,
-    profiles: state.profiles.map(profile => {
-      if (profile.id === action.id) {
-        return {
-          ...profile,
-          isApplying: action.value
-        };
-      }
-      return profile;
-    }),
-    selectedId: action.id
-  };
-}
-
-export const loadProfileUpdater = (state, { profiles }) => {
-  return {
-    ...state,
-    profiles,
-    isLoading: false
-  };
-}
-
-export const saveProfileUpdater = (state, { newProfile }) => {
+export const addProfileSuccessUpdater = (state, { profile }) => {
   return {
     ...state,
     profiles: [
       ...state.profiles,
-      newProfile
+      profile
     ],
-    isSaving: false
+    isAdding: false
   }
 };
 
-export const updateProfileUpdater = (state, { profile }) => {
+export const addProfileErrorUpdater = (state, { error }) => {
+  return {
+    ...state,
+    isAdding: false,
+    error
+  }
+};
+
+export const updateProfileUpdater = (state, { map }) => {
+  const mutation = GQL_UPDATE_PROFILE();
+  const updateProfileTask = GRAPHQL_MUTATION_TASK({
+    variables: {
+      id: state.selectedId,
+      config: KeplerGlSchema.getConfigToSave(map)
+    },
+    mutation
+  }).bimap(
+    res => updateProfileSuccess(res.data.update_signal_db_profiles_by_pk),
+    err => updateProfileError(err)
+  );
+  const newState = { ...state, isUpdating: true };
+
+  return withTask(newState, updateProfileTask);
+};
+
+export const updateProfileSuccessUpdater = (state, { profile }) => {
   return {
     ...state,
     profiles: state.profiles.map(p => p.id == profile.id ? profile : p),
@@ -86,29 +128,78 @@ export const updateProfileUpdater = (state, { profile }) => {
   }
 };
 
-export const removeProfileUpdater = (state, { id }) => {
-  const { profiles } = state;
-
+export const updateProfileErrorUpdater = (state, { error }) => {
   return {
     ...state,
-    profiles: profiles.filter(profile => profile.id !== id),
-    selectedId: state.selectedId == id ? null : state.selectedId
+    isUpdating: false,
+    error
+  }
+};
+
+export const applyProfileUpdater = (state, { id }) => {
+  return {
+    ...state,
+    selectedId: id
   };
 };
 
-export const updateProfileLabelUpdater = (state, { action }) => {
-  const { profiles } = state;
 
+export const removeProfileUpdater = (state, { id }) => {
+  const mutation = GQL_REMOVE_PROFILE();
+  const removeProfileTask = GRAPHQL_MUTATION_TASK({
+    variables: { id },
+    mutation
+  }).bimap(
+    res => removeProfileSuccess(res.data.update_signal_db_profiles_by_pk),
+    err => removeProfileError(err)
+  );
+  const newState = { ...state, profiles: state.profiles.map(profile => profile.id == id ? {...profile, isRemoving: true }: profile) };
+
+  return withTask(newState, removeProfileTask);
+};
+
+export const removeProfileSuccessUpdater = (state, { profile: {id} }) => {
   return {
     ...state,
-    profiles: profiles.map(profile => {
-      if (profile.id === action.id) {
-        return {
-          ...profile,
-          label: action.label
-        };
-      }
-      return profile;
-    })
-  };
+    profiles: state.profiles.filter(profile => profile.id !== id),
+    selectedId: state.selectedId == id ? null : state.selectedId
+  }
+};
+
+export const removeProfileErrorUpdater = (state, { error }) => {
+  return {
+    ...state,
+    profiles: state.profiles.map(p => ({...p, isRemoving: false})),
+    error
+  }
+};
+
+export const updateProfileLabelUpdater = (state, { id, label }) => {
+  const mutation = GQL_UPDATE_PROFILE_LABEL();
+  const updateProfileLabelTask = GRAPHQL_MUTATION_TASK({
+    variables: { id, label },
+    mutation
+  }).bimap(
+    res => updateProfileLabelSuccess(res.data.update_signal_db_profiles_by_pk),
+    err => updateProfileLabelError(err)
+  );
+  const newState = { ...state, isLabelUpdating: true };
+
+  return withTask(newState, updateProfileLabelTask);
+};
+
+export const updateProfileLabelSuccessUpdater = (state, { profile: {id, label} }) => {
+  return {
+    ...state,
+    profiles: state.profiles.map(p => p.id == id ? {...p, label} : p),
+    isLabelUpdating: false
+  }
+};
+
+export const updateProfileLabelErrorUpdater = (state, { error }) => {
+  return {
+    ...state,
+    isLabelUpdating: false,
+    error
+  }
 };

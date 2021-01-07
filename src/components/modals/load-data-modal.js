@@ -24,7 +24,7 @@ import get from 'lodash.get';
 import {useIntl} from 'react-intl';
 
 import FileUploadFactory from 'components/common/file-uploader/file-upload';
-import LoadStorageMapFactory from './load-storage-map';
+import LoadDatabaseFactory from './load-database';
 import ModalTabsFactory from './modal-tabs';
 import LoadingDialog from './loading-dialog';
 
@@ -44,9 +44,9 @@ const StyledLoadDataModal = styled.div.attrs({
 const noop = () => {};
 const getDefaultMethod = methods => (Array.isArray(methods) ? get(methods, [0]) : null);
 
-LoadDataModalFactory.deps = [ModalTabsFactory, FileUploadFactory, LoadStorageMapFactory];
+LoadDataModalFactory.deps = [ModalTabsFactory, FileUploadFactory, LoadDatabaseFactory];
 
-export function LoadDataModalFactory(ModalTabs, FileUpload, LoadStorageMap) {
+export function LoadDataModalFactory(ModalTabs, FileUpload, LoadDatabase) {
   /** @type {React.FunctionComponent<LoadDataModalProps>} */
   const LoadDataModal = props => {
     const intl = useIntl();
@@ -81,9 +81,9 @@ export function LoadDataModalFactory(ModalTabs, FileUpload, LoadStorageMap) {
         elementType: FileUpload
       },
       {
-        id: LOADING_METHODS.storage,
-        label: 'modal.loadData.storage',
-        elementType: LoadStorageMap
+        id: LOADING_METHODS.database,
+        label: 'modal.loadData.database',
+        elementType: LoadDatabase
       }
     ]
   };

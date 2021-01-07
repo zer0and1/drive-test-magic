@@ -21,7 +21,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import {loadProfile, saveProfile, updateProfile, removeProfile, applyProfile, updateProfileLabel} from 'actions';
 
 import {Button, SidePanelSection} from 'components/common/styled-components';
 import MapStyleSelectorFactory from 'components/side-panel/map-style-panel/map-style-selector';
@@ -44,16 +43,18 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
       mapProfile: PropTypes.object.isRequired,
       onConfigChange: PropTypes.func.isRequired,
       onStyleChange: PropTypes.func.isRequired,
-      showAddMapStyleModal: PropTypes.func.isRequired
+      showAddMapStyleModal: PropTypes.func.isRequired,
+      loadProfile: PropTypes.func.isRequired,
+      addProfile: PropTypes.func.isRequired,
+      updateProfile: PropTypes.func.isRequired,
+      removeProfile: PropTypes.func.isRequired,
+      applyProfile: PropTypes.func.isRequired,
+      updateProfileLabel: PropTypes.func.isRequired,
     };
 
     state = {
       isSelecting: false
     };
-
-    componentDidMount() {
-      this.props.dispatch(loadProfile());
-    }
 
     buildingColorSelector = props => props.mapStyle.threeDBuildingColor;
     setColorSelector = props => props.set3dBuildingColor;
@@ -66,26 +67,6 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
       this.props.onStyleChange(val);
       this._toggleSelecting();
     };
-
-    _saveProfile = () => {
-      this.props.dispatch(saveProfile());
-    }
-
-    _updateProfile = () => {
-      this.props.dispatch(updateProfile());
-    }
-    
-    _removeProfile = (id) => {
-      this.props.dispatch(removeProfile(id));
-    }
-
-    _applyProfile = (id) => {
-      this.props.dispatch(applyProfile(id));
-    }
-
-    _updateProfileLabel = (id, label) => {
-      this.props.dispatch(updateProfileLabel(id, label));
-    }
 
     render() {
       const {mapStyle, intl, mapProfile} = this.props;
@@ -138,11 +119,11 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
             </SidePanelSection>
             <MapProfileSelector
               mapProfile={mapProfile}
-              saveProfile={this._saveProfile}
-              updateProfile={this._updateProfile}
-              applyProfile={this._applyProfile}
-              removeProfile={this._removeProfile}
-              updateProfileLabel={this._updateProfileLabel}
+              addProfile={this.props.addProfile}
+              updateProfile={this.props.updateProfile}
+              applyProfile={this.props.applyProfile}
+              removeProfile={this.props.removeProfile}
+              updateProfileLabel={this.props.updateProfileLabel}
             />
           </div>
         </div>

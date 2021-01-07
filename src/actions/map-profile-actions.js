@@ -18,212 +18,117 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// vis-state-reducer
 import ActionTypes from 'constants/action-types';
-import { gql } from '@apollo/client';
-import { addDataToMap } from 'actions/actions';
-import KeplerGlSchema from 'schemas';
 
 export function loadProfile() {
-  const query = gql`
-    query {
-      signal_db_profiles (
-        where: {
-          removed: {
-            _eq: false
-          }
-        }
-      ) {
-        id
-        label
-        config
-        removed
-      }
-    }
-  `;
-  return (dispatch) => {
-    dispatch({
-      type: ActionTypes.SET_LOADING,
-      value: true
-    });
-    apolloClient.query({
-      query,
-      fetchPolicy: 'network-only'
-    }).then(res => dispatch({
-      type: ActionTypes.LOAD_PROFILE,
-      profiles: res.data.signal_db_profiles
-    }));
+  return {
+    type: ActionTypes.LOAD_PROFILE
   }
-}
+};
 
-export function saveProfile() {
-  const mutation = gql`
-    mutation($label: String!, $config: jsonb) {
-      insert_signal_db_profiles_one(
-        object: {
-          label: $label,
-          config: $config
-        }
-      ) {
-        id
-        label
-        config
-      }
-    }
-  `;
-
-  return (dispatch, getState) => {
-    dispatch({
-      type: ActionTypes.SET_SAVING,
-      value: true
-    });
-    apolloClient.mutate({
-      variables: {
-        label: "New Profile",
-        config: getState().main.keplerGl.map.visState.schema.getConfigToSave(
-          getState().main.keplerGl.map
-        )
-      },
-      mutation
-    }).then(res => dispatch({
-      type: ActionTypes.SAVE_PROFILE,
-      newProfile: res.data.insert_signal_db_profiles_one
-    }));
+export function loadProfileSuccess(profiles) {
+  return {
+    type: ActionTypes.LOAD_PROFILE_SUCCESS,
+    profiles
   }
-}
+};
 
-export function updateProfile() {
-  const mutation = gql`
-    mutation($id: uuid!, $config: jsonb) {
-      update_signal_db_profiles_by_pk (
-        pk_columns: {id: $id}
-        _set: {config: $config}
-      ) {
-        id
-        label
-        config
-      }
-    }
-  `;
-
-  return (dispatch, getState) => {
-    dispatch({
-      type: ActionTypes.SET_UPDATING,
-      value: true
-    });
-    apolloClient.mutate({
-      variables: {
-        id: getState().main.keplerGl.map.mapProfile.selectedId,
-        config: getState().main.keplerGl.map.visState.schema.getConfigToSave(
-          getState().main.keplerGl.map
-        )
-      },
-      mutation
-    }).then(res => dispatch({
-      type: ActionTypes.UPDATE_PROFILE,
-      profile: res.data.update_signal_db_profiles_by_pk
-    }));
+export function loadProfileError(error) {
+  return {
+    type: ActionTypes.LOAD_PROFILE_ERROR,
+    error
   }
-}
+};
+
+export function addProfile(map) {
+  return {
+    type: ActionTypes.ADD_PROFILE,
+    map
+  }
+};
+
+export function addProfileSuccess(profile) {
+  return {
+    type: ActionTypes.ADD_PROFILE_SUCCESS,
+    profile
+  }
+};
+
+export function addProfileError(error) {
+  return {
+    type: ActionTypes.ADD_PROFILE_ERROR,
+    error
+  }
+};
+
+export function updateProfile(map) {
+  return {
+    type: ActionTypes.UPDATE_PROFILE,
+    map
+  }
+};
+
+export function updateProfileSuccess(profile) {
+  return {
+    type: ActionTypes.UPDATE_PROFILE_SUCCESS,
+    profile
+  }
+};
+
+export function updateProfileError(error) {
+  return {
+    type: ActionTypes.UPDATE_PROFILE_ERROR,
+    error
+  }
+};
 
 export function applyProfile(id) {
-  return (dispatch, getState) => {
-    dispatch({
-      type: ActionTypes.SET_PROFILE_APPLYING,
-      action: {
-        id,
-        value: true
-      }
-    });
-    const map = getState().main.keplerGl.map;
-    const {config} = map.mapProfile.profiles.find(profile => profile.id === id);
-    const {datasets} = KeplerGlSchema.save(map);
-    const mapToLoad = KeplerGlSchema.load(datasets, config);
-        
-    Promise.resolve(
-      dispatch(addDataToMap({...mapToLoad, options: { centerMap: false }}))
-    ).then(() => dispatch({
-      type: ActionTypes.SET_PROFILE_APPLYING,
-      action: {
-        id,
-        value: false
-      }
-    }));
+  return {
+    type: ActionTypes.APPLY_PROFILE,
+    id
   }
-}
+};
 
 export function removeProfile(id) {
-  const mutation = gql`
-    mutation {
-      update_signal_db_profiles_by_pk (
-        pk_columns: {
-          id: "${id}"
-        },
-        _set: {
-          removed: true
-        }
-      ) {
-        id
-        label
-        config
-        removed
-      }
-    }
-  `;
-
-  return (dispatch) => {
-    dispatch({
-      type: ActionTypes.SET_PROFILE_REMOVING,
-      action: {
-        id,
-        value: true
-      }
-    });
-    apolloClient.mutate({
-      mutation
-    }).then(res => {
-      if (res.data.update_signal_db_profiles_by_pk.removed) {
-        return dispatch({
-          type: ActionTypes.REMOVE_PROFILE,
-          id
-        });
-      }
-    });
+  return {
+    type: ActionTypes.REMOVE_PROFILE,
+    id
   }
-}
+};
+
+export function removeProfileSuccess(profile) {
+  return {
+    type: ActionTypes.REMOVE_PROFILE_SUCCESS,
+    profile
+  }
+};
+
+export function removeProfileError(error) {
+  return {
+    type: ActionTypes.REMOVE_PROFILE_ERROR,
+    error
+  }
+};
+
 
 export function updateProfileLabel(id, label) {
-  const mutation = gql`
-    mutation {
-      update_signal_db_profiles_by_pk (
-        pk_columns: {
-          id: "${id}"
-        },
-        _set: {
-          label: "${label}"
-        }
-      ) {
-        id
-        label
-        config
-        removed
-      }
-    }
-  `;
-
-  return (dispatch) => {
-    apolloClient.mutate({
-      mutation
-    }).then(res => {
-      if (res.data.update_signal_db_profiles_by_pk.label === label) {
-        return dispatch({
-          type: ActionTypes.UPDATE_PROFILE_LABEL,
-          action: {
-            id,
-            label
-          }
-        });
-      }
-    });
+  return {
+    type: ActionTypes.UPDATE_PROFILE_LABEL,
+    id,
+    label
   }
-}
+};
+
+export function updateProfileLabelSuccess(profile) {
+  return {
+    type: ActionTypes.UPDATE_PROFILE_LABEL_SUCCESS,
+    profile
+  }
+};
+
+export function updateProfileLabelError(error) {
+  return {
+    type: ActionTypes.UPDATE_PROFILE_LABEL_ERROR,
+    error
+  }
+};

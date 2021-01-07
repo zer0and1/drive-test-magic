@@ -32,6 +32,7 @@ import * as MinionStateActions from 'actions/minion-state-actions';
 import * as VisStateActions from 'actions/vis-state-actions';
 import * as MapStateActions from 'actions/map-state-actions';
 import * as MapStyleActions from 'actions/map-style-actions';
+import * as MapProfileActions from 'actions/map-profile-actions';
 import * as UIStateActions from 'actions/ui-state-actions';
 import * as ProviderActions from 'actions/provider-actions';
 
@@ -222,7 +223,7 @@ function KeplerGlFactory(
         {toLoad: {}, toRequest: {}}
       );
 
-      this.props.mapStyleActions.loadMapStyles(allStyles.toLoad);
+      this.props.mapStyleActions.loadMapStyles(allStyles.profile);
       this.props.mapStyleActions.requestMapStyles(allStyles.toRequest);
     };
 
@@ -257,6 +258,7 @@ function KeplerGlFactory(
         visStateActions,
         mapStateActions,
         mapStyleActions,
+        mapProfileActions,
         uiStateActions,
         providerActions,
 
@@ -306,6 +308,7 @@ function KeplerGlFactory(
         uiState,
         minionState,
         mapStyleActions,
+        mapProfileActions,
         mapStateActions,
         visStateActions,
         uiStateActions,
@@ -473,11 +476,12 @@ const getUserActions = (dispatch, props) => props.actions || defaultUserActions;
 
 function makeGetActionCreators() {
   return createSelector([getDispatch, getUserActions], (dispatch, userActions) => {
-    const [minionStateActions, visStateActions, mapStateActions, mapStyleActions, uiStateActions, providerActions] = [
+    const [minionStateActions, visStateActions, mapStateActions, mapStyleActions, mapProfileActions, uiStateActions, providerActions] = [
       MinionStateActions,
       VisStateActions,
       MapStateActions,
       MapStyleActions,
+      MapProfileActions,
       UIStateActions,
       ProviderActions
     ].map(actions => bindActionCreators(mergeActions(actions, userActions), dispatch));
@@ -487,6 +491,7 @@ function makeGetActionCreators() {
       visStateActions,
       mapStateActions,
       mapStyleActions,
+      mapProfileActions,
       uiStateActions,
       providerActions,
       dispatch
