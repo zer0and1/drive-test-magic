@@ -226,7 +226,7 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
                     </div>
                   )}
                 </div>
-                {layerHoverProp.layer.isAggregated && dsc != undefined && dsc != 'property.pointCount' ? (
+                {layerHoverProp?.layer?.isAggregated && dsc != undefined && dsc != 'property.pointCount' ? (
                   <div className="primary-label gutter" style={{ paddingTop: 2, marginRight: -15 }}>
                     <Switch
                       checked={layerHoverProp.isGraphShow}

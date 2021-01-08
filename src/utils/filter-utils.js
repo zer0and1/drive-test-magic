@@ -561,6 +561,8 @@ export function filterDataByFilterTypes({dynamicDomainFilters, cpuFilters, filte
     }
   }
 
+  console.log(result)
+
   return result;
 }
 

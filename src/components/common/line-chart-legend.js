@@ -29,7 +29,10 @@ function LineChartLegendFactory() {
   const LineChartLegend = ({
     visState,
     index,
-    aggregation
+    aggregation,
+    ymin,
+    ymax,
+    cellnames
   }) => {
 
     const lineChart = visState?.object?.points;
@@ -107,7 +110,12 @@ function LineChartLegendFactory() {
       }
     }
 
+    const colors = ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800', '#7E36AF', '#00ECFF'];
+
     const series = [];
+    const annos = [];
+    let iter = 0;
+
     for (var ids of enodebIds)
     {
       const item = {
@@ -115,9 +123,21 @@ function LineChartLegendFactory() {
         type: 'line',
         data: yvalues[ids]
       }
-      series.push(item)
+      const anno = {
+        y: mean(yvalues[ids]),
+        borderColor: colors[iter++],
+        strokeDashArray: 3,
+      }
+      series.push(item);
+      annos.push(anno);
     }
-  
+
+    const withZero = num => {
+      if (num < 10)
+        return '0' + num;
+      return num;
+    }
+
     const options = {
       chart: {
         height: 350,
@@ -131,6 +151,7 @@ function LineChartLegendFactory() {
           enabled: false
         }
       },
+      colors: colors,
       stroke: {
         width: 2,
         curve: 'straight'
@@ -189,7 +210,21 @@ function LineChartLegendFactory() {
         type: 'datetime',
         tooltip: {
           enabled: false
+        },
+        labels: {
+          datetimeFormatter: {
+            year: 'yyyy',
+            month: 'MMM \'yy',
+            day: 'dd MMM',
+            hour: 'HH:mm'
+          }
         }
+      },
+      yaxis: {
+        show: true,
+        tickAmount: 6,
+        min: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymin : undefined,
+        max: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymax : undefined
       },
       tooltip: {
         shared: true,
@@ -198,7 +233,12 @@ function LineChartLegendFactory() {
           formatter: function (x) {
             if (typeof x !== "undefined") {
               let current_datetime = new Date(x);
-              let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + " " + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds() 
+              let formatted_date = current_datetime.getFullYear() + "-" 
+                                  + withZero((current_datetime.getMonth() + 1)) + "-" 
+                                  + withZero(current_datetime.getDate()) + " " 
+                                  + withZero(current_datetime.getHours()) + ":" 
+                                  + withZero(current_datetime.getMinutes()) + ":" 
+                                  + withZero(current_datetime.getSeconds());
               return "<center>" + formatted_date + "</center>";
             }
             return x;
@@ -207,7 +247,18 @@ function LineChartLegendFactory() {
       },
       legend: {
         position: 'right',
-        offsetY: 20
+        offsetY: 20,
+        showForSingleSeries: true,
+        formatter: function(seriesName, opts) {
+          return [cellnames[seriesName], "<br><span style='padding-left:3em'>", 
+              "<span style='color:", opts.w.globals.colors[opts.seriesIndex], "'>min:</span>", min(opts.w.globals.series[opts.seriesIndex]).toFixed(2), 
+              "<span style='color:", opts.w.globals.colors[opts.seriesIndex], "'>max:</span>", max(opts.w.globals.series[opts.seriesIndex]).toFixed(2), 
+              "<span style='color:", opts.w.globals.colors[opts.seriesIndex], "'>avg:</span>", mean(opts.w.globals.series[opts.seriesIndex]).toFixed(2), 
+              "</span>"]
+        }
+      },
+      annotations: {
+        yaxis: annos
       }
     };
 
