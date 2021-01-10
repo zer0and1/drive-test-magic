@@ -29,6 +29,7 @@ import {
 } from './styled-components';
 import {Close, LineChart} from './icons';
 import LineChartLegendFactory from './line-chart-legend';
+import {min, max} from 'd3-array';
 
 const TOP_SECTION_HEIGHT = '36px';
 
@@ -68,6 +69,14 @@ function GraphWidgetFactory(LineChartLegend) {
       const fieldIndex = layer?.config?.colorField?.tableFieldIndex;
       const aggregation = layer?.config?.visConfig?.colorAggregation;
 
+      const ymin = min(this.props.allData.map(function(el){return el[fieldIndex-1]}));
+      const ymax = max(this.props.allData.map(function(el){return el[fieldIndex-1]}));
+      const cellnames = this.props.allData.reduce(function(r, o) {
+        if (!r[o[11]])
+          r[o[11]] = o[4];
+        return r;
+      }, []);
+
       return (
         <GraphBottomWidgetInner className="bottom-widget--inner">
           <TopSectionWrapper>
@@ -88,6 +97,9 @@ function GraphWidgetFactory(LineChartLegend) {
             visState={this.props.visState}
             index={fieldIndex}
             aggregation={aggregation}
+            ymin={ymin}
+            ymax={ymax}
+            cellnames={cellnames}
           />
         </GraphBottomWidgetInner>
       );
