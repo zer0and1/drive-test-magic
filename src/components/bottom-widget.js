@@ -183,6 +183,10 @@ export default function BottomWidgetFactory(
     const showSessionWidget = uiState.activeSidePanel == 'minion';
     const selectedField = visState?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
 
+    const layerId = visState?.layer?.id;
+    const datasetName = layers.find(item => item.id === layerId)?.config?.dataId;
+    const allData = datasets[datasetName]?.allData
+
     return (
       <BottomWidgetContainer
         width={Math.min(maxWidth, enlargedFilterWidth)}
@@ -215,6 +219,7 @@ export default function BottomWidgetFactory(
             showGraphState={uiStateActions.toggleGraphShow}
             visState={visState}
             layers={layers}
+            allData={allData}
           />
           ) : null
         }
