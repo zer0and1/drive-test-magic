@@ -64,17 +64,28 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       lastAck: PropTypes.string,
       sessionId: PropTypes.number,
       details: PropTypes.object,
-      minions: PropTypes.array
     };
 
     static defaultProps = {
       details: {},
-      minions: []
     };
 
-    minionGridRef = createRef();
+    minionSource = {
+      localdata: [],
+      datatype: 'array',
+      datafields: [
+        { name: 'id', type: 'int' },
+        { name: 'name', type: 'string' },
+        { name: 'lastupdate', type: 'date' },
+        { name: 'gps_fix_lastupdate', type: 'date' },
+        { name: 'operation_mode', type: 'string' }
+      ]
+    };
+
     timeoutId = 0;
     panelRatio = 0.2;
+    minionSortColumn = null;
+    minionSortDirection = null;
 
     strRenderer(row, columnproperties, value) {
       return `<div style='text-align: center; margin-top: 5px;'>${value}</div>`
@@ -107,17 +118,29 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     componentDidMount() {
       $('#minion-grid').LoadingOverlay('show');
       this.props.loadMinions(this.onMinionsLoaded.bind(this));
+      this._mounted = true;
     }
 
     componentWillUnmount() {
       this.props.removeMarker();
       this.props.setSelectedMinion({ name: null, idx: -1 });
-      window.clearTimeout(this.timeoutId);
+      clearTimeout(this.timeoutId);
+      this._mounted = false;
     }
 
-    onMinionsLoaded(selectedMinionData) {
+    onMinionsLoaded(selectedMinionData, minions) {
+      if (this._mounted == false) {
+        return;
+      }
+      
       $('#minion-grid').LoadingOverlay('hide', true);
-      $('#minion-group').LoadingOverlay('hide', true)
+      $('#minion-group').LoadingOverlay('hide', true);
+      
+      this.minionSource.localdata = minions;
+      // this.minionSource.sortcolumn = this.minionSortColumn;
+      // this.minionSource.sortdirection = this.minionSortDirection;
+      this.refs.minionGrid.updatebounddata('sort');
+
       this.timeoutId = setTimeout(this.props.loadMinions.bind(this), 3000, this.onMinionsLoaded.bind(this));
       this.props.selectedMinionName && this.trackMinion(selectedMinionData);
     }   
@@ -185,17 +208,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 width={'100%'}
                 height={'100%'}
                 theme={'metrodark'}
-                source={new jqx.dataAdapter({
-                  localdata: this.props.minions,
-                  datatype: 'array',
-                  datafields: [
-                    { name: 'id', type: 'int' },
-                    { name: 'name', type: 'string' },
-                    { name: 'lastupdate', type: 'date' },
-                    { name: 'gps_fix_lastupdate', type: 'date' },
-                    { name: 'operation_mode', type: 'string' }
-                  ]
-                })}
+                source={new jqx.dataAdapter(this.minionSource)}
                 columns={[
                   { text: 'Name', datafield: 'name', cellsalign: 'center', align: 'center', width: '20%', cellsrenderer: this.strRenderer.bind(this) },
                   { text: 'Last Update', datafield: 'lastupdate', cellsalign: 'center', cellsrenderer: this.datetimeRenderer.bind(this), align: 'center', width: '34%' },
@@ -210,6 +223,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 enabletooltips={true}
                 editable={false}
                 onRowselect={this.minionRowselect}
+                onSort={({args: {sortinformation: {sortcolumn, sortdirection}}}) => {
+                  this.minionSortColumn = sortcolumn;
+                  this.minionSortDirection = sortcolumn ? (sortdirection.ascending ? 'asc' : 'desc' ) : null;
+                }}
               />
             </div>
             <StyledMinionGroup className={"splitter-panel"} id="minion-group">

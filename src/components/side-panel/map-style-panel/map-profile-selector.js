@@ -29,6 +29,7 @@ const PanelWrapper = styled.div`
 
 const StyledProfilePanelHeader = styled(StyledPanelHeader)`
   height: fit-content;
+  min-height: 48px;
   .profile__remove-profile {
     opacity: 0;
   }
@@ -39,10 +40,6 @@ const StyledProfilePanelHeader = styled(StyledPanelHeader)`
   :hover {
     cursor: pointer;
     background-color: ${props => props.theme.panelBackgroundHover};
-
-    .profile__drag-handle {
-      opacity: 1;
-    }
 
     .profile__remove-profile {
       opacity: 1;

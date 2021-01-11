@@ -181,7 +181,10 @@ export default {
   },
   datasetTitle: {
     showDataTable: 'Show data table',
-    removeDataset: 'Remove dataset'
+    removeDataset: 'Remove dataset',
+    setupDataset: 'Setup Dataset',
+    hideDataset: 'Hide Dataset',
+    showDataset: 'Show Dataset'
   },
   datasetInfo: {
     rowCount: '{rowCount} rows'
@@ -216,7 +219,9 @@ export default {
     pause: 'pause',
     reset: 'reset',
     removeProfile: 'Remove profile',
-    applyProfile: 'Apply profile'
+    applyProfile: 'Apply profile',
+    reloadSession: 'Reload Sessions',
+    testQuery: 'Test Query',
   },
   toolbar: {
     exportImage: 'Export Image',
@@ -248,6 +253,8 @@ export default {
       export: 'Export',
       addStyle: 'Add Style',
       save: 'Save',
+      add: 'Add',
+      update: 'Update',
       defaultCancel: 'Cancel',
       defaultConfirm: 'Confirm'
     },
@@ -275,6 +282,14 @@ export default {
       unfilteredData: 'Unfiltered Data',
       fileCount: '{fileCount} Files',
       rowCount: '{rowCount} Rows'
+    },
+    loadDatabase: {
+      datasetTitle: 'Dataset Label',
+      datasetSubtitle: 'Enter dataset label to display',
+      queryTitle: 'GraphQL Query',
+      querySubtitle: 'Enter GraphQL query to fetch dataset from database table',
+      sessionTitle: 'Session Selector',
+      sessionSubtitle: 'Check to limit DB data to specific sessions'
     },
     deleteData: {
       warning: 'you are going to delete this dataset. It will affect {length} layers'
@@ -348,7 +363,7 @@ export default {
     },
     loadData: {
       upload: 'Load Files',
-      database: 'Database Layers'
+      database: 'Load from DB'
     },
     tripInfo: {
       title: 'How to enable trip animation',

@@ -36,6 +36,9 @@ function SourceDataCatalogFactory(DatasetTitle, DatasetInfo) {
     datasets,
     showDatasetTable,
     removeDataset,
+    reloadDataset,
+    setupDataset,
+    enableDataset,
     onTitleClick,
     showDeleteDataset = false
   }) => (
@@ -46,6 +49,9 @@ function SourceDataCatalogFactory(DatasetTitle, DatasetInfo) {
             showDatasetTable={showDatasetTable}
             showDeleteDataset={showDeleteDataset}
             removeDataset={removeDataset}
+            reloadDataset={reloadDataset}
+            setupDataset={setupDataset}
+            enableDataset={enableDataset}
             dataset={dataset}
             onTitleClick={onTitleClick}
           />

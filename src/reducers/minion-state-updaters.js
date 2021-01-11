@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import { disableStackCapturing, withTask } from 'react-palm/tasks';
-import { EXECUTE_GRAPH_QL_TASK } from 'tasks/tasks';
+import { GRAPHQL_QUERY_TASK } from 'tasks/tasks';
 import { GQL_GET_MINIONS } from 'graphqls';
 import { loadMinionsSuccess, loadMinionsError } from 'actions/minion-state-actions';
 import { SIGNAL_QUALITY } from 'constants/default-settings';
@@ -77,7 +77,6 @@ const minionStateUpdaters = null;
  * @public
  */
 export const INITIAL_MINION_STATE = {
-  minions: [],
   details: {},
   selectedMinionName: null,
   selectedMinionIdx: -1,
@@ -94,13 +93,13 @@ export const INITIAL_MINION_STATE = {
  *
  */
 export function loadMinionsUpdater(state, { onLoaded }) {
-  const query = GQL_GET_MINIONS(state.selectedMinionName)
-  const loadMinionTask = EXECUTE_GRAPH_QL_TASK({ query, fetchPolicy: 'network-only' }).bimap(
+  const query = GQL_GET_MINIONS(state.selectedMinionName);
+  const loadMinionTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     result => {
       const minions = result.data.signal_db_minions;
       const sample = result.data.signal_db_signal_samples?.[0];
       
-      onLoaded(minions?.[state.selectedMinionIdx]);
+      onLoaded(minions?.[state.selectedMinionIdx], minions);
       
       return loadMinionsSuccess(minions, sample);
     },
@@ -151,7 +150,6 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
   const newState = {
     ...state,
     isLoadingMinions: false,
-    minions,
     details: {}
   };
 

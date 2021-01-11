@@ -170,3 +170,72 @@ mutation($id: uuid!, $label: String!) {
   }
 }
 `;
+
+export const GQL_INSERT_DATASET = () => gql`
+mutation($id: String!, $label: String, $type: String, $query: String, $sessions: jsonb, $enabled: Boolean) {
+  insert_signal_db_datasets_one(
+    object: {
+      id: $id,
+      label: $label,
+      query: $query,
+      type: $type,
+      sessions: $sessions,
+      enabled: $enabled
+    }
+  ) {
+    id
+    label
+    query
+    type
+    sessions
+    enabled
+  }
+}
+`;
+
+export const GQL_GET_DATASETS = () => gql`
+query {
+  signal_db_datasets {
+    id
+    label
+    query
+    type
+    sessions
+    enabled
+  }
+}
+`;
+
+export const GQL_UPDATE_DATASET = () => gql`
+mutation($id: String!, $label: String, $type: String, $query: String, $sessions: jsonb, $enabled: Boolean) {
+  update_signal_db_datasets_by_pk(
+    pk_columns: {
+      id: $id
+    },
+    _set: {
+      label: $label,
+      query: $query,
+      type: $type,
+      sessions: $sessions,
+      enabled: $enabled
+    }
+  ) {
+    id
+    label
+    query
+    type
+    sessions
+    enabled
+  }
+}
+`;
+
+export const GQL_DELETE_DATASET = () => gql`
+mutation($id: String!) {
+  delete_signal_db_datasets_by_pk (
+    id: $id
+  ) {
+    id
+  }
+}
+`;

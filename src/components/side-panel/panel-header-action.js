@@ -30,7 +30,7 @@ const HeaderActionWrapper = styled.div`
   display: flex;
   align-items: center;
   color: ${props =>
-    props.active ? props.theme.panelHeaderIconActive : props.theme.panelHeaderIcon};
+    props.active ? props.theme.panelHeaderIconActive : (props.color ? props.theme[props.color] : props.theme.panelHeaderIcon)};
 
   :hover {
     cursor: pointer;
@@ -55,6 +55,7 @@ export default function PanelHeaderActionFactory() {
       onClick: PropTypes.func,
       active: PropTypes.bool,
       disabled: PropTypes.bool,
+      color: PropTypes.string,
       hoverColor: PropTypes.string,
       className: PropTypes.string,
       tooltipType: PropTypes.string
@@ -73,6 +74,7 @@ export default function PanelHeaderActionFactory() {
         id,
         active,
         flush,
+        color,
         hoverColor,
         tooltipType,
         disabled,
@@ -83,6 +85,7 @@ export default function PanelHeaderActionFactory() {
           className={classnames('panel--header__action', {disabled, [className]: className})}
           active={active}
           hoverColor={hoverColor}
+          color={color}
           flush={flush}
         >
           <this.props.IconComponent

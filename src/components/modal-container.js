@@ -18,23 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {css} from 'styled-components';
-import {findDOMNode} from 'react-dom';
-import {createSelector} from 'reselect';
+import { css } from 'styled-components';
+import { findDOMNode } from 'react-dom';
+import { createSelector } from 'reselect';
 import get from 'lodash.get';
 import document from 'global/document';
 
 import ModalDialogFactory from './modals/modal-dialog';
-import {exportJson, exportHtml, exportData, exportImage, exportMap} from 'utils/export-utils';
-import {isValidMapInfo} from 'utils/map-info-utils';
+import { exportJson, exportHtml, exportData, exportImage, exportMap } from 'utils/export-utils';
+import { isValidMapInfo } from 'utils/map-info-utils';
 
 // modals
 import DeleteDatasetModalFactory from './modals/delete-data-modal';
 import OverWriteMapModalFactory from './modals/overwrite-map-modal';
 import DataTableModalFactory from './modals/data-table-modal';
 import LoadDataModalFactory from './modals/load-data-modal';
+import LoadDatabaseFactory from './modals/load-database';
 import ExportImageModalFactory from './modals/export-image-modal';
 import ExportDataModalFactory from './modals/export-data-modal';
 import ExportMapModalFactory from './modals/export-map-modal/export-map-modal';
@@ -43,13 +44,14 @@ import SaveMapModalFactory from './modals/save-map-modal';
 import ShareMapModalFactory from './modals/share-map-modal';
 
 // Breakpoints
-import {media} from 'styles/media-breakpoints';
+import { media } from 'styles/media-breakpoints';
 
 // Template
 import {
   ADD_DATA_ID,
   DATA_TABLE_ID,
   DELETE_DATA_ID,
+  UPDATE_DATA_ID,
   EXPORT_DATA_ID,
   EXPORT_IMAGE_ID,
   EXPORT_MAP_ID,
@@ -58,9 +60,9 @@ import {
   SHARE_MAP_ID,
   OVERWRITE_MAP_ID
 } from 'constants/default-settings';
-import {EXPORT_MAP_FORMATS} from 'constants/default-settings';
+import { EXPORT_MAP_FORMATS } from 'constants/default-settings';
 import KeyEvent from 'constants/keyevent';
-import {getFileFormatNames, getFileExtensions} from '../reducers/vis-state-selectors';
+import { getFileFormatNames, getFileExtensions } from '../reducers/vis-state-selectors';
 
 const DataTableModalStyle = css`
   top: 80px;
@@ -95,6 +97,7 @@ ModalContainerFactory.deps = [
   OverWriteMapModalFactory,
   DataTableModalFactory,
   LoadDataModalFactory,
+  LoadDatabaseFactory,
   ExportImageModalFactory,
   ExportDataModalFactory,
   ExportMapModalFactory,
@@ -109,6 +112,7 @@ export default function ModalContainerFactory(
   OverWriteMapModal,
   DataTableModal,
   LoadDataModal,
+  LoadDatabase,
   ExportImageModal,
   ExportDataModal,
   ExportMapModal,
@@ -191,8 +195,8 @@ export default function ModalContainerFactory(
     };
 
     _onExportMap = () => {
-      const {uiState} = this.props;
-      const {format} = uiState.exportMap;
+      const { uiState } = this.props;
+      const { format } = uiState.exportMap;
       (format === EXPORT_MAP_FORMATS.HTML ? exportHtml : exportJson)(
         this.props,
         this.props.uiState.exportMap[format] || {}
@@ -200,7 +204,7 @@ export default function ModalContainerFactory(
       this._closeModal();
     };
 
-    _exportFileToCloud = ({provider, isPublic, overwrite, closeModal}) => {
+    _exportFileToCloud = ({ provider, isPublic, overwrite, closeModal }) => {
       const toSave = exportMap(this.props);
 
       this.props.providerActions.exportFileToCloud({
@@ -218,7 +222,7 @@ export default function ModalContainerFactory(
     };
 
     _onSaveMap = (overwrite = false) => {
-      const {currentProvider} = this.props.providerState;
+      const { currentProvider } = this.props.providerState;
       // @ts-ignore
       const provider = this.props.cloudProviders.find(p => p.name === currentProvider);
       this._exportFileToCloud({
@@ -234,7 +238,7 @@ export default function ModalContainerFactory(
     };
 
     _onShareMapUrl = provider => {
-      this._exportFileToCloud({provider, isPublic: true, overwrite: false, closeModal: false});
+      this._exportFileToCloud({ provider, isPublic: true, overwrite: false, closeModal: false });
     };
 
     _onCloseSaveMap = () => {
@@ -264,8 +268,8 @@ export default function ModalContainerFactory(
         uiStateActions,
         providerState
       } = this.props;
-      const {currentModal, datasetKeyToRemove} = uiState;
-      const {datasets, layers, editingDataset} = visState;
+      const { currentModal, datasetKeyToRemove, datasetKeyToUpdate } = uiState;
+      const { datasets, layers, editingDataset } = visState;
 
       let template = null;
       let modalProps = {};
@@ -334,6 +338,15 @@ export default function ModalContainerFactory(
                 cloudProviders={this.providerWithStorage(this.props)}
                 onSetCloudProvider={this.props.providerActions.setCloudProvider}
                 getSavedMaps={this.props.providerActions.getSavedMaps}
+                setDatasetLabel={this.props.providerActions.setDatasetLabel}
+                setQuery={this.props.providerActions.setQuery}
+                setSessionChecked={this.props.providerActions.setSessionChecked}
+                setQueryExpanded={this.props.providerActions.setQueryExpanded}
+                setSessionExpanded={this.props.providerActions.setSessionExpanded}
+                reloadSession={this.props.providerActions.reloadSession}
+                selectSession={this.props.providerActions.selectSession}
+                addDataset={this.props.providerActions.addDataset}
+                testQuery={this.props.providerActions.testQuery}
                 loadFiles={uiState.loadFiles}
                 fileLoading={visState.fileLoading}
                 fileLoadingProgress={visState.fileLoadingProgress}
@@ -343,6 +356,32 @@ export default function ModalContainerFactory(
             );
             modalProps = {
               title: 'modal.title.addDataToMap',
+              cssStyle: LoadDataModalStyle,
+              footer: false,
+              onConfirm: this._closeModal
+            };
+            break;
+          case UPDATE_DATA_ID:
+            template = (
+              <LoadDatabase
+                {...providerState}
+                updating={true}
+                oldDataset={visState.datasets[datasetKeyToUpdate]}
+                onClose={this._closeModal}
+                setDatasetLabel={this.props.providerActions.setDatasetLabel}
+                setQuery={this.props.providerActions.setQuery}
+                setSessionChecked={this.props.providerActions.setSessionChecked}
+                setQueryExpanded={this.props.providerActions.setQueryExpanded}
+                setSessionExpanded={this.props.providerActions.setSessionExpanded}
+                reloadSession={this.props.providerActions.reloadSession}
+                selectSession={this.props.providerActions.selectSession}
+                addDataset={this.props.providerActions.addDataset}
+                initDataset={this.props.providerActions.initDataset}
+                testQuery={this.props.providerActions.testQuery}
+              />
+            );
+            modalProps = {
+              title: 'modal.title.updateDataset',
               cssStyle: LoadDataModalStyle,
               footer: false,
               onConfirm: this._closeModal

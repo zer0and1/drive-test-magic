@@ -158,6 +158,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       openModal: PropTypes.func.isRequired,
       removeLayer: PropTypes.func.isRequired,
       removeDataset: PropTypes.func.isRequired,
+      loadDataset: PropTypes.func.isRequired,
       showDatasetTable: PropTypes.func.isRequired,
       updateLayerBlending: PropTypes.func.isRequired,
       updateLayerOrder: PropTypes.func.isRequired
@@ -167,14 +168,17 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
     };
 
     componentDidMount() {
-      this.loadData()
+      if (Object.keys(this.props.datasets).length == 0) {
+        $('.side-panel__content').LoadingOverlay('show');
+        this.props.loadDataset();
+      }
     }
 
     loadData() {
       if (this.props.datasets.signal_sample_data) {
         return;
       }
-      
+
       $('#kepler-container').LoadingOverlay('show');
 
       apolloClient.query({ query: GQL_GET_SIGNAL_SAMPLES })
@@ -205,30 +209,10 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
               options: {
                 centerMap: true,
                 readOnly: false
-              },
-              // config: {
-              //   version: 'v1',
-              //   config: {
-              //     visState: {
-              //       layers: [
-              //         {
-              //           type: 'point',
-              //           config: {
-              //             dataId: 'signal_sample_data',
-              //             columns: {
-              //               lat: 'latitude',
-              //               lng: 'longitude'
-              //             },
-              //             isVisible: true
-              //           }
-              //         }
-              //       ]
-              //     }
-              //   }
-              // }
+              }
             })
           );
-          
+
           $('#kepler-container').LoadingOverlay('hide', true);
         })
     }
@@ -295,6 +279,9 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
             datasets={datasets}
             showDatasetTable={this.props.showDatasetTable}
             removeDataset={this.props.removeDataset}
+            reloadDataset={this.props.reloadDataset}
+            setupDataset={this.props.setupDataset}
+            enableDataset={this.props.enableDataset}
             showDeleteDataset
           />
           <AddDataButton onClick={this.props.showAddDataModal} isInactive={!defaultDataset} />

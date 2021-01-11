@@ -18,15 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {PureComponent} from 'react';
+import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import {FormattedMessage} from 'localization';
+import { FormattedMessage } from 'localization';
 
-import {CenterFlexbox, Tooltip} from 'components/common/styled-components';
-import {ArrowRight, Table, Trash} from 'components/common/icons';
+import { CenterFlexbox, Tooltip } from 'components/common/styled-components';
+import { ArrowRight, Table, Trash, Reload, Spinner, EyeSeen, EyeUnseen, Gear } from 'components/common/icons';
 import DatasetTagFactory from 'components/side-panel/common/dataset-tag';
 
-function nop() {}
+import $ from 'jquery';
+import 'gasparesganga-jquery-loading-overlay';
+
+function nop() { }
 
 const StyledDatasetTitle = styled.div`
   color: ${props => props.theme.textColor};
@@ -36,6 +39,7 @@ const StyledDatasetTitle = styled.div`
   .source-data-arrow {
     height: 16px;
   }
+
   :hover {
     cursor: ${props => (props.clickable ? 'pointer' : 'auto')};
 
@@ -60,7 +64,7 @@ const DataTagAction = styled.div`
   opacity: 0;
 `;
 
-const ShowDataTable = ({id, showDatasetTable = nop}) => (
+const ShowDataTable = ({ id, showDatasetTable = nop }) => (
   <DataTagAction className="dataset-action show-data-table" data-tip data-for={`data-table-${id}`}>
     <Table
       height="16px"
@@ -77,7 +81,7 @@ const ShowDataTable = ({id, showDatasetTable = nop}) => (
   </DataTagAction>
 );
 
-const RemoveDataset = ({datasetKey, removeDataset = nop}) => (
+const RemoveDataset = ({ datasetKey, removeDataset = nop }) => (
   <DataTagAction
     className="dataset-action remove-dataset"
     data-tip
@@ -98,6 +102,69 @@ const RemoveDataset = ({datasetKey, removeDataset = nop}) => (
   </DataTagAction>
 );
 
+const ReloadDataset = ({ datasetKey, reloadDataset = nop }) => (
+  <DataTagAction
+    className="dataset-action reload-dataset"
+    data-tip
+    data-for={`reload-${datasetKey}`}
+  >
+    <Reload
+      height="16px"
+      onClick={e => {
+        e.stopPropagation();
+        reloadDataset(datasetKey);
+      }}
+    />
+    <Tooltip id={`reload-${datasetKey}`} effect="solid">
+      <span>
+        <FormattedMessage id={'datasetTitle.reloadDataset'} />
+      </span>
+    </Tooltip>
+  </DataTagAction>
+);
+
+const SetupDataset = ({ datasetKey, setupDataset = nop }) => (
+  <DataTagAction
+    className="dataset-action reload-dataset"
+    data-tip
+    data-for={`reload-${datasetKey}`}
+  >
+    <Gear
+      height="16px"
+      onClick={e => {
+        e.stopPropagation();
+        setupDataset(datasetKey);
+      }}
+    />
+    <Tooltip id={`reload-${datasetKey}`} effect="solid">
+      <span>
+        <FormattedMessage id={'datasetTitle.setupDataset'} />
+      </span>
+    </Tooltip>
+  </DataTagAction>
+);
+
+const EnableDataset = ({ datasetKey, enabled, enableDataset = nop }) => (
+  <DataTagAction
+    className="dataset-action reload-dataset"
+    data-tip
+    data-for={`reload-${datasetKey}`}
+  >
+    <EyeSeen
+      height="16px"
+      onClick={e => {
+        e.stopPropagation();
+        enableDataset(datasetKey);
+      }}
+    />
+    <Tooltip id={`reload-${datasetKey}`} effect="solid">
+      <span>
+        <FormattedMessage id={'datasetTitle.enableDataset'} />
+      </span>
+    </Tooltip>
+  </DataTagAction>
+);
+
 DatasetTitleFactory.deps = [DatasetTagFactory];
 
 export default function DatasetTitleFactory(DatasetTag) {
@@ -111,12 +178,21 @@ export default function DatasetTitleFactory(DatasetTag) {
       }
     };
 
+    componentDidMount() {
+      if (this.props.dataset.loadingCompleted) {
+        $('.side-panel__content').LoadingOverlay('hide', true);
+      }
+    }
+    
     render() {
       const {
         showDatasetTable,
         showDeleteDataset,
         onTitleClick,
         removeDataset,
+        reloadDataset,
+        setupDataset,
+        enableDataset,
         dataset
       } = this.props;
 
@@ -131,12 +207,15 @@ export default function DatasetTitleFactory(DatasetTag) {
               <ArrowRight height="12px" />
             </CenterFlexbox>
           ) : null}
-          {showDatasetTable ? (
+          { false ? (
             <ShowDataTable id={dataset.id} showDatasetTable={showDatasetTable} />
           ) : null}
           {showDeleteDataset ? (
             <RemoveDataset datasetKey={dataset.id} removeDataset={removeDataset} />
           ) : null}
+          <SetupDataset datasetKey={dataset.id} setupDataset={setupDataset} />
+          <ReloadDataset datasetKey={dataset.id} reloadDataset={reloadDataset} />
+          <EnableDataset datasetKey={dataset.id} enableDataset={enableDataset} enabled={dataset.enabled} />
         </StyledDatasetTitle>
       );
     }

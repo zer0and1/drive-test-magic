@@ -163,6 +163,10 @@ export default function SidePanelFactory(
       this.props.uiStateActions.openDeleteModal(key);
     };
 
+    _setupDataset = key => {
+      this.props.uiStateActions.openDatasetModal(key);
+    };
+
     _onClickExportImage = () => this.props.uiStateActions.toggleModal(EXPORT_IMAGE_ID);
 
     _onClickExportData = () => this.props.uiStateActions.toggleModal(EXPORT_DATA_ID);
@@ -205,6 +209,7 @@ export default function SidePanelFactory(
         mapStateActions,
         mapProfileActions,
         uiStateActions,
+        providerActions,
         availableProviders
       } = this.props;
 
@@ -241,6 +246,10 @@ export default function SidePanelFactory(
         showAddDataModal: this._showAddDataModal,
         removeLayer: visStateActions.removeLayer,
         removeDataset: this._removeDataset,
+        reloadDataset: providerActions.reloadDataset,
+        setupDataset: this._setupDataset,
+        enableDataset: providerActions.enableDataset,
+        loadDataset: providerActions.loadDataset,
         openModal: uiStateActions.toggleModal
       };
 

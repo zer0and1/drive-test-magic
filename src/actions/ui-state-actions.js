@@ -75,13 +75,22 @@ export const toggleMapControl = createAction(ActionTypes.TOGGLE_MAP_CONTROL, (pa
 }));
 
 /**
- * Toggle active map control panel
+ * Open model to delete dataset
  * @memberof uiStateActions
  * @param datasetId - `id` of the dataset to be deleted
  * @type {typeof import('./ui-state-actions').openDeleteModal}
  * @public
  */
 export const openDeleteModal = createAction(ActionTypes.OPEN_DELETE_MODAL, datasetId => datasetId);
+
+/**
+ * Open modal to update dataset info
+ * @memberof uiStateActions
+ * @param datasetId - `id` of the dataset to be updated
+ * @type {typeof import('./ui-state-actions').openDatasetModal}
+ * @public
+ */
+export const openDatasetModal = createAction(ActionTypes.OPEN_DATASET_MODAL, datasetId => datasetId);
 
 /**
  * Add a notification to be displayed

@@ -67,6 +67,13 @@ export const DATA_TABLE_ID = 'dataTable';
  */
 export const DELETE_DATA_ID = 'deleteData';
 /**
+ * Modal id: update dataset dialog
+ * @constant
+ * @type {string}
+ * @public
+ */
+export const UPDATE_DATA_ID = 'updateData';
+/**
  * Modal id: add data modal
  * @constant
  * @type {string}
@@ -888,6 +895,11 @@ export const DATASET_FORMATS = keyMirror({
   geojson: null,
   csv: null,
   keplergl: null
+});
+
+export const DATASET_TYPES = keyMirror({
+  database: null,
+  file: null
 });
 
 export const ASSETS_URL = 'https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/';

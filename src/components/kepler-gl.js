@@ -313,6 +313,7 @@ function KeplerGlFactory(
         visStateActions,
         uiStateActions,
         minionStateActions,
+        providerActions,
         width: this.props.sidePanelWidth,
         height: this.props.height - DIMENSIONS.sidePanel.margin.top - DIMENSIONS.sidePanel.margin.bottom,
         availableProviders,

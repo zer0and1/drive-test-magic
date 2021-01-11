@@ -1,5 +1,5 @@
 import { disableStackCapturing, withTask } from 'react-palm/tasks';
-import { EXECUTE_GRAPH_QL_TASK } from 'tasks/tasks';
+import { GRAPHQL_QUERY_TASK } from 'tasks/tasks';
 
 import { 
   GQL_GET_PROFILES, 
@@ -41,7 +41,7 @@ export const INITIAL_MAP_PROFILE_STATE = {
 
 export const loadProfileUpdater = (state) => {
   const query = GQL_GET_PROFILES();
-  const loadProfileTask = EXECUTE_GRAPH_QL_TASK({ query }).bimap(
+  const loadProfileTask = GRAPHQL_QUERY_TASK({ query }).bimap(
     res => loadProfileSuccess(res.data.signal_db_profiles),
     err => loadProfileError(err)
   );

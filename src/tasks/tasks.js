@@ -65,10 +65,10 @@ export const LOAD_CLOUD_MAP_TASK = Task.fromPromise(
   'LOAD_CLOUD_MAP_TASK'
 );
 
-export const EXECUTE_GRAPH_QL_TASK = Task.fromPromise(
+export const GRAPHQL_QUERY_TASK = Task.fromPromise(
   (context) => apolloClient.query(context),
 
-  'EXECUTE_GRAPH_QL_TASK'
+  'GRAPHQL_QUERY_TASK'
 );
 
 export const GRAPHQL_MUTATION_TASK = Task.fromPromise(

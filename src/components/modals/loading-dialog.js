@@ -38,7 +38,8 @@ const StyledLoadingDialog = styled.div.attrs({
   align-items: center;
   justify-content: center;
   flex-grow: 1;
-
+  height: ${props => props.height ? props.height : 'fit-content'};
+  
   .loading-content {
     display: flex;
     justify-content: center;
@@ -53,8 +54,8 @@ const StyledLoadingDialog = styled.div.attrs({
   }
 `;
 
-const LoadingDialog = ({size = 64, message = 'modal.loadingDialog.loading'}) => (
-  <StyledLoadingDialog>
+const LoadingDialog = ({size = 64, message = 'modal.loadingDialog.loading', height}) => (
+  <StyledLoadingDialog height={height}>
     <div className="loading-content">
       <StyledSpinner>
         <LoadingSpinner size={size} />

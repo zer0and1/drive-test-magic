@@ -23,6 +23,7 @@ import {
   ADD_DATA_ID,
   DEFAULT_NOTIFICATION_TOPICS,
   DELETE_DATA_ID,
+  UPDATE_DATA_ID,
   EXPORT_DATA_TYPE,
   EXPORT_HTML_MAP_MODES,
   EXPORT_IMG_RATIOS,
@@ -375,7 +376,7 @@ export const toggleGraphShowUpdater = state => ({
 });
 
 /**
- * Toggle active map control panel
+ * Open dataset deleting modal
  * @memberof uiStateUpdaters
  * @param state `uiState`
  * @param action
@@ -390,6 +391,21 @@ export const openDeleteModalUpdater = (state, {payload: datasetKeyToRemove}) => 
   datasetKeyToRemove
 });
 
+/**
+ * Open modal to update dataset
+ * @memberof uiStateUpdaters
+ * @param state `uiState`
+ * @param action
+ * @param action.payload dataset id
+ * @returns nextState
+ * @type {typeof import('./ui-state-updaters').openDatasetModalUpdater}
+ * @public
+ */
+export const openDatasetModalUpdater = (state, {payload: datasetKeyToUpdate}) => ({
+  ...state,
+  currentModal: UPDATE_DATA_ID,
+  datasetKeyToUpdate
+});
 /**
  * Set `exportImage.legend` to `true` or `false`
  * @memberof uiStateUpdaters
