@@ -19,7 +19,8 @@ import {
   removeProfileSuccess,
   removeProfileError,
   updateProfileLabelSuccess,
-  updateProfileLabelError
+  updateProfileLabelError,
+  applyProfile,
 } from 'actions/map-profile-actions';
 
 import { GRAPHQL_MUTATION_TASK } from '../tasks/tasks';
@@ -52,11 +53,18 @@ export const loadProfileUpdater = (state) => {
 };
 
 export const loadProfileSuccessUpdater = (state, { profiles }) => {
-  return {
+  const newState = {
     ...state,
     isLoading: false,
     profiles
-  }
+  };
+
+  const defaultProfile = profiles.find(p => p.id == localStorage.getItem('default_profile_id'));
+  const tasks = [
+    defaultProfile && ACTION_TASK().map(_ => applyProfile(defaultProfile.id, { visState: { datasets: {} }}))
+  ].filter(d => d);
+
+  return withTask(newState, tasks);
 };
 
 
@@ -140,13 +148,14 @@ export const updateProfileErrorUpdater = (state, { error }) => {
 export const applyProfileUpdater = (state, { id, map }) => {
   const { config } = state.profiles.find(p => p.id == id);
   const { datasets } = KeplerGlSchema.save(map);
-  console.log(datasets)
   const mapToLoad = KeplerGlSchema.load(datasets, config);
   const task = ACTION_TASK().map(_ => addDataToMap({ ...mapToLoad, options: { centerMap: false } }));
   const newState = {
     ...state,
     selectedId: id
   };
+  
+  localStorage.setItem('default_profile_id', id);
 
   return withTask(newState, task); 
 };
