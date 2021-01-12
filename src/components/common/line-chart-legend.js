@@ -82,29 +82,31 @@ function LineChartLegendFactory() {
     const yvalues = [];
     for (var i of enodebIds) {
       yvalues[i] = []
-      for (var k of labels) {
-        const v = null;
+      for (var k of dataset[i]) {
+        let v = {
+          x: k.time
+        };
         switch (aggregation) {
           case 'maximum':
-            v = result[k+i] !== undefined ? result[k+i]?.max : null;
+            v.y = k.max;
             break;
           case 'minimum':
-            v = result[k+i] !== undefined ? result[k+i]?.min : null;
+            v.y = k.min;
             break;
           case 'median':
-            v = result[k+i] !== undefined ? result[k+i]?.median : null;
+            v.y = k.median;
             break;
           case 'sum':
-            v = result[k+i] !== undefined ? result[k+i]?.sum : null;
+            v.y = k.sum;
             break;
           case 'stdev':
-            v = result[k+i] !== undefined ? result[k+i]?.stdev : null;
+            v.y = k.stdev;
             break;
           case 'variance':
-            v = result[k+i] !== undefined ? result[k+i]?.v : null;
+            v.y = k.v;
             break;
           default:
-            v = result[k+i] !== undefined ? result[k+i]?.average : null;
+            v.y = k.average;
           }
         yvalues[i].push(v);
       }
@@ -124,7 +126,7 @@ function LineChartLegendFactory() {
         data: yvalues[ids]
       }
       const anno = {
-        y: mean(yvalues[ids]),
+        y: mean(yvalues[ids].map(item => { return item.y })),
         borderColor: colors[iter++],
         strokeDashArray: 3,
       }
@@ -147,14 +149,22 @@ function LineChartLegendFactory() {
         toolbar: {
           show: false
         },
-        zoom: {
-          enabled: false
+        events: {
+          legendClick: function(chartContext, seriesIndex, opts) {
+            // console.log(chartContext)
+            const op = opts.config.annotations.yaxis[seriesIndex].width;
+            opts.config.annotations.yaxis[seriesIndex].width = (op == '100%' ? '0%' : '100%');
+          }
         }
       },
       colors: colors,
       stroke: {
-        width: 2,
+        width: 1,
         curve: 'straight'
+      },
+      markers: {
+        size: 3,
+        strokeWidth: 0
       },
       plotOptions: {
         bar: {
@@ -203,9 +213,6 @@ function LineChartLegendFactory() {
         }
       },
       labels: labels,
-      markers: {
-        size: 0
-      },
       xaxis: {
         type: 'datetime',
         tooltip: {
@@ -250,12 +257,15 @@ function LineChartLegendFactory() {
         offsetY: 20,
         showForSingleSeries: true,
         formatter: function(seriesName, opts) {
+          const color = opts.w.globals.colors[opts.seriesIndex];
+          const val = opts.w.globals.series[opts.seriesIndex];
           return [cellnames[seriesName], "<br><span style='padding-left:3em'>", 
-              "<span style='color:", opts.w.globals.colors[opts.seriesIndex], "'>min:</span>", min(opts.w.globals.series[opts.seriesIndex]).toFixed(2), 
-              "<span style='color:", opts.w.globals.colors[opts.seriesIndex], "'>max:</span>", max(opts.w.globals.series[opts.seriesIndex]).toFixed(2), 
-              "<span style='color:", opts.w.globals.colors[opts.seriesIndex], "'>avg:</span>", mean(opts.w.globals.series[opts.seriesIndex]).toFixed(2), 
+              "<span style='color:", color, "'>#min:</span>", val.length === 0 ? null: min(val).toFixed(2), 
+              "<span style='color:", color, "'>#max:</span>", val.length === 0 ? null: max(val).toFixed(2), 
+              "<span style='color:", color, "'>#avg:</span>", val.length === 0 ? null: mean(val).toFixed(2), 
+              "<span style='color:", color, "'>#smp:</span>", val.length, 
               "</span>"]
-        }
+        },
       },
       annotations: {
         yaxis: annos

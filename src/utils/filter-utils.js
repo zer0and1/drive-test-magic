@@ -561,8 +561,6 @@ export function filterDataByFilterTypes({dynamicDomainFilters, cpuFilters, filte
     }
   }
 
-  console.log(result)
-
   return result;
 }
 
@@ -937,6 +935,7 @@ export function getDefaultFilterPlotType(filter) {
  */
 export function applyFiltersToDatasets(datasetIds, datasets, filters, layers) {
   const dataIds = toArray(datasetIds);
+
   return dataIds.reduce((acc, dataId) => {
     const layersToFilter = (layers || []).filter(l => l.config.dataId === dataId);
     const appliedFilters = filters.filter(d => shouldApplyFilter(d, dataId));
