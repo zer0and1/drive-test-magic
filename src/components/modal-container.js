@@ -169,6 +169,7 @@ export default function ModalContainerFactory(
 
     _deleteDataset = key => {
       this.props.visStateActions.removeDataset(key);
+      this.props.providerActions.unregisterDataset(key);
       this._closeModal();
     };
 

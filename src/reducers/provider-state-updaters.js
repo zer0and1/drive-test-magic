@@ -30,16 +30,6 @@ import {
   GRAPHQL_QUERY_TASK,
   GRAPHQL_MUTATION_TASK
 } from 'tasks/tasks';
-import {
-  exportFileSuccess,
-  exportFileError,
-  postSaveLoadSuccess,
-  loadCloudMapSuccess,
-  getSavedMapsSuccess,
-  getSavedMapsError,
-  loadCloudMapError,
-  resetProviderStatus
-} from 'actions/provider-actions';
 import { removeNotification, toggleModal, addNotification } from 'actions/ui-state-actions';
 import { addDataToMap } from 'actions/actions';
 import {
@@ -53,9 +43,23 @@ import { toArray } from 'utils/utils';
 import { FILE_CONFLICT_MSG } from 'cloud-providers';
 import { DATASET_HANDLERS } from 'processors/data-processor';
 import { gql } from '@apollo/client';
-import { GQL_INSERT_DATASET, GQL_GET_DATASETS, GQL_UPDATE_DATASET } from 'graphqls';
+import {
+  GQL_INSERT_DATASET,
+  GQL_GET_DATASETS,
+  GQL_UPDATE_DATASET,
+  GQL_DELETE_DATASET
+} from 'graphqls';
 
 import {
+  exportFileSuccess,
+  exportFileError,
+  postSaveLoadSuccess,
+  loadCloudMapSuccess,
+  getSavedMapsSuccess,
+  getSavedMapsError,
+  loadCloudMapError,
+  resetProviderStatus,
+
   testQuery,
   testQuerySuccess,
   testQueryError,
@@ -63,6 +67,8 @@ import {
   registerDataset,
   registerDatasetSuccess,
   registerDatasetError,
+  unregisterDatasetSuccess,
+  unregisterDatasetError,
   updateDataset,
   updateDatasetSuccess,
   updateDatasetError,
@@ -72,6 +78,13 @@ import {
 import _ from 'lodash';
 import moment from 'moment';
 import { getFieldsFromData } from 'processors';
+import {
+  extractFields,
+  extractOperation,
+  restrictSession,
+  filterWithList,
+  makeDataset
+} from '../utils/gql-utils';
 
 export const INITIAL_SESSION_STATE = {
   sessions: [],
@@ -484,11 +497,8 @@ export const setDatasetLabelUpdater = (state, { payload: label }) => {
 };
 
 function checkSessionId(query) {
-  const gquery = gql`${query}`;
-  const documentNode = gquery.definitions?.[0];
-  const fieldNode = documentNode.selectionSet.selections?.[0];
-  const fields = fieldNode.selectionSet?.selections;
-  return fields && fields.filter(f => f.name.value == 'session_id').length > 0;
+  const fields = extractFields(query);
+  return fields && fields.findIndex(f => f == 'session_id') >= 0;
 }
 
 export const setQueryUpdater = (state, { payload: query }) => {
@@ -615,15 +625,13 @@ export const reloadSessionUpdater = (state) => {
 };
 
 export const testQueryUpdater = (state, { payload: { nextAction, payload } }) => {
-  const query = gql`${state.query}`;
-  const documentNode = query.definitions?.[0];
-  const fieldNode = documentNode.selectionSet.selections?.[0];
+  const query = gql(state.query);
   const startTime = new Date();
   const queryTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     res => {
       const endTime = new Date();
       const queryTestTime = endTime - startTime;
-      return testQuerySuccess({ data: res.data[fieldNode.name.value], nextAction, payload, queryTestTime })
+      return testQuerySuccess({ data: res.data[extractOperation(query)], nextAction, payload, queryTestTime })
     },
     err => testQueryError(err)
   );
@@ -717,25 +725,26 @@ export const addDatasetUpdater = (state, { payload: { selectedSessions, updating
     };
   }
 
-  if (updating && oldDataset.query == state.query) {
-    map.datasets.info.sessions = oldDataset.sessions;
-    map.datasets.data = {
-      fields: oldDataset.fields,
-      rows: oldDataset.allData
+  const { query, queryTestResult, isCheckedSession } = state;
+
+  if (updating && oldDataset.query == query) {
+    const sessions = isCheckedSession ? (selectedSessions ? selectedSessions : oldDataset.sessions) : [];
+
+    if (queryTestResult) {
+      map.datasets.data = makeDataset(query, queryTestResult, selectedSessions);
     }
+    else {
+      const fields = oldDataset.fields;
+      const sessionIdx = oldDataset.fields.findIndex(f => f.name == 'session_id');
+      const rows = filterWithList(oldDataset.allData, sessionIdx, sessions);
+      map.datasets.data = { fields, rows };
+    }
+
+    map.datasets.info.sessions = sessions;
   }
   else {
-    const gquery = gql`${state.query}`;
-    const documentNode = gquery.definitions?.[0];
-    const fieldNode = documentNode.selectionSet.selections?.[0];
-    const order = fieldNode.selectionSet?.selections.map(f => f.name.value);
-    const data = state.isCheckedSession ? state.queryTestResult.filter(o => selectedSessions.findIndex(id => id == o.session_id) >= 0) : state.queryTestResult;
-    const fields = getFieldsFromData(data, order);
-    const rows = new Array;
-
-    data.forEach(item => rows.push(order.map(field => item[field])));
     map.datasets.info.sessions = selectedSessions;
-    map.datasets.data = { fields, rows };
+    map.datasets.data = makeDataset(query, queryTestResult, selectedSessions);
   }
 
   const tasks = [
@@ -771,13 +780,42 @@ export const registerDatasetSuccessUpdater = (state, { payload: info }) => {
   };
 };
 
-export const registerDatasetErrorUpdater = (state, { payload: info }) => {
+export const registerDatasetErrorUpdater = (state, { payload: error }) => {
   return {
     ...state,
+    error,
     isRegistering: false
   };
 };
 
+export const unregisterDatasetUpdater = (state, { payload: id }) => {
+  const mutation = GQL_DELETE_DATASET();
+  const deleteDatasetTask = GRAPHQL_MUTATION_TASK({
+    variables: { id },
+    mutation
+  }).bimap(
+    () => unregisterDatasetSuccess(),
+    err => unregisterDatasetError(err)
+  );
+  const newState = { ...state, isUnregistering: true };
+
+  return withTask(newState, deleteDatasetTask);
+};
+
+export const unregisterDatasetSuccessUpdater = (state) => {
+  return {
+    ...state,
+    isUnregistering: false
+  };
+};
+
+export const unregisterDatasetErrorUpdater = (state, { payload: error }) => {
+  return {
+    ...state,
+    isUnregistering: false,
+    error
+  };
+};
 
 export const updateDatasetUpdater = (state, { payload: info }) => {
   const mutation = GQL_UPDATE_DATASET();
@@ -825,36 +863,44 @@ export const loadDatasetSuccessUpdater = (state, { payload: datasets }) => {
   let loadedCount = 0;
 
   const tasks = datasets.map(dataset => {
-    const query = gql`${dataset.query}`;
-    const queryTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
-      result => {
-        loadedCount ++;
+    const { sessions, query: qstr, enabled } = dataset;
 
-        const documentNode = query.definitions?.[0];
-        const fieldNode = documentNode.selectionSet.selections?.[0];
-        const order = fieldNode.selectionSet?.selections.map(f => f.name.value);
-        const data = result.data[fieldNode.name.value];
-        const filteredData = dataset.sessions.length ? data.filter(o => dataset.sessions.findIndex(id => id == o.session_id) >= 0) : data;
-        const fields = getFieldsFromData(filteredData, order);
-        const rows = new Array;
+    if (enabled) {
+      const query = gql(restrictSession(qstr, sessions));
+      const queryTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
+        result => {
+          loadedCount++;
 
-        data.forEach(item => rows.push(order.map(field => item[field])));
+          const data = result.data[extractOperation(query)];
+          const map = {
+            datasets: {
+              info: { ...dataset, loadingCompleted: loadedCount == datasets.length },
+              data: makeDataset(query, data, sessions)
+            },
+            options: {
+              autoCreateLayers: false
+            }
+          };
 
-        const map = {
-          datasets: {
-            info: {...dataset, loadingCompleted: loadedCount == datasets.length },
-            data: { fields, rows }
-          },
-          options: {
-            autoCreateLayers: false
-          }
-        };
-        
-        return addDataToMap(map);
-      },
-      error => loadDatasetError(error)
-    );
-    return queryTask;
+          return addDataToMap(map);
+        },
+        error => loadDatasetError(error)
+      );
+      return queryTask;
+    }
+    else {
+      loadedCount++;
+
+      return createActionTask(addDataToMap, {
+        datasets: {
+          info: { ...dataset, loadingCompleted: loadedCount == datasets.length },
+          data: { fields: [], rows: [] }
+        },
+        options: {
+          autoCreateLayers: false
+        }
+      });
+    }
   });
 
   const newState = { ...state, isLoadingDataset: false };
@@ -881,4 +927,8 @@ export const initDatasetUpdater = (state, { payload: oldDataset }) => {
     isCheckedSession: sessions.length > 0,
     isAvailableSessionId: checkSessionId(query)
   };
+};
+
+export const reloadDatasetUpdater = (state, { payload: dataset }) => {
+
 };

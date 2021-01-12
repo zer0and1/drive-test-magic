@@ -876,7 +876,12 @@ export function removeMarker() {
   };
 }
 
-
+export function enableDataset(datasetKey) {
+  return {
+    type: ActionTypes.ENABLE_DATASET,
+    datasetKey
+  };
+}
 /**
  * This declaration is needed to group actions in docs
  */

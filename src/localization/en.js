@@ -182,6 +182,7 @@ export default {
   datasetTitle: {
     showDataTable: 'Show data table',
     removeDataset: 'Remove dataset',
+    reloadDataset: 'Remove dataset',
     setupDataset: 'Setup Dataset',
     hideDataset: 'Hide Dataset',
     showDataset: 'Show Dataset'
@@ -240,6 +241,7 @@ export default {
     title: {
       deleteDataset: 'Delete Dataset',
       addDataToMap: 'Add Data To Map',
+      updateDataset: 'Setup Dataset',
       exportImage: 'Export Image',
       exportData: 'Export Data',
       exportMap: 'Export Map',

@@ -50,6 +50,9 @@ export const ActionTypes = {
   REGISTER_DATASET: `${ACTION_PREFIX}REGISTER_DATASET`,
   REGISTER_DATASET_SUCCESS: `${ACTION_PREFIX}REGISTER_DATASET_SUCCESS`,
   REGISTER_DATASET_ERROR: `${ACTION_PREFIX}REGISTER_DATASET_ERROR`,
+  UNREGISTER_DATASET: `${ACTION_PREFIX}UNREGISTER_DATASET`,
+  UNREGISTER_DATASET_SUCCESS: `${ACTION_PREFIX}UNREGISTER_DATASET_SUCCESS`,
+  UNREGISTER_DATASET_ERROR: `${ACTION_PREFIX}UNREGISTER_DATASET_ERROR`,
   UPDATE_DATASET: `${ACTION_PREFIX}UPDATE_DATASET`,
   UPDATE_DATASET_SUCCESS: `${ACTION_PREFIX}UPDATE_DATASET_SUCCESS`,
   UPDATE_DATASET_ERROR: `${ACTION_PREFIX}UPDATE_DATASET_ERROR`,
@@ -159,6 +162,15 @@ export const registerDatasetSuccess = createAction(ActionTypes.REGISTER_DATASET_
 
 /** @type {typeof import('./provider-actions').registerDatasetError} */
 export const registerDatasetError = createAction(ActionTypes.REGISTER_DATASET_ERROR, payload => payload);
+
+/** @type {typeof import('./provider-actions').registerDataset} */
+export const unregisterDataset = createAction(ActionTypes.UNREGISTER_DATASET, payload => payload);
+
+/** @type {typeof import('./provider-actions').unregisterDatasetSuccess} */
+export const unregisterDatasetSuccess = createAction(ActionTypes.UNREGISTER_DATASET_SUCCESS, payload => payload);
+
+/** @type {typeof import('./provider-actions').unregisterDatasetError} */
+export const unregisterDatasetError = createAction(ActionTypes.UNREGISTER_DATASET_ERROR, payload => payload);
 
 /** @type {typeof import('./provider-actions').updateDataset} */
 export const updateDataset = createAction(ActionTypes.UPDATE_DATASET, payload => payload);

@@ -13,8 +13,6 @@ import {
 } from 'components/common/styled-components';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
 import { Trash } from 'components/common/icons';
-import KeplerGlSchema from 'schemas';
-import {addDataToMap} from 'actions/actions';
 
 const PanelWrapper = styled.div`
   font-size: 12px;
@@ -158,7 +156,6 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
     removeProfile,
     updateProfileLabel,
     map,
-    dispatch,
     actionIcons = defaultActionIcons
   }) => {
     const { profiles, isLoading, isAdding, isUpdating, selectedId } = mapProfile;
@@ -193,13 +190,7 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
                   className="profile__apply-profile"
                   id={profile.id}
                   tooltip={'tooltip.applyProfile'}
-                  onClick={() => {
-                    const { config } = profiles.find(p => p.id == profile.id);
-                    const { datasets } = KeplerGlSchema.save(map);
-                    const mapToLoad = KeplerGlSchema.load(datasets, config);
-                    dispatch(addDataToMap({ ...mapToLoad, options: { centerMap: false } }));
-                    applyProfile(profile.id);
-                  }}
+                  onClick={() => applyProfile(profile.id, map)}
                   IconComponent={profile.isApplying ? actionIcons.spinner : actionIcons.apply}
                 />
               </HeaderActionSection>
@@ -234,9 +225,8 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
   };
 
   const mapStateToProps = state => state.main.keplerGl;
-  const dispatchToProps = dispatch => ({ dispatch });
 
-  return connect(mapStateToProps, dispatchToProps)(MapProfileSelector)
+  return connect(mapStateToProps)(MapProfileSelector)
 }
 
 export default MapProfileSelectorFactory;

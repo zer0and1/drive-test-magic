@@ -1,16 +1,16 @@
 import { disableStackCapturing, withTask } from 'react-palm/tasks';
-import { GRAPHQL_QUERY_TASK } from 'tasks/tasks';
+import { GRAPHQL_QUERY_TASK, ACTION_TASK } from 'tasks/tasks';
 
-import { 
-  GQL_GET_PROFILES, 
-  GQL_INSERT_PROFILE, 
-  GQL_UPDATE_PROFILE, 
-  GQL_REMOVE_PROFILE, 
-  GQL_UPDATE_PROFILE_LABEL 
+import {
+  GQL_GET_PROFILES,
+  GQL_INSERT_PROFILE,
+  GQL_UPDATE_PROFILE,
+  GQL_REMOVE_PROFILE,
+  GQL_UPDATE_PROFILE_LABEL
 } from 'graphqls';
 
-import { 
-  loadProfileSuccess, 
+import {
+  loadProfileSuccess,
   loadProfileError,
   addProfileSuccess,
   addProfileError,
@@ -24,6 +24,7 @@ import {
 
 import { GRAPHQL_MUTATION_TASK } from '../tasks/tasks';
 import KeplerGlSchema from 'schemas';
+import { addDataToMap } from 'actions/actions';
 
 // react-palm
 // disable capture exception for react-palm call to withTask
@@ -136,11 +137,17 @@ export const updateProfileErrorUpdater = (state, { error }) => {
   }
 };
 
-export const applyProfileUpdater = (state, { id }) => {
-  return {
+export const applyProfileUpdater = (state, { id, map }) => {
+  const { config } = state.profiles.find(p => p.id == id);
+  const { datasets } = KeplerGlSchema.save(map);
+  const mapToLoad = KeplerGlSchema.load(datasets, config);
+  const task = ACTION_TASK().map(_ => addDataToMap({ ...mapToLoad, options: { centerMap: false } }));
+  const newState = {
     ...state,
     selectedId: id
   };
+
+  return withTask(newState, task); 
 };
 
 
@@ -153,12 +160,12 @@ export const removeProfileUpdater = (state, { id }) => {
     res => removeProfileSuccess(res.data.update_signal_db_profiles_by_pk),
     err => removeProfileError(err)
   );
-  const newState = { ...state, profiles: state.profiles.map(profile => profile.id == id ? {...profile, isRemoving: true }: profile) };
+  const newState = { ...state, profiles: state.profiles.map(profile => profile.id == id ? { ...profile, isRemoving: true } : profile) };
 
   return withTask(newState, removeProfileTask);
 };
 
-export const removeProfileSuccessUpdater = (state, { profile: {id} }) => {
+export const removeProfileSuccessUpdater = (state, { profile: { id } }) => {
   return {
     ...state,
     profiles: state.profiles.filter(profile => profile.id !== id),
@@ -169,7 +176,7 @@ export const removeProfileSuccessUpdater = (state, { profile: {id} }) => {
 export const removeProfileErrorUpdater = (state, { error }) => {
   return {
     ...state,
-    profiles: state.profiles.map(p => ({...p, isRemoving: false})),
+    profiles: state.profiles.map(p => ({ ...p, isRemoving: false })),
     error
   }
 };
@@ -188,10 +195,10 @@ export const updateProfileLabelUpdater = (state, { id, label }) => {
   return withTask(newState, updateProfileLabelTask);
 };
 
-export const updateProfileLabelSuccessUpdater = (state, { profile: {id, label} }) => {
+export const updateProfileLabelSuccessUpdater = (state, { profile: { id, label } }) => {
   return {
     ...state,
-    profiles: state.profiles.map(p => p.id == id ? {...p, label} : p),
+    profiles: state.profiles.map(p => p.id == id ? { ...p, label } : p),
     isLabelUpdating: false
   }
 };

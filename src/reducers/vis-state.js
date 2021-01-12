@@ -137,7 +137,10 @@ const actionHandler = {
 
   [ActionTypes.MOVE_UP_FILTER]: visStateUpdaters.moveUpFilterUpdater,
 
-  [ActionTypes.MOVE_DOWN_FILTER]: visStateUpdaters.moveDownFilterUpdater
+  [ActionTypes.MOVE_DOWN_FILTER]: visStateUpdaters.moveDownFilterUpdater,
+
+  [ActionTypes.ENABLE_DATASET]: visStateUpdaters.enableDatasetUpdater
+
 };
 
 // construct vis-state reducer

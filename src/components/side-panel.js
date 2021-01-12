@@ -248,7 +248,7 @@ export default function SidePanelFactory(
         removeDataset: this._removeDataset,
         reloadDataset: providerActions.reloadDataset,
         setupDataset: this._setupDataset,
-        enableDataset: providerActions.enableDataset,
+        enableDataset: visStateActions.enableDataset,
         loadDataset: providerActions.loadDataset,
         openModal: uiStateActions.toggleModal
       };

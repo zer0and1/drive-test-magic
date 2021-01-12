@@ -74,6 +74,8 @@ import { pick_, merge_ } from './composer-helpers';
 import { processFileContent } from 'actions/vis-state-actions';
 
 import KeplerGLSchema, { CURRENT_VERSION, visStateSchema } from 'schemas';
+import { ACTION_TASK } from 'tasks/tasks';
+import { updateDataset } from 'actions/provider-actions';
 
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
@@ -2034,3 +2036,20 @@ export function removeMarkerUpdater(state) {
     marked: null
   }
 }
+
+export function enableDatasetUpdater(state, { datasetKey }) {
+  const dataset = state.datasets[datasetKey];
+  const updateDatasetTask = ACTION_TASK().map(_ => updateDataset({...dataset, enabled: !dataset.enabled}));
+  const newState = {
+    ...state, 
+    datasets: {
+      ...state.datasets,
+      [datasetKey]: {
+        ...dataset,
+        enabled: !dataset.enabled
+      }
+    }
+  };
+
+  return withTask(newState, updateDatasetTask);
+};

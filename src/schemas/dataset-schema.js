@@ -54,6 +54,10 @@ const propertiesV0 = {
   label: null,
   color: null,
   allData: null,
+  sessions: null,
+  type: null,
+  query: null,
+  enabled: null,
   fields: new FieldSchema({
     key: 'fields',
     version: VERSIONS.v0,
@@ -110,7 +114,7 @@ class DatasetSchema extends Schema {
     // get format of all fields
     return {
       data: {fields: updatedFields, rows: dataset.allData},
-      info: pick(dataset, ['id', 'label', 'color'])
+      info: pick(dataset, ['id', 'label', 'color', 'query', 'sessions', 'enabled', 'type'])
     };
   }
 }

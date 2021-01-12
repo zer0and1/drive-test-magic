@@ -61,7 +61,8 @@ const StyledDatasetTitle = styled.div`
 const DataTagAction = styled.div`
   margin-left: 12px;
   height: 16px;
-  opacity: 0;
+  float: right;
+  opacity: ${props => props.alwaysVisible ? 1 : 0};
 `;
 
 const ShowDataTable = ({ id, showDatasetTable = nop }) => (
@@ -125,9 +126,9 @@ const ReloadDataset = ({ datasetKey, reloadDataset = nop }) => (
 
 const SetupDataset = ({ datasetKey, setupDataset = nop }) => (
   <DataTagAction
-    className="dataset-action reload-dataset"
+    className="dataset-action setup-dataset"
     data-tip
-    data-for={`reload-${datasetKey}`}
+    data-for={`setup-${datasetKey}`}
   >
     <Gear
       height="16px"
@@ -136,7 +137,7 @@ const SetupDataset = ({ datasetKey, setupDataset = nop }) => (
         setupDataset(datasetKey);
       }}
     />
-    <Tooltip id={`reload-${datasetKey}`} effect="solid">
+    <Tooltip id={`setup-${datasetKey}`} effect="solid">
       <span>
         <FormattedMessage id={'datasetTitle.setupDataset'} />
       </span>
@@ -146,20 +147,31 @@ const SetupDataset = ({ datasetKey, setupDataset = nop }) => (
 
 const EnableDataset = ({ datasetKey, enabled, enableDataset = nop }) => (
   <DataTagAction
-    className="dataset-action reload-dataset"
+    className="dataset-action enable-dataset"
     data-tip
-    data-for={`reload-${datasetKey}`}
+    data-for={`enable-${datasetKey}`}
   >
-    <EyeSeen
-      height="16px"
-      onClick={e => {
-        e.stopPropagation();
-        enableDataset(datasetKey);
-      }}
-    />
-    <Tooltip id={`reload-${datasetKey}`} effect="solid">
+    {enabled ? (
+      <EyeSeen
+        height="16px"
+        onClick={e => {
+          e.stopPropagation();
+          enableDataset(datasetKey);
+        }}
+      />
+    ) : (
+      <EyeUnseen
+        height="16px"
+        onClick={e => {
+          e.stopPropagation();
+          enableDataset(datasetKey);
+        }}
+      />
+    )}
+
+    <Tooltip id={`enable-${datasetKey}`} effect="solid">
       <span>
-        <FormattedMessage id={'datasetTitle.enableDataset'} />
+        <FormattedMessage id={enabled ? 'datasetTitle.hideDataset' : 'datasetTitle.showDataset'} />
       </span>
     </Tooltip>
   </DataTagAction>
@@ -183,7 +195,7 @@ export default function DatasetTitleFactory(DatasetTag) {
         $('.side-panel__content').LoadingOverlay('hide', true);
       }
     }
-    
+
     render() {
       const {
         showDatasetTable,
