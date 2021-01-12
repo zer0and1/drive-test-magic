@@ -182,7 +182,7 @@ export default {
   datasetTitle: {
     showDataTable: 'Show data table',
     removeDataset: 'Remove dataset',
-    reloadDataset: 'Remove dataset',
+    reloadDataset: 'Reload dataset',
     setupDataset: 'Setup Dataset',
     hideDataset: 'Hide Dataset',
     showDataset: 'Show Dataset'

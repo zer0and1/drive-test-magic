@@ -874,14 +874,22 @@ export function removeMarker() {
   return {
     type: ActionTypes.REMOVE_MARKER
   };
-}
+};
 
 export function enableDataset(datasetKey) {
   return {
     type: ActionTypes.ENABLE_DATASET,
     datasetKey
   };
-}
+};
+
+export function startReloadingDataset(datasetKey) {
+  return {
+    type: ActionTypes.START_RELOADING_DATASET,
+    datasetKey
+  }
+};
+
 /**
  * This declaration is needed to group actions in docs
  */

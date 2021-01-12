@@ -36,7 +36,7 @@ function SourceDataCatalogFactory(DatasetTitle, DatasetInfo) {
     datasets,
     showDatasetTable,
     removeDataset,
-    reloadDataset,
+    startReloadingDataset,
     setupDataset,
     enableDataset,
     onTitleClick,
@@ -49,7 +49,7 @@ function SourceDataCatalogFactory(DatasetTitle, DatasetInfo) {
             showDatasetTable={showDatasetTable}
             showDeleteDataset={showDeleteDataset}
             removeDataset={removeDataset}
-            reloadDataset={reloadDataset}
+            startReloadingDataset={startReloadingDataset}
             setupDataset={setupDataset}
             enableDataset={enableDataset}
             dataset={dataset}

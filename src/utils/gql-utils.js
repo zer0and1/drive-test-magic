@@ -74,8 +74,5 @@ export function makeDataset(query, data, sessions) {
 
   filteredData.forEach(item => rows.push(orders.map(field => item[field])));
 
-  return {
-    fields,
-    rows
-  };
+  return { fields, rows };
 };

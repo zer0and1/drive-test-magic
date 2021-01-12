@@ -103,19 +103,24 @@ const RemoveDataset = ({ datasetKey, removeDataset = nop }) => (
   </DataTagAction>
 );
 
-const ReloadDataset = ({ datasetKey, reloadDataset = nop }) => (
+const ReloadDataset = ({ datasetKey, reloading, startReloadingDataset = nop }) => (
   <DataTagAction
     className="dataset-action reload-dataset"
     data-tip
     data-for={`reload-${datasetKey}`}
   >
-    <Reload
-      height="16px"
-      onClick={e => {
-        e.stopPropagation();
-        reloadDataset(datasetKey);
-      }}
-    />
+    {reloading ? (
+      <Spinner height="16px" />
+    ) : (
+      <Reload
+        height="16px"
+        onClick={e => {
+          e.stopPropagation();
+          startReloadingDataset(datasetKey);
+        }}
+      />
+    )}
+
     <Tooltip id={`reload-${datasetKey}`} effect="solid">
       <span>
         <FormattedMessage id={'datasetTitle.reloadDataset'} />
@@ -160,14 +165,14 @@ const EnableDataset = ({ datasetKey, enabled, enableDataset = nop }) => (
         }}
       />
     ) : (
-      <EyeUnseen
-        height="16px"
-        onClick={e => {
-          e.stopPropagation();
-          enableDataset(datasetKey);
-        }}
-      />
-    )}
+        <EyeUnseen
+          height="16px"
+          onClick={e => {
+            e.stopPropagation();
+            enableDataset(datasetKey);
+          }}
+        />
+      )}
 
     <Tooltip id={`enable-${datasetKey}`} effect="solid">
       <span>
@@ -202,7 +207,7 @@ export default function DatasetTitleFactory(DatasetTag) {
         showDeleteDataset,
         onTitleClick,
         removeDataset,
-        reloadDataset,
+        startReloadingDataset,
         setupDataset,
         enableDataset,
         dataset
@@ -226,7 +231,7 @@ export default function DatasetTitleFactory(DatasetTag) {
             <RemoveDataset datasetKey={dataset.id} removeDataset={removeDataset} />
           ) : null}
           <SetupDataset datasetKey={dataset.id} setupDataset={setupDataset} />
-          <ReloadDataset datasetKey={dataset.id} reloadDataset={reloadDataset} />
+          <ReloadDataset datasetKey={dataset.id} reloading={dataset.reloading} startReloadingDataset={startReloadingDataset} />
           <EnableDataset datasetKey={dataset.id} enableDataset={enableDataset} enabled={dataset.enabled} />
         </StyledDatasetTitle>
       );

@@ -246,7 +246,7 @@ export default function SidePanelFactory(
         showAddDataModal: this._showAddDataModal,
         removeLayer: visStateActions.removeLayer,
         removeDataset: this._removeDataset,
-        reloadDataset: providerActions.reloadDataset,
+        startReloadingDataset: visStateActions.startReloadingDataset,
         setupDataset: this._setupDataset,
         enableDataset: visStateActions.enableDataset,
         loadDataset: providerActions.loadDataset,

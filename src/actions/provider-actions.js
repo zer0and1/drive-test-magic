@@ -60,6 +60,7 @@ export const ActionTypes = {
   LOAD_DATASET_SUCCESS: `${ACTION_PREFIX}LOAD_DATASET_SUCCESS`,
   LOAD_DATASET_ERROR: `${ACTION_PREFIX}LOAD_DATASET_ERROR`,
   INIT_DATASET: `${ACTION_PREFIX}INIT_DATASET`,
+  RELOAD_DATASET: `${ACTION_PREFIX}RELOAD_DATASET`,
 };
 
 /**
@@ -192,5 +193,8 @@ export const loadDatasetError = createAction(ActionTypes.LOAD_DATASET_ERROR, pay
 
 /** @type {typeof import('./provider-actions').initDataset} */
 export const initDataset = createAction(ActionTypes.INIT_DATASET, payload => payload);
+
+/** @type {typeof import('./provider-actions').reloadDataset} */
+export const reloadDataset = createAction(ActionTypes.RELOAD_DATASET, payload => payload);
 
 

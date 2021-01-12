@@ -158,7 +158,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       openModal: PropTypes.func.isRequired,
       removeLayer: PropTypes.func.isRequired,
       removeDataset: PropTypes.func.isRequired,
-      reloadDataset: PropTypes.func.isRequired,
+      startReloadingDataset: PropTypes.func.isRequired,
       enableDataset: PropTypes.func.isRequired,
       setupDataset: PropTypes.func.isRequired,
       loadDataset: PropTypes.func.isRequired,
@@ -175,49 +175,6 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
         $('.side-panel__content').LoadingOverlay('show');
         this.props.loadDataset();
       }
-    }
-
-    loadData() {
-      if (this.props.datasets.signal_sample_data) {
-        return;
-      }
-
-      $('#kepler-container').LoadingOverlay('show');
-
-      apolloClient.query({ query: GQL_GET_SIGNAL_SAMPLES })
-        .then(result => {
-          const data = result.data.signal_db_signal_samples_view;
-          const order = ['aux', 'bs_latitude', 'bs_longitude', 'cell_id', 'cell_name', 'connection_state',
-            'connection_type', 'cqi', 'date', 'dl_chan_bandwidth', 'duplex_mode', 'enodeb_id', 'freq_arfcn',
-            'freq_band', 'freq_mhz_dl', 'freq_mhz_ul', 'latitude', 'longitude', 'mcc_mnc', 'minion_dl_rate',
-            'minion_id', 'minion_module_firmware', 'minion_module_type', 'minion_state', 'minion_target_ping_ms',
-            'minion_ul_rate', 'pcid', 'rsrp_rscp', 'rsrq', 'rssi', 'session_id', 'sinr_ecio', 'ul_chan_bandwidth'
-          ];
-          const fields = getFieldsFromData(data, order);
-          const rows = new Array;
-
-          data.forEach(item => {
-            rows.push(order.map(field => item[field]));
-          });
-
-          this.props.dispatch(
-            addDataToMap({
-              datasets: {
-                info: {
-                  label: 'Signal Samples',
-                  id: 'signal_sample_data'
-                },
-                data: { fields, rows }
-              },
-              options: {
-                centerMap: true,
-                readOnly: false
-              }
-            })
-          );
-
-          $('#kepler-container').LoadingOverlay('hide', true);
-        })
     }
 
     layerClassSelector = props => props.layerClasses;
@@ -282,7 +239,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
             datasets={datasets}
             showDatasetTable={this.props.showDatasetTable}
             removeDataset={this.props.removeDataset}
-            reloadDataset={this.props.reloadDataset}
+            startReloadingDataset={this.props.startReloadingDataset}
             setupDataset={this.props.setupDataset}
             enableDataset={this.props.enableDataset}
             showDeleteDataset

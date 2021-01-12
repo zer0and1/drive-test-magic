@@ -75,7 +75,7 @@ import { processFileContent } from 'actions/vis-state-actions';
 
 import KeplerGLSchema, { CURRENT_VERSION, visStateSchema } from 'schemas';
 import { ACTION_TASK } from 'tasks/tasks';
-import { updateDataset } from 'actions/provider-actions';
+import { updateDataset, reloadDataset } from 'actions/provider-actions';
 
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
@@ -2039,17 +2039,40 @@ export function removeMarkerUpdater(state) {
 
 export function enableDatasetUpdater(state, { datasetKey }) {
   const dataset = state.datasets[datasetKey];
-  const updateDatasetTask = ACTION_TASK().map(_ => updateDataset({...dataset, enabled: !dataset.enabled}));
+  dataset.enabled = !dataset.enabled;
+
+  const tasks = [
+    ACTION_TASK().map(_ => updateDataset(dataset)),
+    dataset.enabled && ACTION_TASK().map(_ => reloadDataset(dataset)),
+  ].filter(d => d);
+
   const newState = {
     ...state, 
     datasets: {
       ...state.datasets,
       [datasetKey]: {
         ...dataset,
-        enabled: !dataset.enabled
+        reloading: dataset.enabled
       }
     }
   };
 
-  return withTask(newState, updateDatasetTask);
+  return withTask(newState, tasks);
+};
+
+export function startReloadingDatasetUpdater(state, { datasetKey }) {
+  const dataset = state.datasets[datasetKey];
+  const task = ACTION_TASK().map(_ => reloadDataset(dataset));
+  const newState = {
+    ...state, 
+    datasets: {
+      ...state.datasets,
+      [datasetKey]: {
+        ...dataset,
+        reloading: dataset.enabled
+      }
+    }
+  };
+
+  return withTask(newState, task);
 };

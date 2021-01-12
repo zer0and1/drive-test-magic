@@ -77,7 +77,6 @@ import {
 } from '../actions/provider-actions';
 import _ from 'lodash';
 import moment from 'moment';
-import { getFieldsFromData } from 'processors';
 import {
   extractFields,
   extractOperation,
@@ -705,6 +704,7 @@ export const addDatasetUpdater = (state, { payload: { selectedSessions, updating
           type: oldDataset.type,
           color: oldDataset.color,
           enabled: oldDataset.enabled,
+          timestamp: oldDataset.timestamp
         }
       }
     };
@@ -720,6 +720,7 @@ export const addDatasetUpdater = (state, { payload: { selectedSessions, updating
           query: state.query,
           sessions: selectedSessions,
           enabled: true,
+          timestamp: moment().valueOf()
         }
       }
     };
@@ -732,6 +733,7 @@ export const addDatasetUpdater = (state, { payload: { selectedSessions, updating
 
     if (queryTestResult) {
       map.datasets.data = makeDataset(query, queryTestResult, selectedSessions);
+      map.datasets.info.timestamp = moment().valueOf();
     }
     else {
       const fields = oldDataset.fields;
@@ -870,11 +872,11 @@ export const loadDatasetSuccessUpdater = (state, { payload: datasets }) => {
       const queryTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
         result => {
           loadedCount++;
-
+          const timestamp = moment().valueOf();
           const data = result.data[extractOperation(query)];
           const map = {
             datasets: {
-              info: { ...dataset, loadingCompleted: loadedCount == datasets.length },
+              info: { ...dataset, loadingCompleted: loadedCount == datasets.length, timestamp },
               data: makeDataset(query, data, sessions)
             },
             options: {
@@ -930,5 +932,28 @@ export const initDatasetUpdater = (state, { payload: oldDataset }) => {
 };
 
 export const reloadDatasetUpdater = (state, { payload: dataset }) => {
+  const { query: qstr, sessions } = dataset;
+  const query = gql(restrictSession(qstr, sessions));
+  const task = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only'}).map(
+    result => {
+      const data = makeDataset(query, result.data[extractOperation(query)], sessions);
+      return addDataToMap({
+        datasets: {
+          info: {
+            ...dataset,
+            reloading: false,
+            timestamp: moment().valueOf()
+          },
+          data
+        },
+        options: {
+          keepExistingConfig: true,
+          centerMap: false,
+          autoCreateLayers: false
+        }
+      });
+    }
+  );
 
+  return withTask(state, task);
 };
