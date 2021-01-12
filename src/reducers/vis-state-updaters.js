@@ -670,6 +670,9 @@ export function setFilterUpdater(state, action) {
     ? [datasetIds[valueIndex]]
     : datasetIds;
 
+  //////////////////////////// log test ----------- need to add applyFiltersToDatasets function to moveup/down function
+  console.log(datasetIdsToFilter, newState)
+
   // filter data
   const filteredDatasets = applyFiltersToDatasets(
     datasetIdsToFilter,
