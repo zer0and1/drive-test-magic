@@ -71,11 +71,12 @@ import { Layer, LayerClasses } from 'layers';
 import { DEFAULT_TEXT_LABEL } from 'layers/layer-factory';
 import { EDITOR_MODES, SORT_ORDER } from 'constants/default-settings';
 import { pick_, merge_ } from './composer-helpers';
-import { processFileContent } from 'actions/vis-state-actions';
+import { processFileContent, removeLayer } from 'actions/vis-state-actions';
 
 import KeplerGLSchema, { CURRENT_VERSION, visStateSchema } from 'schemas';
 import { ACTION_TASK } from 'tasks/tasks';
 import { updateDataset, reloadDataset } from 'actions/provider-actions';
+import { applyProfile } from 'actions/map-profile-actions';
 
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
@@ -2040,19 +2041,40 @@ export function removeMarkerUpdater(state) {
 export function enableDatasetUpdater(state, { datasetKey }) {
   const dataset = state.datasets[datasetKey];
   dataset.enabled = !dataset.enabled;
+  const { enabled, id, allData } = dataset;
+  const shouldReloadDataset = enabled && allData.length == 0;
+  const shouldApplyProfile = enabled;
+  const shouldRemoveLayers = enabled == false;
 
-  const tasks = [
+  let tasks = [
     ACTION_TASK().map(_ => updateDataset(dataset)),
-    dataset.enabled && ACTION_TASK().map(_ => reloadDataset(dataset)),
+    shouldReloadDataset && ACTION_TASK().map(_ => reloadDataset(dataset)),
+    shouldApplyProfile && ACTION_TASK().map(_ => applyProfile(localStorage.getItem('default_profile_id'), { visState: state }, { centerMap: false }))
   ].filter(d => d);
 
+  if (shouldRemoveLayers) {
+    const layersToRemove = state.layers.filter(layer => layer.config.dataId == id);
+    const idxsToRemove = [];
+    layersToRemove.reduce((remainedLayers, layer) => {
+      const idxToRemove = remainedLayers.findIndex(l => l.id == layer.id);
+      idxsToRemove.push(idxToRemove);
+      return remainedLayers.filter(l => l.id != layer.id);
+    }, state.layers);
+
+    tasks = [
+      ...tasks,
+      ...idxsToRemove.map(idx => ACTION_TASK().map(_ => removeLayer(idx)))
+    ];
+  };
+
+
   const newState = {
-    ...state, 
+    ...state,
     datasets: {
       ...state.datasets,
       [datasetKey]: {
         ...dataset,
-        reloading: dataset.enabled
+        reloading: enabled
       }
     }
   };
@@ -2064,7 +2086,7 @@ export function startReloadingDatasetUpdater(state, { datasetKey }) {
   const dataset = state.datasets[datasetKey];
   const task = ACTION_TASK().map(_ => reloadDataset(dataset));
   const newState = {
-    ...state, 
+    ...state,
     datasets: {
       ...state.datasets,
       [datasetKey]: {

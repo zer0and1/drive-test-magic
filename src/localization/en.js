@@ -188,7 +188,8 @@ export default {
     showDataset: 'Show Dataset'
   },
   datasetInfo: {
-    rowCount: '{rowCount} rows'
+    rowCount: '{rowCount} rows',
+    hidden: 'Hidden'
   },
   tooltip: {
     hideLayer: 'hide layer',

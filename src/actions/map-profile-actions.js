@@ -82,11 +82,12 @@ export function updateProfileError(error) {
   }
 };
 
-export function applyProfile(id, map) {
+export function applyProfile(id, map, options) {
   return {
     type: ActionTypes.APPLY_PROFILE,
     id,
-    map
+    map,
+    options
   }
 };
 

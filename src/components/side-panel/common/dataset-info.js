@@ -18,10 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React from 'react';
+import React, { Component } from 'react';
 import styled from 'styled-components';
-import {format} from 'd3-format';
-import {FormattedMessage} from 'localization';
+import { format } from 'd3-format';
+import { FormattedMessage } from 'localization';
+import moment from 'moment';
 
 const numFormat = format(',');
 
@@ -32,14 +33,60 @@ const StyledDataRowCount = styled.div`
 `;
 
 export default function DatasetInfoFactory() {
-  const DatasetInfo = ({dataset}) => (
-    <StyledDataRowCount className="source-data-rows">
-      <FormattedMessage
-        id={'datasetInfo.rowCount'}
-        values={{rowCount: numFormat(dataset.allData.length)}}
-      />
-    </StyledDataRowCount>
-  );
+  class DatasetInfo extends Component {
+    state = {
+      timeAgoLabel: ''
+    };
+    intervalId = null;
+
+    componentDidMount() {
+      this.intervalId = setInterval(this.updateTimeAgo.bind(this), 1000);
+    }
+
+    componentWillUnmount() {
+      this.intervalId && clearInterval(this.intervalId);
+    }
+
+    updateTimeAgo() {
+      const { dataset: { timestamp } } = this.props;
+      let secs = moment().diff(timestamp, 'seconds');
+      const mins = Math.floor(secs / 60);
+      secs = secs % 60;
+
+      if (mins == 0 && secs == 0) {
+        this.setState({ timeAgoLabel: '=> just now' });
+      }
+      else {
+        this.setState({ timeAgoLabel: `=> ${mins ? mins + 'm ' : ''} ${secs ? secs + 's' : ''} ago` });
+      }
+    }
+
+    render() {
+      const { dataset } = this.props;
+      const { enabled } = dataset;
+      const { timeAgoLabel } = this.state;
+
+      return (
+        <StyledDataRowCount className="source-data-rows">
+          {enabled ? (
+            <>
+              <span>
+                <FormattedMessage
+                  id={'datasetInfo.rowCount'}
+                  values={{ rowCount: numFormat(dataset.allData.length) }}
+                />
+              </span>
+              <span style={{ marginLeft: '10px' }}>{timeAgoLabel}</span>
+            </>
+          ) : (
+              <FormattedMessage
+                id={'datasetInfo.hidden'}
+              />
+            )}
+        </StyledDataRowCount>
+      )
+    }
+  }
 
   return DatasetInfo;
 }

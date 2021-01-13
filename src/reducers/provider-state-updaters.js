@@ -863,6 +863,11 @@ export const loadDatasetUpdater = (state) => {
 
 export const loadDatasetSuccessUpdater = (state, { payload: datasets }) => {
   let loadedCount = 0;
+  const options = {
+    autoCreateLayers: false,
+    centerMap: false,
+    keepExistingConfig: true
+  };
 
   const tasks = datasets.map(dataset => {
     const { sessions, query: qstr, enabled } = dataset;
@@ -879,9 +884,7 @@ export const loadDatasetSuccessUpdater = (state, { payload: datasets }) => {
               info: { ...dataset, loadingCompleted: loadedCount == datasets.length, timestamp },
               data: makeDataset(query, data, sessions)
             },
-            options: {
-              autoCreateLayers: false
-            }
+            options
           };
 
           return addDataToMap(map);
@@ -898,9 +901,7 @@ export const loadDatasetSuccessUpdater = (state, { payload: datasets }) => {
           info: { ...dataset, loadingCompleted: loadedCount == datasets.length },
           data: { fields: [], rows: [] }
         },
-        options: {
-          autoCreateLayers: false
-        }
+        options
       });
     }
   });

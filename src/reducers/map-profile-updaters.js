@@ -61,7 +61,7 @@ export const loadProfileSuccessUpdater = (state, { profiles }) => {
 
   const defaultProfile = profiles.find(p => p.id == localStorage.getItem('default_profile_id'));
   const tasks = [
-    defaultProfile && ACTION_TASK().map(_ => applyProfile(defaultProfile.id, { visState: { datasets: {} }}))
+    defaultProfile && ACTION_TASK().map(_ => applyProfile(defaultProfile.id, { visState: { datasets: {} } }))
   ].filter(d => d);
 
   return withTask(newState, tasks);
@@ -145,19 +145,25 @@ export const updateProfileErrorUpdater = (state, { error }) => {
   }
 };
 
-export const applyProfileUpdater = (state, { id, map }) => {
+export const applyProfileUpdater = (state, { id, map, options = {} }) => {
   const { config } = state.profiles.find(p => p.id == id);
   const { datasets } = KeplerGlSchema.save(map);
   const mapToLoad = KeplerGlSchema.load(datasets, config);
-  const task = ACTION_TASK().map(_ => addDataToMap({ ...mapToLoad, options: { centerMap: false } }));
+
+  if (datasets.length) {
+    const enabledDatasets = mapToLoad.datasets.filter(d => d.info.enabled).map(d => d.info.id);
+    mapToLoad.config.visState.layers = mapToLoad.config.visState.layers.filter(l => enabledDatasets.includes(l.config.dataId));
+  }
+
+  const task = ACTION_TASK().map(_ => addDataToMap({ ...mapToLoad, options: { centerMap: false, autoCreateLayers: false, ...options } }));
   const newState = {
     ...state,
     selectedId: id
   };
-  
+
   localStorage.setItem('default_profile_id', id);
 
-  return withTask(newState, task); 
+  return withTask(newState, task);
 };
 
 
