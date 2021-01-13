@@ -63,21 +63,25 @@ export default function DatasetInfoFactory() {
 
     render() {
       const { dataset } = this.props;
-      const { enabled } = dataset;
+      const { enabled, reloading } = dataset;
       const { timeAgoLabel } = this.state;
 
       return (
         <StyledDataRowCount className="source-data-rows">
           {enabled ? (
-            <>
-              <span>
-                <FormattedMessage
-                  id={'datasetInfo.rowCount'}
-                  values={{ rowCount: numFormat(dataset.allData.length) }}
-                />
-              </span>
-              <span style={{ marginLeft: '10px' }}>{timeAgoLabel}</span>
-            </>
+            reloading ? (
+              <FormattedMessage id={'datasetInfo.loading'} />
+            ) : (
+              <>
+                <span>
+                  <FormattedMessage
+                    id={'datasetInfo.rowCount'}
+                    values={{ rowCount: numFormat(dataset.allData.length) }}
+                  />
+                </span>
+                <span style={{ marginLeft: '10px' }}>{timeAgoLabel}</span>
+              </>
+            )
           ) : (
               <FormattedMessage
                 id={'datasetInfo.hidden'}

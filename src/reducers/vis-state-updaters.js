@@ -971,7 +971,7 @@ export const removeFilterUpdater = (state, action) => {
   // newState = set(['datasets'], filteredDatasets, newState);
   newState = set(['editor'], newEditor, newState);
   newState = updateFilters(newState, toArray(dataId));
-  
+
   return {
     ...updateAllLayerDomainData(newState, dataId, undefined)
   };
@@ -2081,13 +2081,13 @@ export function enableDatasetUpdater(state, { datasetKey }) {
   dataset.enabled = !dataset.enabled;
   const { enabled, id, allData } = dataset;
   const shouldReloadDataset = enabled && allData.length == 0;
-  const shouldApplyProfile = enabled;
-  const shouldRemoveLayers = enabled == false;
+  const shouldApplyProfile = enabled && allData.length;
+  const shouldRemoveLayers = !enabled;
 
   let tasks = [
-    ACTION_TASK().map(_ => updateDataset(dataset)),
     shouldReloadDataset && ACTION_TASK().map(_ => reloadDataset(dataset)),
-    shouldApplyProfile && ACTION_TASK().map(_ => applyProfile(localStorage.getItem('default_profile_id'), { visState: state }, { centerMap: false }))
+    shouldApplyProfile && ACTION_TASK().map(_ => applyProfile(localStorage.getItem('default_profile_id'), { visState: state }, { centerMap: false })),
+    ACTION_TASK().map(_ => updateDataset({ ...dataset, reloading: shouldReloadDataset })),
   ].filter(d => d);
 
   if (shouldRemoveLayers) {
