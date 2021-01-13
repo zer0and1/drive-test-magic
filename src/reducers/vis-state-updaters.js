@@ -41,9 +41,12 @@ import { findFieldsToShow, getDefaultInteraction } from 'utils/interaction-utils
 import {
   applyFilterFieldName,
   applyFiltersToDatasets,
+  mergeFilterDomainStep,
+  validateFilterWithData,
   featureToFilterValue,
   FILTER_UPDATER_PROPS,
   filterDatasetCPU,
+  filterDataset,
   generatePolygonFilter,
   getDefaultFilter,
   getDefaultFilterPlotType,
@@ -53,6 +56,7 @@ import {
   LIMITED_FILTER_EFFECT_PROPS,
   updateFilterDataId
 } from 'utils/filter-utils';
+
 import { assignGpuChannel, setFilterGpuMode } from 'utils/gpu-filter-utils';
 import { createNewDataEntry, sortDatasetByColumn } from 'utils/dataset-utils';
 import { set, toArray } from 'utils/utils';
@@ -77,6 +81,9 @@ import KeplerGLSchema, { CURRENT_VERSION, visStateSchema } from 'schemas';
 import { ACTION_TASK } from 'tasks/tasks';
 import { updateDataset, reloadDataset } from 'actions/provider-actions';
 import { applyProfile } from 'actions/map-profile-actions';
+
+import { mergeFilters } from './vis-state-merger';
+import { YAxis } from 'react-vis';
 
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
@@ -588,7 +595,7 @@ export function setFilterUpdater(state, action) {
       // TODO: Next PR for UI filter name will only update filter name but it won't have side effects
       // we are gonna use pair of datasets and fieldIdx to update the filter
       const datasetId = newFilter.dataId[valueIndex];
-      const { filter: updatedFilter, dataset: newDataset } = applyFilterFieldName(
+      let { filter: updatedFilter, dataset: newDataset } = applyFilterFieldName(
         newFilter,
         state.datasets[datasetId],
         value,
@@ -607,7 +614,6 @@ export function setFilterUpdater(state, action) {
       }
 
       newState = set(['datasets', datasetId], newDataset, state);
-
       // only filter the current dataset
       break;
     case FILTER_UPDATER_PROPS.layerId:
@@ -670,20 +676,47 @@ export function setFilterUpdater(state, action) {
     ? [datasetIds[valueIndex]]
     : datasetIds;
 
-  // filter data
-  const filteredDatasets = applyFiltersToDatasets(
-    datasetIdsToFilter,
-    newState.datasets,
-    newState.filters,
-    newState.layers
-  );
+  if (FILTER_UPDATER_PROPS.dataId != prop) {
+    newState = updateFilters(newState, datasetIdsToFilter);
+  }
 
-  newState = set(['datasets'], filteredDatasets, newState);
   // dataId is an array
   // pass only the dataset we need to update
   newState = updateAllLayerDomainData(newState, datasetIdsToFilter, newFilter);
 
   return newState;
+}
+
+export function updateFilters(state, datasetIds) {
+  const filtersToUpdate = state.filters.map(f => ({
+    animationWindow: f.animationWindow,
+    dataId: f.dataId,
+    enlarged: f.enlarged,
+    id: f.id,
+    name: f.name,
+    plotType: f.plotType,
+    type: f.type,
+    value: f.value,
+    yAxis: f.yAxis,
+    layerId: f.layerId,
+    fixedDomain: f.fixedDomain
+  }));
+
+  const datasetsForFiltering = datasetIds.reduce((acc, id) => ({
+    ...acc,
+    [id]: {
+      ...acc[id],
+      fields: acc[id].fields.map(f => ({ ...f, filterProps: null })),
+      filteredIndexAcc: acc[id].allIndexes,
+      filteredIndexForDomain: acc[id].allIndexes,
+      filteredIndex: acc[id].allIndexes,
+      filterRecord: {}
+    }
+  }), state.datasets);
+
+  const merged = mergeFilters({ ...state, filters: [], datasets: datasetsForFiltering, filterToBeMerged: [] }, filtersToUpdate);
+
+  return { ...state, ...merged };
 }
 
 /**
@@ -752,10 +785,12 @@ export const moveUpFilterUpdater = (state, { filterId }) => {
   newFilters[srcIdx] = newFilters[srcIdx - 1];
   newFilters[srcIdx - 1] = srcFilter;
 
-  return {
+  const newState = {
     ...state,
     filters: newFilters
-  }
+  };
+
+  return updateFilters(newState, Object.keys(newState.datasets));
 };
 
 /**
@@ -776,10 +811,12 @@ export const moveDownFilterUpdater = (state, { filterId }) => {
   newFilters[srcIdx] = newFilters[srcIdx + 1];
   newFilters[srcIdx + 1] = srcFilter;
 
-  return {
+  const newState = {
     ...state,
     filters: newFilters
-  }
+  };
+
+  return updateFilters(newState, Object.keys(newState.datasets));
 };
 
 
@@ -921,7 +958,7 @@ export const removeFilterUpdater = (state, action) => {
     ...state.filters.slice(idx + 1, state.filters.length)
   ];
 
-  const filteredDatasets = applyFiltersToDatasets(dataId, state.datasets, newFilters, state.layers);
+  // const filteredDatasets = applyFiltersToDatasets(dataId, state.datasets, newFilters, state.layers);
   const newEditor =
     getFilterIdInFeature(state.editor.selectedFeature) === id
       ? {
@@ -931,9 +968,10 @@ export const removeFilterUpdater = (state, action) => {
       : state.editor;
 
   let newState = set(['filters'], newFilters, state);
-  newState = set(['datasets'], filteredDatasets, newState);
+  // newState = set(['datasets'], filteredDatasets, newState);
   newState = set(['editor'], newEditor, newState);
-
+  newState = updateFilters(newState, toArray(dataId));
+  
   return {
     ...updateAllLayerDomainData(newState, dataId, undefined)
   };

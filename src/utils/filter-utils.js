@@ -959,8 +959,9 @@ export function applyFiltersToDatasets(datasetIds, datasets, filters, layers) {
 export function applyFilterFieldName(filter, dataset, fieldName, filterDatasetIndex = 0, option) {
   // using filterDatasetIndex we can filter only the specified dataset
   const mergeDomain = option && option.hasOwnProperty('mergeDomain') ? option.mergeDomain : false;
-  const {fields, allData} = dataset;
-
+  const {fields, allData, filteredIndexAcc: acc } = dataset;
+  const accData = (acc && acc.length ? acc.map(idx => allData[idx]) : null);
+  
   const fieldIndex = fields.findIndex(f => f.name === fieldName);
   // if no field with same name is found, move to the next datasets
   if (fieldIndex === -1) {
@@ -970,9 +971,9 @@ export function applyFilterFieldName(filter, dataset, fieldName, filterDatasetIn
 
   // TODO: validate field type
   const field = fields[fieldIndex];
-  const filterProps = field.hasOwnProperty('filterProps')
+  const filterProps = (field.hasOwnProperty('filterProps') && field.filterProps)
     ? field.filterProps
-    : getFilterProps(allData, field);
+    : getFilterProps(accData ? accData : allData, field);
 
   const newFilter = {
     ...(mergeDomain ? mergeFilterDomainStep(filter, filterProps) : {...filter, ...filterProps}),
@@ -995,7 +996,7 @@ export function applyFilterFieldName(filter, dataset, fieldName, filterDatasetIn
     filter: newFilter,
     dataset: {
       ...dataset,
-      fields: newFields
+      // fields: newFields
     }
   };
 }

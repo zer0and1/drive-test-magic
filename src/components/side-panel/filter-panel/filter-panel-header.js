@@ -21,9 +21,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
-import {Trash, ArrowDown, ArrowUp} from 'components/common/icons';
-import {createLinearGradient} from 'utils/color-utils';
-import {StyledPanelHeader} from 'components/common/styled-components';
+import { Trash, ArrowDown, ArrowUp } from 'components/common/icons';
+import { createLinearGradient } from 'utils/color-utils';
+import { StyledPanelHeader } from 'components/common/styled-components';
 
 export const StyledFilterHeader = styled(StyledPanelHeader)`
   cursor: pointer;
@@ -76,20 +76,20 @@ function FilterPanelHeaderFactory(PanelHeaderAction) {
         hoverColor={'errorColor'}
         IconComponent={actionIcons.delete}
       />
-      {filter.first || (
-        <PanelHeaderAction
-          id={filter.id}
-          tooltip="tooltip.moveUp"
-          onClick={moveUpFilter}
-          IconComponent={ArrowUp}
-        />
-      )}
       {filter.last || (
         <PanelHeaderAction
           id={filter.id}
           tooltip="tooltip.moveDown"
           onClick={moveDownFilter}
           IconComponent={ArrowDown}
+        />
+      )}
+      {filter.first || (
+        <PanelHeaderAction
+          id={filter.id}
+          tooltip="tooltip.moveUp"
+          onClick={moveUpFilter}
+          IconComponent={ArrowUp}
         />
       )}
     </StyledFilterHeader>

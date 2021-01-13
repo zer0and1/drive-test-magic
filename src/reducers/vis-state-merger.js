@@ -22,18 +22,19 @@ import uniq from 'lodash.uniq';
 import pick from 'lodash.pick';
 import isEqual from 'lodash.isequal';
 import flattenDeep from 'lodash.flattendeep';
-import {toArray, isObject, arrayInsert} from 'utils/utils';
+import { toArray, isObject, arrayInsert } from 'utils/utils';
 
 import {
   applyFiltersToDatasets,
   mergeFilterDomainStep,
-  validateFilterWithData
+  validateFilterWithData,
+  filterDataset
 } from 'utils/filter-utils';
 
-import {getInitialMapLayersForSplitMap} from 'utils/split-map-utils';
-import {resetFilterGpuMode, assignGpuChannels} from 'utils/gpu-filter-utils';
+import { getInitialMapLayersForSplitMap } from 'utils/split-map-utils';
+import { resetFilterGpuMode, assignGpuChannels } from 'utils/gpu-filter-utils';
 
-import {LAYER_BLENDINGS} from 'constants/default-settings';
+import { LAYER_BLENDINGS } from 'constants/default-settings';
 
 /**
  * Merge loaded filters with current state, if no fields or data are loaded
@@ -44,7 +45,7 @@ import {LAYER_BLENDINGS} from 'constants/default-settings';
 export function mergeFilters(state, filtersToMerge) {
   const merged = [];
   const unmerged = [];
-  const {datasets} = state;
+  const { datasets } = state;
   let updatedDatasets = datasets;
 
   if (!Array.isArray(filtersToMerge) || !filtersToMerge.length) {
@@ -59,15 +60,21 @@ export function mergeFilters(state, filtersToMerge) {
     // we can merge a filter only if all datasets in filter.dataId are loaded
     if (datasetIds.every(d => datasets[d])) {
       // all datasetIds in filter must be present the state datasets
-      const {filter: validatedFilter, applyToDatasets, augmentedDatasets} = datasetIds.reduce(
+      const { filter: validatedFilter, applyToDatasets, augmentedDatasets } = datasetIds.reduce(
         (acc, datasetId) => {
           const dataset = updatedDatasets[datasetId];
           const layers = state.layers.filter(l => l.config.dataId === dataset.id);
-          const {filter: updatedFilter, dataset: updatedDataset} = validateFilterWithData(
+          let { filter: updatedFilter, dataset: updatedDataset } = validateFilterWithData(
             acc.augmentedDatasets[datasetId] || dataset,
             filter,
             layers
           );
+
+          const { filteredIndexForDomain } = filterDataset(dataset, toArray(updatedFilter), layers);
+          updatedDataset = {
+            ...updatedDataset,
+            filteredIndexAcc: filteredIndexForDomain
+          };
 
           if (updatedFilter) {
             return {
@@ -75,9 +82,9 @@ export function mergeFilters(state, filtersToMerge) {
               // merge filter props
               filter: acc.filter
                 ? {
-                    ...acc.filter,
-                    ...mergeFilterDomainStep(acc, updatedFilter)
-                  }
+                  ...acc.filter,
+                  ...mergeFilterDomainStep(acc, updatedFilter)
+                }
                 : updatedFilter,
 
               applyToDatasets: [...acc.applyToDatasets, datasetId],
@@ -144,7 +151,7 @@ export function mergeLayers(state, layersToMerge, fromConfig) {
   const mergedLayer = [];
   const unmerged = [];
 
-  const {datasets} = state;
+  const { datasets } = state;
 
   if (!Array.isArray(layersToMerge) || !layersToMerge.length) {
     return state;
@@ -170,7 +177,7 @@ export function mergeLayers(state, layersToMerge, fromConfig) {
   });
 
   // put new layers in front of current layers
-  const {newLayerOrder, newLayers} = insertLayerAtRightOrder(
+  const { newLayerOrder, newLayers } = insertLayerAtRightOrder(
     state.layers,
     mergedLayer,
     state.layerOrder,
@@ -247,11 +254,11 @@ export function mergeInteractions(state, interactionToBeMerged) {
 
       const currentConfig = state.interactionConfig[key].config;
 
-      const {enabled, ...configSaved} = interactionToBeMerged[key] || {};
+      const { enabled, ...configSaved } = interactionToBeMerged[key] || {};
       let configToMerge = configSaved;
 
       if (key === 'tooltip') {
-        const {mergedTooltip, unmergedTooltip} = mergeInteractionTooltipConfig(state, configSaved);
+        const { mergedTooltip, unmergedTooltip } = mergeInteractionTooltipConfig(state, configSaved);
 
         // merge new dataset tooltips with original dataset tooltips
         configToMerge = {
@@ -262,7 +269,7 @@ export function mergeInteractions(state, interactionToBeMerged) {
         };
 
         if (Object.keys(unmergedTooltip).length) {
-          unmerged.tooltip = {fieldsToShow: unmergedTooltip, enabled};
+          unmerged.tooltip = { fieldsToShow: unmergedTooltip, enabled };
         }
       }
 
@@ -271,14 +278,14 @@ export function mergeInteractions(state, interactionToBeMerged) {
         enabled,
         ...(currentConfig
           ? {
-              config: pick(
-                {
-                  ...currentConfig,
-                  ...configToMerge
-                },
-                Object.keys(currentConfig)
-              )
-            }
+            config: pick(
+              {
+                ...currentConfig,
+                ...configToMerge
+              },
+              Object.keys(currentConfig)
+            )
+          }
           : {})
       };
     });
@@ -341,7 +348,7 @@ export function mergeInteractionTooltipConfig(state, tooltipConfig = {}) {
   const mergedTooltip = {};
 
   if (!tooltipConfig.fieldsToShow || !Object.keys(tooltipConfig.fieldsToShow).length) {
-    return {mergedTooltip, unmergedTooltip};
+    return { mergedTooltip, unmergedTooltip };
   }
 
   for (const dataId in tooltipConfig.fieldsToShow) {
@@ -359,7 +366,7 @@ export function mergeInteractionTooltipConfig(state, tooltipConfig = {}) {
     }
   }
 
-  return {mergedTooltip, unmergedTooltip};
+  return { mergedTooltip, unmergedTooltip };
 }
 /**
  * Merge layerBlending with saved
@@ -410,11 +417,11 @@ export function validateSavedLayerColumns(fields, savedCols = {}, emptyCols) {
   // Prepare columns for the validator
   const columns = {};
   for (const key of Object.keys(emptyCols)) {
-    columns[key] = {...emptyCols[key]};
+    columns[key] = { ...emptyCols[key] };
 
     const saved = savedCols[key];
     if (saved) {
-      const fieldIdx = fields.findIndex(({name}) => name === saved);
+      const fieldIdx = fields.findIndex(({ name }) => name === saved);
 
       if (fieldIdx > -1) {
         // update found columns
@@ -461,8 +468,8 @@ export function validateSavedTextLabel(fields, [layerTextLabel], savedTextLabel)
   return savedTextLabels.map(textLabel => {
     const field = textLabel.field
       ? fields.find(fd =>
-          Object.keys(textLabel.field).every(key => textLabel.field[key] === fd[key])
-        )
+        Object.keys(textLabel.field).every(key => textLabel.field[key] === fd[key])
+      )
       : null;
 
     return Object.keys(layerTextLabel).reduce(
@@ -485,7 +492,7 @@ export function validateSavedTextLabel(fields, [layerTextLabel], savedTextLabel)
  * @return {Object} - newLayer
  */
 export function validateSavedVisualChannels(fields, newLayer, savedLayer) {
-  Object.values(newLayer.visualChannels).forEach(({field, scale, key}) => {
+  Object.values(newLayer.visualChannels).forEach(({ field, scale, key }) => {
     let foundField;
     if (savedLayer.config[field]) {
       foundField = fields.find(fd =>
@@ -496,8 +503,8 @@ export function validateSavedVisualChannels(fields, newLayer, savedLayer) {
     }
 
     const foundChannel = {
-      ...(foundField ? {[field]: foundField} : {}),
-      ...(savedLayer.config[scale] ? {[scale]: savedLayer.config[scale]} : {})
+      ...(foundField ? { [field]: foundField } : {}),
+      ...(savedLayer.config[scale] ? { [scale]: savedLayer.config[scale] } : {})
     };
     if (Object.keys(foundChannel).length) {
       newLayer.updateLayerConfig(foundChannel);
@@ -513,12 +520,12 @@ export function validateSavedVisualChannels(fields, newLayer, savedLayer) {
  * @type {typeof import('./vis-state-merger').validateLayerWithData}
  */
 export function validateLayerWithData(
-  {fields, id: dataId},
+  { fields, id: dataId },
   savedLayer,
   layerClasses,
   options = {}
 ) {
-  const {type} = savedLayer;
+  const { type } = savedLayer;
   // layer doesnt have a valid type
   if (!layerClasses.hasOwnProperty(type) || !savedLayer.config || !savedLayer.config.columns) {
     return null;
@@ -538,7 +545,7 @@ export function validateLayerWithData(
   if (Object.keys(columnConfig).length) {
     const columns = validateSavedLayerColumns(fields, savedLayer.config.columns, columnConfig);
     if (columns) {
-      newLayer.updateLayerConfig({columns});
+      newLayer.updateLayerConfig({ columns });
     } else if (!options.allowEmptyColumn) {
       return null;
     }
@@ -558,7 +565,7 @@ export function validateLayerWithData(
   const visConfig = newLayer.copyLayerConfig(
     newLayer.config.visConfig,
     savedLayer.config.visConfig || {},
-    {shallowCopy: ['colorRange', 'strokeColorRange']}
+    { shallowCopy: ['colorRange', 'strokeColorRange'] }
   );
 
   newLayer.updateLayerConfig({
@@ -574,10 +581,10 @@ export function isValidMerger(merger) {
 }
 
 export const VIS_STATE_MERGERS = [
-  {merge: mergeLayers, prop: 'layers', toMergeProp: 'layerToBeMerged'},
-  {merge: mergeFilters, prop: 'filters', toMergeProp: 'filterToBeMerged'},
-  {merge: mergeInteractions, prop: 'interactionConfig', toMergeProp: 'interactionToBeMerged'},
-  {merge: mergeLayerBlending, prop: 'layerBlending'},
-  {merge: mergeSplitMaps, prop: 'splitMaps', toMergeProp: 'splitMapsToBeMerged'},
-  {merge: mergeAnimationConfig, prop: 'animationConfig'}
+  { merge: mergeLayers, prop: 'layers', toMergeProp: 'layerToBeMerged' },
+  { merge: mergeFilters, prop: 'filters', toMergeProp: 'filterToBeMerged' },
+  { merge: mergeInteractions, prop: 'interactionConfig', toMergeProp: 'interactionToBeMerged' },
+  { merge: mergeLayerBlending, prop: 'layerBlending' },
+  { merge: mergeSplitMaps, prop: 'splitMaps', toMergeProp: 'splitMapsToBeMerged' },
+  { merge: mergeAnimationConfig, prop: 'animationConfig' }
 ];
