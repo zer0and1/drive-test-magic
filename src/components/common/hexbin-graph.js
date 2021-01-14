@@ -94,6 +94,28 @@ function HexbinGraphFactory() {
       const diff = max(labels) - min(labels);
       let startDate, endDate, flag = false;
 
+      let func = (t => {
+        if (diff > 3600000 * 24 * 30 * 36) {
+          return new Date(t.getFullYear(), Math.floor( t.getMonth() / 3 ) * 3).getTime()
+        }
+        if (diff > 3600000 * 24 * 30 * 12) {
+          return new Date(t.getFullYear(), t.getMonth()).getTime()
+        }
+        if (diff > 3600000 * 24 * 30 * 3) {
+          return new Date(t.getFullYear(), t.getMonth(), Math.floor(( min(t.getDate(), 30) - 1 ) / 10 ) * 10 + 1).getTime()
+        }
+        if (diff > 3600000 * 24 * 30) {
+          return new Date(t.getFullYear(), t.getMonth(), Math.floor(( t.getDate() - 1 ) / 4 ) * 4 + 1).getTime()
+        }
+        if (diff > 3600000 * 24 * 6) {
+          return new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()
+        }
+        if (diff > 3600000 * 24 * 2) {
+          return new Date(t.getFullYear(), t.getMonth(), t.getDate(), Math.floor( t.getHours() / 4 ) * 4).getTime()
+        }
+        return new Date(t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()).getTime()
+      });
+
       Object.keys(result).forEach(function(k) {
         // calculate aggregation values
         result[k].average = result[k].value != undefined ? mean(result[k].values).toFixed(2) : null;
@@ -108,66 +130,74 @@ function HexbinGraphFactory() {
         let t = new Date(result[k].time)
         if (diff > 3600000 * 24 * 30 * 36) {
           // groupBy 3-month
-          result[k].groupTime = new Date(t.getFullYear(), Math.floor( t.getMonth() / 3 ) * 3).getTime()
+          result[k].groupTime = func(t)
           if (!flag) {
-            t = new Date(min(labels) - 3600000 * 24 * 30 * 3)
-            startDate = new Date(t.getFullYear(), Math.floor( t.getMonth() / 3 ) * 3).getTime()
-            t = new Date(max(labels) + 3600000 * 24 * 30 * 3)
-            endDate = new Date(t.getFullYear(), Math.floor( t.getMonth() / 3 ) * 3).getTime()
+            t = new Date(min(labels))
+            t.setMonth(t.getMonth() - 3)
+            startDate = func(t)
+            t = new Date(max(labels))
+            t.setMonth(t.getMonth() + 3)
+            endDate = func(t)
           }
         } else if (diff > 3600000 * 24 * 30 * 12) {
           // groupBy 1-month
-          result[k].groupTime = new Date(t.getFullYear(), t.getMonth()).getTime()
+          result[k].groupTime = func(t)
           if (!flag) {
-            t = new Date(min(labels) - 3600000 * 24 * 30)
-            startDate = new Date(t.getFullYear(), t.getMonth()).getTime()
-            t = new Date(max(labels) + 3600000 * 24 * 30)
-            endDate = new Date(t.getFullYear(), t.getMonth()).getTime()
+            t = new Date(min(labels))
+            t.setMonth(t.getMonth() - 1)
+            startDate = func(t)
+            t = new Date(max(labels))
+            t.setMonth(t.getMonth() + 1)
+            endDate = func(t)
           }
         } else if (diff > 3600000 * 24 * 30 * 3) {
           // groupBy 10-days
-          result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), Math.floor(( min(t.getDate(), 30) - 1 ) / 10 ) * 10 + 1).getTime()
+          result[k].groupTime = func(t)
           if (!flag) {
-            t = new Date(min(labels) - 3600000 * 24 * 10)
-            startDate = new Date(t.getFullYear(), t.getMonth(), Math.floor(( min(t.getDate(), 30) - 1 ) / 10 ) * 10 + 1).getTime()
-            t = new Date(max(labels) + 3600000 * 24 * 10)
-            endDate = new Date(t.getFullYear(), t.getMonth(), Math.floor(( min(t.getDate(), 30) - 1 ) / 10 ) * 10 + 1).getTime()
+            t = new Date(min(labels))
+            t.setDate(t.getDate() - 10)
+            startDate = func(t)
+            t = new Date(max(labels))
+            t.setDate(t.getDate() + 10)
+            endDate = func(t)
           }
         } else if (diff > 3600000 * 24 * 30) {
           // groupBy 4-days
-          result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), Math.floor(( t.getDate() - 1 ) / 4 ) * 4 + 1).getTime()
+          result[k].groupTime = func(t)
           if (!flag) {
-            t = new Date(min(labels) - 3600000 * 24 * 4)
-            startDate = new Date(t.getFullYear(), t.getMonth(), Math.floor(( t.getDate() - 1 ) / 4 ) * 4 + 1).getTime()
-            t = new Date(max(labels) + 3600000 * 24 * 4)
-            endDate = new Date(t.getFullYear(), t.getMonth(), Math.floor(( t.getDate() - 1 ) / 4 ) * 4 + 1).getTime()
+            t = new Date(min(labels))
+            t.setDate(t.getDate() - 4)
+            startDate = func(t)
+            t = new Date(max(labels))
+            t.setDate(t.getDate() + 4)
+            endDate = func(t)
           }
         } else if (diff > 3600000 * 24 * 6) {
           // groupBy 1-days
-          result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()
+          result[k].groupTime = func(t)
           if (!flag) {
             t = new Date(min(labels) - 3600000 * 24)
-            startDate = new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()
+            startDate = func(t)
             t = new Date(max(labels) + 3600000 * 24)
-            endDate = new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()
+            endDate = func(t)
           }
         } else if (diff > 3600000 * 24 * 2) {
           // groupBy 4-hours
-          result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), t.getDate(), Math.floor( t.getHours() / 4 ) * 4).getTime()
+          result[k].groupTime = func(t)
           if (!flag) {
             t = new Date(min(labels) - 3600000 * 4)
-            startDate = new Date(t.getFullYear(), t.getMonth(), t.getDate(), Math.floor( t.getHours() / 4 ) * 4).getTime()
+            startDate = func(t)
             t = new Date(max(labels) + 3600000 * 4)
-            endDate = new Date(t.getFullYear(), t.getMonth(), t.getDate(), Math.floor( t.getHours() / 4 ) * 4).getTime()
+            endDate = func(t)
           }
         } else {
           // groupBy 1-hour
-          result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()).getTime()
+          result[k].groupTime = func(t)
           if (!flag) {
             t = new Date(min(labels) - 3600000)
-            startDate = new Date(t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()).getTime()
+            startDate = func(t)
             t = new Date(max(labels) + 3600000)
-            endDate = new Date(t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()).getTime()
+            endDate = func(t)
           }
         }
         flag = true;
@@ -262,11 +292,14 @@ function HexbinGraphFactory() {
           color: colors[iter++],
           dashStyle: 'shortdash',
           width: 1,
-          id: ids
+          id: ids,
+          zIndex: 10
         }
         series.push(item);
         annos.push(anno);
       }
+
+      console.log(series)
 
       const withZero = num => {
         if (num < 10)
