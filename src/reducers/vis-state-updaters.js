@@ -40,13 +40,9 @@ import {
 import { findFieldsToShow, getDefaultInteraction } from 'utils/interaction-utils';
 import {
   applyFilterFieldName,
-  applyFiltersToDatasets,
-  mergeFilterDomainStep,
-  validateFilterWithData,
   featureToFilterValue,
   FILTER_UPDATER_PROPS,
   filterDatasetCPU,
-  filterDataset,
   generatePolygonFilter,
   getDefaultFilter,
   getDefaultFilterPlotType,
@@ -688,25 +684,24 @@ export function setFilterUpdater(state, action) {
 }
 
 export function updateFilters(state, datasetIds) {
-  const filtersToUpdate = state.filters.map(f => ({
-    animationWindow: f.animationWindow,
-    dataId: f.dataId,
-    enlarged: f.enlarged,
-    id: f.id,
-    name: f.name,
-    plotType: f.plotType,
-    type: f.type,
-    value: f.value,
-    yAxis: f.yAxis,
-    layerId: f.layerId,
-    fixedDomain: f.fixedDomain
-  }));
+  const filters = state.filters.map(f => ([
+    'animationWindow', 
+    'dataId', 
+    'enlarged', 
+    'id', 
+    'name', 
+    'plotType', 
+    'type', 
+    'value', 
+    'yAxis', 
+    'layerId', 
+    'fixedDomain'
+  ].reduce((acc, field) => ({...acc, [field]: f[field]}), {})));
 
-  const datasetsForFiltering = datasetIds.reduce((acc, id) => ({
+  const datasets = datasetIds.reduce((acc, id) => ({
     ...acc,
     [id]: {
       ...acc[id],
-      fields: acc[id].fields.map(f => ({ ...f, filterProps: null })),
       filteredIndexAcc: acc[id].allIndexes,
       filteredIndexForDomain: acc[id].allIndexes,
       filteredIndex: acc[id].allIndexes,
@@ -714,9 +709,9 @@ export function updateFilters(state, datasetIds) {
     }
   }), state.datasets);
 
-  const merged = mergeFilters({ ...state, filters: [], datasets: datasetsForFiltering, filterToBeMerged: [] }, filtersToUpdate);
+  const merged = mergeFilters({ ...state, filters: [], datasets, filterToBeMerged: [] }, filters);
 
-  return { ...state, ...merged };
+  return merged;
 }
 
 /**
@@ -776,6 +771,9 @@ export const addFilterUpdater = (state, action) => {
 export const moveUpFilterUpdater = (state, { filterId }) => {
   const srcIdx = state.filters.findIndex(filter => filter.id == filterId);
   const srcFilter = state.filters[srcIdx];
+  const destFilter = state.filters[srcIdx - 1];
+  const { dataId: srcDataId } = srcFilter;
+  const { dataId: destDataId } = destFilter;
 
   if (srcIdx == 0) {
     return state;
@@ -790,8 +788,11 @@ export const moveUpFilterUpdater = (state, { filterId }) => {
     filters: newFilters
   };
 
-  return updateFilters(newState, Object.keys(newState.datasets));
-};
+  if (srcDataId.toString() == destDataId.toString()) {
+    return updateFilters(newState, toArray(destDataId));
+  }
+
+  return newState;};
 
 /**
  * Move down a filter
@@ -802,13 +803,16 @@ export const moveUpFilterUpdater = (state, { filterId }) => {
 export const moveDownFilterUpdater = (state, { filterId }) => {
   const srcIdx = state.filters.findIndex(filter => filter.id == filterId);
   const srcFilter = state.filters[srcIdx];
+  const destFilter = state.filters[srcIdx + 1];
+  const { dataId: srcDataId } = srcFilter;
+  const { dataId: destDataId } = destFilter;
 
   if (srcIdx == state.filters.length - 1) {
     return state;
   }
 
   const newFilters = [...state.filters];
-  newFilters[srcIdx] = newFilters[srcIdx + 1];
+  newFilters[srcIdx] = destFilter;
   newFilters[srcIdx + 1] = srcFilter;
 
   const newState = {
@@ -816,7 +820,11 @@ export const moveDownFilterUpdater = (state, { filterId }) => {
     filters: newFilters
   };
 
-  return updateFilters(newState, Object.keys(newState.datasets));
+  if (srcDataId.toString() == destDataId.toString()) {
+    return updateFilters(newState, toArray(destDataId));
+  }
+
+  return newState;
 };
 
 

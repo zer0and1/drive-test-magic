@@ -45,6 +45,7 @@ import { LAYER_BLENDINGS } from 'constants/default-settings';
 export function mergeFilters(state, filtersToMerge) {
   const merged = [];
   const unmerged = [];
+  const filterStack = [];
   const { datasets } = state;
   let updatedDatasets = datasets;
 
@@ -53,7 +54,7 @@ export function mergeFilters(state, filtersToMerge) {
   }
 
   // merge filters
-  filtersToMerge.forEach(filter => {
+  filtersToMerge.forEach((filter, idx) => {
     // we can only look for datasets define in the filter dataId
     const datasetIds = toArray(filter.dataId);
 
@@ -62,18 +63,28 @@ export function mergeFilters(state, filtersToMerge) {
       // all datasetIds in filter must be present the state datasets
       const { filter: validatedFilter, applyToDatasets, augmentedDatasets } = datasetIds.reduce(
         (acc, datasetId) => {
-          const dataset = updatedDatasets[datasetId];
+          let dataset = acc.augmentedDatasets[datasetId] || updatedDatasets[datasetId];
           const layers = state.layers.filter(l => l.config.dataId === dataset.id);
+
+          dataset = {
+            ...dataset,
+            filterRecord: {},
+            filteredIndexAcc: (idx == 0 ? dataset.allIndexes : dataset.filteredIndexAcc)
+          };
+
           let { filter: updatedFilter, dataset: updatedDataset } = validateFilterWithData(
-            acc.augmentedDatasets[datasetId] || dataset,
+            dataset,
             filter,
             layers
           );
+          
+          filterStack.push(updatedFilter);
 
-          const { filteredIndexForDomain } = filterDataset(dataset, toArray(updatedFilter), layers);
+          const filteredDataset = filterDataset(dataset, filterStack, layers);
+
           updatedDataset = {
             ...updatedDataset,
-            filteredIndexAcc: filteredIndexForDomain
+            filteredIndexAcc: filteredDataset.filteredIndexForDomain,
           };
 
           if (updatedFilter) {
