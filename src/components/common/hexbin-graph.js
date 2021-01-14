@@ -21,12 +21,14 @@
 import React, {useMemo} from 'react';
 import styled from 'styled-components';
 import ApexCharts from "react-apexcharts";
+import {Line} from 'react-chartjs-2';
+import ReactHighcharts from 'react-highcharts';
 import _ from 'lodash';
 import {mean, min, max, median, deviation, variance, sum} from 'd3-array';
 import moment from 'moment';
 
-function LineChartLegendFactory() {
-  const LineChartLegend = ({
+function HexbinGraphFactory() {
+  const HexbinGraph = ({
     visState,
     index,
     aggregation,
@@ -74,45 +76,63 @@ function LineChartLegendFactory() {
       result[k].v = result[k].values.length > 1 ? variance(result[k].values).toFixed(2) : 0;
     })
 
-    const labels = Object.keys(_.groupBy(result, 'time'));
+    const labels = Object.keys(_.groupBy(result, 'time')).map(item => {return new Date(item).getTime()});
+    const diff = max(labels) - min(labels);
 
     const dataset = _.groupBy(result, 'enodeb');
     const enodebIds = Object.keys(dataset)
+
+    console.log(dataset)
+    if (diff > 3600000 * 24 * 30 * 36) {
+      // groupBy 3m
+    } else if (diff > 3600000 * 24 * 30 * 12) {
+      // groupBy 1m
+    } else if (diff > 3600000 * 24 * 30 * 3) {
+      // groupBy 10d
+    } else if (diff > 3600000 * 24 * 10 * 30) {
+      // groupBy 4d
+    } else if (diff > 3600000 * 24 * 10 * 30) {
+      // groupBy 1d
+    } else if (diff > 3600000 * 24 * 10 * 30) {
+      // groupBy 4h
+    } else {
+      // groupBy 1h
+    }
 
     const yvalues = [];
     for (var i of enodebIds) {
       yvalues[i] = []
       for (var k of dataset[i]) {
         let v = {
-          x: k.time
+          x: new Date(k.time).getTime()
         };
         switch (aggregation) {
           case 'maximum':
-            v.y = k.max;
+            v.y = parseFloat(k.max);
             break;
           case 'minimum':
-            v.y = k.min;
+            v.y = parseFloat(k.min);
             break;
           case 'median':
-            v.y = k.median;
+            v.y = parseFloat(k.median);
             break;
           case 'sum':
-            v.y = k.sum;
+            v.y = parseFloat(k.sum);
             break;
           case 'stdev':
-            v.y = k.stdev;
+            v.y = parseFloat(k.stdev);
             break;
           case 'variance':
-            v.y = k.v;
+            v.y = parseFloat(k.v);
             break;
           default:
-            v.y = k.average;
+            v.y = parseFloat(k.average);
           }
         yvalues[i].push(v);
       }
     }
 
-    const colors = ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800', '#7E36AF', '#00ECFF'];
+    const colors = ['#2E93fA', '#66DA26', '#FF9800', '#7E36AF', '#00ECFF', '#f0ec26', '#E91E63'];
 
     const series = [];
     const annos = [];
@@ -126,9 +146,10 @@ function LineChartLegendFactory() {
         data: yvalues[ids]
       }
       const anno = {
-        y: mean(yvalues[ids].map(item => { return item.y })),
-        borderColor: colors[iter++],
-        strokeDashArray: 3,
+        value: mean(yvalues[ids].map(it => { return it.y })),
+        color: colors[iter++],
+        dashStyle: 'shortdash',
+        width: 1
       }
       series.push(item);
       annos.push(anno);
@@ -140,149 +161,110 @@ function LineChartLegendFactory() {
       return num;
     }
 
-    const options = {
+    const config = {
       chart: {
         height: 350,
         type: 'line',
-        stacked: false,
-        foreColor: '#c3c3c3',
-        toolbar: {
-          show: false
-        },
-        events: {
-          legendClick: function(chartContext, seriesIndex, opts) {
-            // console.log(chartContext)
-            const op = opts.config.annotations.yaxis[seriesIndex].width;
-            opts.config.annotations.yaxis[seriesIndex].width = (op == '100%' ? '0%' : '100%');
-          }
-        }
+        backgroundColor: '#29323c'
+      },
+      title: {
+        text: null
       },
       colors: colors,
-      stroke: {
-        width: 1,
-        curve: 'stepline'
-      },
-      markers: {
-        size: 3,
-        strokeWidth: 0
-      },
-      plotOptions: {
-        bar: {
-          horizontal: true,
-          columnWidth: '50%'
-        }
-      },
-      grid: {
-        show: true,
-        borderColor: '#4e5053',
-        strokeDashArray: 0,
-        position: 'back',
-        xaxis: {
-            lines: {
-                show: true
-            }
-        },   
-        yaxis: {
-            lines: {
-                show: true
-            }
-        },  
-        row: {
-            colors: undefined,
-            opacity: 0.5
-        },  
-        column: {
-            colors: undefined,
-            opacity: 0.5
-        },  
-        padding: {
-            top: 10,
-            right: 10,
-            bottom: 10,
-            left: 10
-        },  
-      },  
-      fill: {
-        opacity: 1,
-        gradient: {
-          inverseColors: false,
-          shade: 'light',
-          type: "vertical",
-          opacityFrom: 0.85,
-          opacityTo: 0.55,
-          stops: [0, 100, 100, 100]
-        }
-      },
-      labels: labels,
-      xaxis: {
-        type: 'category',
-        tooltip: {
-          enabled: false
-        },
-        tickPlacement: 'between',
+      xAxis: {
+        type: 'datetime',
+        lineWidth: 1,
+        lineColor: '#4e5053',
+        gridLineWidth: 1,
+        gridLineColor: '#4e5053',
         labels: {
-          datetimeFormatter: {
-            year: 'yyyy',
-            month: 'MMM \'yy',
-            day: 'dd MMM',
-            hour: 'HH:mm'
+          style: {
+            color: '#e3e3e3'
           }
         }
       },
-      yaxis: {
-        show: true,
+      yAxis: {
         tickAmount: 6,
+        title: {
+          text: null
+        },
         min: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymin : undefined,
-        max: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymax : undefined
+        max: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymax : undefined,
+        lineWidth: 0,
+        lineColor: '#4e5053',
+        gridLineWidth: 1,
+        gridLineColor: '#4e5053',
+        labels: {
+          style: {
+            color: '#e3e3e3'
+          }
+        },
+        plotLines: annos
+      },
+      series: series,
+      plotOptions: {
+        series: {
+          step: 'center',
+          animation: {
+            duration: 0
+          }
+        },
+        line: {
+          events: {
+            legendItemClick: function() {
+              if (this.yAxis.plotLinesAndBands.length < enodebIds.length) {
+                this.yAxis.update({
+                  plotLines: annos
+                })
+              } else {
+                this.yAxis.plotLinesAndBands[this.index].destroy();
+              }
+            }
+          }
+        }
+      },
+      legend:{
+        align: 'right',
+        verticalAlign: 'middle',
+        itemStyle: {
+            color: '#e3e3e3',
+        },
+        layout: 'vertical',
+        useHTML: true,
+        itemHiddenStyle: {"color": "#616b75"},
+        labelFormatter: function () {
+          const color = this.color;
+          const val = this.yData;
+          return cellnames[this.name] + "<br/><span style='padding-left:3em'>" + 
+              "<span style='color:" + color + "'>#min:</span>" + min(val).toFixed(2) + 
+              "<span style='color:" + color + "'>#max:</span>" + max(val).toFixed(2) + 
+              "<span style='color:" + color + "'>#avg:</span>" + mean(val).toFixed(2) + 
+              "<span style='color:" + color + "'>#smp:</span>" + val.length +
+              "</span>";
+        }
       },
       tooltip: {
         shared: true,
-        theme: 'dark',
-        x: {
-          formatter: function (x) {
-            if (typeof x !== "undefined") {
-              let current_datetime = new Date(x);
-              let formatted_date = current_datetime.getFullYear() + "-" 
-                                  + withZero((current_datetime.getMonth() + 1)) + "-" 
-                                  + withZero(current_datetime.getDate()) + " " 
-                                  + withZero(current_datetime.getHours()) + ":" 
-                                  + withZero(current_datetime.getMinutes()) + ":" 
-                                  + withZero(current_datetime.getSeconds());
-              return "<center>" + formatted_date + "</center>";
-            }
-            return x;
-          }
-        }
-      },
-      legend: {
-        position: 'right',
-        offsetY: 20,
-        showForSingleSeries: true,
-        formatter: function(seriesName, opts) {
-          const color = opts.w.globals.colors[opts.seriesIndex];
-          const val = opts.w.globals.series[opts.seriesIndex];
-          return [cellnames[seriesName], "<br><span style='padding-left:3em'>", 
-              "<span style='color:", color, "'>#min:</span>", val.length === 0 ? null: min(val).toFixed(2), 
-              "<span style='color:", color, "'>#max:</span>", val.length === 0 ? null: max(val).toFixed(2), 
-              "<span style='color:", color, "'>#avg:</span>", val.length === 0 ? null: mean(val).toFixed(2), 
-              "<span style='color:", color, "'>#smp:</span>", val.length, 
-              "</span>"]
+        backgroundColor: '#232630',
+        borderColor: '#19222c',
+        style: {
+          color: '#e3e3e3'
         },
-      },
-      annotations: {
-        yaxis: annos
+        xDateFormat: '%Y-%m-%d %H',
+        useHTML: true,
+        headerFormat: '<center>{point.key}</center><table>',
+        pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
+            '<td style="text-align: right">{point.y}</td></tr>',
+        footerFormat: '</table>',
+        valueDecimals: 2
       }
-    };
+    }
 
     return (
-      <ApexCharts
-        series={series}
-        options={options}
-        height={options.chart.height}
-      />
+      <ReactHighcharts config = {config}/>
     );
   };
-  return LineChartLegend;
+  return HexbinGraph;
 }
 
-export default LineChartLegendFactory;
+export default HexbinGraphFactory;

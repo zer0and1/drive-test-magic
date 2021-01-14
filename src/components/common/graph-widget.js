@@ -28,7 +28,7 @@ import {
   BottomWidgetInner
 } from './styled-components';
 import {Close, LineChart} from './icons';
-import LineChartLegendFactory from './line-chart-legend';
+import HexbinGraphFactory from './hexbin-graph';
 import {min, max} from 'd3-array';
 
 const TOP_SECTION_HEIGHT = '36px';
@@ -57,9 +57,9 @@ const StyledTitle = styled(CenterFlexbox)`
   }
 `;
 
-GraphWidgetFactory.deps = [LineChartLegendFactory]
+GraphWidgetFactory.deps = [HexbinGraphFactory]
 
-function GraphWidgetFactory(LineChartLegend) {
+function GraphWidgetFactory(HexbinGraph) {
   class GraphWidget extends Component {
 
     render() {
@@ -93,7 +93,7 @@ function GraphWidgetFactory(LineChartLegend) {
               </IconRoundSmall>
             </CenterFlexbox>
           </TopSectionWrapper>
-          <LineChartLegend
+          <HexbinGraph
             visState={this.props.visState}
             index={fieldIndex}
             aggregation={aggregation}
