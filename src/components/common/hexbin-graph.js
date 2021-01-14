@@ -18,14 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {useMemo} from 'react';
-import styled from 'styled-components';
-import ApexCharts from "react-apexcharts";
-import {Line} from 'react-chartjs-2';
+import React from 'react';
 import ReactHighcharts from 'react-highcharts';
 import _ from 'lodash';
 import {mean, min, max, median, deviation, variance, sum} from 'd3-array';
-import moment from 'moment';
 
 function HexbinGraphFactory() {
   const HexbinGraph = ({
