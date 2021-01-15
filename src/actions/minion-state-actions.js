@@ -121,10 +121,10 @@ export function increaseSessionId() {
  * @type {typeof import('./minion-state-actions').sendCommand}
  * @return action
  */
-export function sendCommand(cmd) {
+export function sendCommand(command) {
   return {
     type: ActionTypes.SEND_COMMAND,
-    cmd
+    command
   };
 }
 

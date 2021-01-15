@@ -63,6 +63,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       operationMode: PropTypes.string,
       lastAck: PropTypes.string,
       sessionId: PropTypes.number,
+      command: PropTypes.string,
       details: PropTypes.object,
     };
 
@@ -109,7 +110,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     datetimeRenderer(row, columnproperties, value) {
       return this.strRenderer(row, columnproperties, this.convertToHRTime(value));
     };
-    
+
     constructor(props) {
       super(props);
       this.minionRowselect = this.minionRowselect.bind(this);
@@ -132,10 +133,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       if (this._mounted == false) {
         return;
       }
-      
+
       $('#minion-grid').LoadingOverlay('hide', true);
       $('#minion-group').LoadingOverlay('hide', true);
-      
+
       this.minionSource.localdata = minions;
       // this.minionSource.sortcolumn = this.minionSortColumn;
       // this.minionSource.sortdirection = this.minionSortDirection;
@@ -143,23 +144,23 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
       this.timeoutId = setTimeout(this.props.loadMinions.bind(this), 3000, this.onMinionsLoaded.bind(this));
       this.props.selectedMinionName && this.trackMinion(selectedMinionData);
-    }   
+    }
 
-    trackMinion({ latitude, longitude, name: minionName }) {    
+    trackMinion({ latitude, longitude, name: minionName }) {
       if (!latitude || !longitude || !minionName) {
         this.props.removeMarker();
         return;
-      }  
+      }
 
-      this.props.onMouseMove({ point: [0, 0], lngLat: [longitude, latitude]});
-      this.props.addMarker({ 
-        center: true, 
-        lng: longitude, 
-        lat: latitude, 
-        color: 'red', 
-        info: { 
-          label: minionName 
-        } 
+      this.props.onMouseMove({ point: [0, 0], lngLat: [longitude, latitude] });
+      this.props.addMarker({
+        center: true,
+        lng: longitude,
+        lat: latitude,
+        color: 'red',
+        info: {
+          label: minionName
+        }
       });
       this.props.updateMap({
         latitude,
@@ -171,7 +172,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       this.panelRatio = args.panels[0].size / this.props.height;
     }
 
-    minionRowselect({args: {row: {name}, rowindex}}) {
+    minionRowselect({ args: { row: { name }, rowindex } }) {
       $('#minion-group').LoadingOverlay('show');
       this.props.setSelectedMinion({ name, idx: rowindex });
       this.props.loadMinions(this.onMinionsLoaded.bind(this));
@@ -185,12 +186,26 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         operationMode,
         lastAck,
         sessionId,
+        command,
         setSleepInterval,
         setOperationMode,
         increaseSessionId,
         sendCommand,
       } = this.props;
 
+      const commandGroupFields = {
+        sleepInterval,
+        operationMode,
+        lastAck,
+        sessionId,
+        command
+      };
+      const commandGroupActions = {
+        setSleepInterval,
+        setOperationMode,
+        increaseSessionId,
+        sendCommand,
+      }
       return (
         <div className="minion-manager">
           <JqxSplitter
@@ -223,25 +238,16 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 enabletooltips={true}
                 editable={false}
                 onRowselect={this.minionRowselect}
-                onSort={({args: {sortinformation: {sortcolumn, sortdirection}}}) => {
+                onSort={({ args: { sortinformation: { sortcolumn, sortdirection } } }) => {
                   this.minionSortColumn = sortcolumn;
-                  this.minionSortDirection = sortcolumn ? (sortdirection.ascending ? 'asc' : 'desc' ) : null;
+                  this.minionSortDirection = sortcolumn ? (sortdirection.ascending ? 'asc' : 'desc') : null;
                 }}
               />
             </div>
             <StyledMinionGroup className={"splitter-panel"} id="minion-group">
               <GPSGroup data={this.props.details} />
               <MinionSignalSampleGroup data={this.props.details} />
-              <CommandGroup 
-                sleepInterval={sleepInterval}
-                operationMode={operationMode}
-                lastAck={lastAck}
-                sessionId={sessionId}
-                setSleepInterval={setSleepInterval}
-                setOperationMode={setOperationMode}
-                increaseSessionId={increaseSessionId}
-                sendCommand={sendCommand}
-              />
+              <CommandGroup {...commandGroupFields} {...commandGroupActions} />
             </StyledMinionGroup>
           </JqxSplitter>
         </div>

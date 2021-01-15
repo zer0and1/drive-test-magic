@@ -51,6 +51,12 @@ export const CLOUDFRONT = 'https://d1a3f4spazzrp4.cloudfront.net/kepler.gl';
 export const ICON_PREFIX = `${CLOUDFRONT}/geodude`;
 export const DEFAULT_MAPBOX_API_URL = 'https://api.mapbox.com';
 
+export const MINION_COMMANDS = [
+  'Command1',
+  'Command2',
+  'Command3'
+];
+
 // Modal Ids
 /**
  * Modal id: data table

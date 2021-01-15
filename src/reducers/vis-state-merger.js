@@ -78,21 +78,18 @@ export function mergeFilters(state, filtersToMerge) {
             layers
           );
 
-          filterStacks.push(updatedFilter);
-
-          const { filteredIndexForDomain: filteredResultIndex } = filterDataset(dataset, filterStacks, layers);
-
-          updatedDataset = {
-            ...updatedDataset,
-            filteredIndexAcc: filteredResultIndex,
-          };
-          
           if (updatedFilter) {
+            filterStacks.push(updatedFilter);
+            const { filteredIndexForDomain: filteredResultIndex } = filterDataset(dataset, filterStacks, layers);
+            updatedDataset = {
+              ...updatedDataset,
+              filteredIndexAcc: filteredResultIndex,
+            };
             updatedFilter = {
               ...updatedFilter,
               filteredResultIndex
             };
-            
+
             return {
               ...acc,
               // merge filter props

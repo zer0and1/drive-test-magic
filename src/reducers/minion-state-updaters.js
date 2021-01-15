@@ -84,7 +84,7 @@ export const INITIAL_MINION_STATE = {
   sleepInterval: null,
   sessionId: null,
   lastAck: null,
-  cmd: null,
+  command: null,
 };
 
 /**
@@ -216,7 +216,6 @@ export function setSleepIntervalUpdater(state, { interval }) {
   };
 }
 
-
 /**
  * Set minion sleep interval
  * @type {typeof import('./minion-state-updaters').setOperationMode}
@@ -229,7 +228,6 @@ export function setOperationModeUpdater(state, { mode }) {
   };
 }
 
-
 /**
  * Set minion sleep interval
  * @type {typeof import('./minion-state-updaters').increaseSessionId}
@@ -241,3 +239,17 @@ export function increaseSessionIdUpdater(state) {
     sessionId: state.sessionId == null ? 1 : state.sessionId + 1
   };
 }
+
+/**
+ * Send command to selected minion
+ * @type {typeof import('./minion-state-updaters').sendCommand}
+ *
+ */
+export function sendCommandUpdater(state, { command }) {
+  alert(command);
+  return {
+    ...state,
+    command
+  };
+}
+

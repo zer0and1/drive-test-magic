@@ -696,7 +696,7 @@ export function updateFilters(state, datasetIds) {
     'yAxis', 
     'layerId', 
     'fixedDomain'
-  ].reduce((acc, field) => ({...acc, [field]: f[field]}), {})));
+  ].reduce((acc, field) => ({...acc, [field]: f[field]}), {}))).filter(d => d.type);
 
   const datasets = datasetIds.reduce((acc, id) => ({
     ...acc,
@@ -959,14 +959,13 @@ export const toggleFilterFeatureUpdater = (state, action) => {
  */
 export const removeFilterUpdater = (state, action) => {
   const { idx } = action;
-  const { dataId, id } = state.filters[idx];
+  const { dataId, id, type } = state.filters[idx];
 
   const newFilters = [
     ...state.filters.slice(0, idx),
     ...state.filters.slice(idx + 1, state.filters.length)
   ];
 
-  // const filteredDatasets = applyFiltersToDatasets(dataId, state.datasets, newFilters, state.layers);
   const newEditor =
     getFilterIdInFeature(state.editor.selectedFeature) === id
       ? {
@@ -976,10 +975,12 @@ export const removeFilterUpdater = (state, action) => {
       : state.editor;
 
   let newState = set(['filters'], newFilters, state);
-  // newState = set(['datasets'], filteredDatasets, newState);
   newState = set(['editor'], newEditor, newState);
-  newState = updateFilters(newState, toArray(dataId));
-
+  
+  if (type) {
+    newState = updateFilters(newState, toArray(dataId));
+  }
+  
   return {
     ...updateAllLayerDomainData(newState, dataId, undefined)
   };
