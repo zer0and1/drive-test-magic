@@ -24,6 +24,7 @@ import {ALL_FIELD_TYPES} from 'constants/default-settings';
 import {TOOLTIP_FORMATS, TOOLTIP_FORMAT_TYPES, TOOLTIP_KEY} from 'constants/tooltip';
 import {format as d3Format} from 'd3-format';
 import {bisectLeft} from 'd3-array';
+import _ from 'lodash';
 
 const MAX_LATITUDE = 90;
 const MIN_LATITUDE = -90;
@@ -398,3 +399,21 @@ export function applyCustomFormat(format, field) {
       return v => v;
   }
 }
+
+// Convert number value to string with the following format: '1.2K, 10.3M'
+export function numToStr(num, round = 1) {
+  if (num == Infinity) {
+    num = 'Inf';
+  }
+  else if (num > 1000000) {
+    num = _.round(num / 1000000, round) + 'M';
+  }
+  else if (num > 1000) {
+    num = _.round(num / 1000, round) + 'K';
+  }
+  else {
+    num = _.round(num, round);
+  }
+
+  return num;
+};

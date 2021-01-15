@@ -47,6 +47,10 @@ const StyledLabel = styled.div`
   user-select: none;
 `;
 
+const StyledMarkerWrapper = styled.div`
+  pointer-events: none;
+`;
+
 MapMarkerFactory.deps = [];
 
 export default function MapMarkerFactory() {
@@ -68,14 +72,14 @@ export default function MapMarkerFactory() {
       const scale = mapW / 1920;
 
       return (
-        <div>
+        <StyledMarkerWrapper>
           <StyledMarker color={color} x={x} y={y} scale={scale} />
           {label && (
             <StyledLabel color={color} x={x} y={y} scale={scale}>
               {label}
             </StyledLabel>
           )}
-        </div>
+        </StyledMarkerWrapper>
       );
     }
   }

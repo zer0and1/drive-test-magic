@@ -41,8 +41,8 @@ export default function SourceDataSelectorFactory(DatasetTag) {
       Object.values(datasets).map(ds => ({
         label: ds.label,
         value: ds.id,
-        color: ds.color
-      }))
+        color: ds.color,
+      })).sort((a, b) => a.label > b.label ? 1 : -1)
     );
 
     render() {

@@ -25,13 +25,16 @@ import _ from 'lodash';
 import RangeFilterFactory from 'components/filters/range-filter';
 import FieldPanelWithFieldSelectFactory from 'components/filters/filter-panels/filter-panel-with-field-select';
 import FilterStatusBarFactory from './filter-status-bar';
+import { rgbToHex } from 'utils/color-utils';
+import { numToStr } from 'utils/data-utils';
 
 const StyledAggrBar = styled.div`
   display: flex;
-  color: red;
+  width: 100%;
+  color: ${props => props.color ? props.color : 'red'};
   font-family: ${props => props.fontFamily};
   font-size: 12px;
-  width: 100%;
+  font-weight: bold;
 `;
 
 const StyledAggrItem = styled.div`
@@ -60,14 +63,15 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter, FilterS
       const onSetFilter = useCallback(value => setFilter(idx, 'value', value), [idx, setFilter]);
       const { dataId, fieldIdx } = filter;
       const dataset = datasets?.[dataId[0]];
-      let min = 0, max = 0, avg = 0;
+      let min = 0, max = 0, avg = 0, color = 'red';
 
       if (dataset) {
-        const { allData } = dataset;
-        const fieldData = allData.map(d => d[fieldIdx[0]])
-        min = _.round(_.min(fieldData), 2);
-        max = _.round(_.max(fieldData), 2);
-        avg = _.round(_.mean(fieldData), 2);
+        const { allData, color: rgb } = dataset;
+        const fieldData = allData.map(d => d[fieldIdx[0]]);
+        min = numToStr(_.min(fieldData), 1);
+        max = numToStr(_.max(fieldData), 1);
+        avg = numToStr(_.mean(fieldData), 1);
+        color = rgbToHex(rgb);
       }
 
       return (
@@ -84,7 +88,7 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter, FilterS
           >
             {filter.type && !filter.enlarged && (
               <div className="filter-panel__filter">
-                <StyledAggrBar>
+                <StyledAggrBar color={color}>
                   <StyledAggrItem>min: {min}</StyledAggrItem>
                   <StyledAggrItem>avg: {avg}</StyledAggrItem>
                   <StyledAggrItem>max: {max}</StyledAggrItem>
