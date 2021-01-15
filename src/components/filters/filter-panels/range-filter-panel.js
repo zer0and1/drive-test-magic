@@ -18,13 +18,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {useCallback} from 'react';
+import React, { useCallback } from 'react';
+import styled from 'styled-components';
+import _ from 'lodash';
+
 import RangeFilterFactory from 'components/filters/range-filter';
 import FieldPanelWithFieldSelectFactory from 'components/filters/filter-panels/filter-panel-with-field-select';
+import FilterStatusBarFactory from './filter-status-bar';
 
-RangeFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, RangeFilterFactory];
+const StyledAggrBar = styled.div`
+  display: flex;
+  color: red;
+  font-family: ${props => props.fontFamily};
+  font-size: 12px;
+  width: 100%;
+`;
 
-function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter) {
+const StyledAggrItem = styled.div`
+  float: left;
+  width: 33.33%;
+  text-align: center;
+`
+
+RangeFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, RangeFilterFactory, FilterStatusBarFactory];
+
+function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter, FilterStatusBar) {
   const RangeFilterPanel = React.memo(
     ({
       idx,
@@ -40,6 +58,17 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter) {
       toggleAnimation
     }) => {
       const onSetFilter = useCallback(value => setFilter(idx, 'value', value), [idx, setFilter]);
+      const { dataId, fieldIdx } = filter;
+      const dataset = datasets?.[dataId[0]];
+      let min = 0, max = 0, avg = 0;
+
+      if (dataset) {
+        const { allData } = dataset;
+        const fieldData = allData.map(d => d[fieldIdx[0]])
+        min = _.round(_.min(fieldData), 2);
+        max = _.round(_.max(fieldData), 2);
+        avg = _.round(_.mean(fieldData), 2);
+      }
 
       return (
         <div className="range-filter-panel">
@@ -55,6 +84,11 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter) {
           >
             {filter.type && !filter.enlarged && (
               <div className="filter-panel__filter">
+                <StyledAggrBar>
+                  <StyledAggrItem>min: {min}</StyledAggrItem>
+                  <StyledAggrItem>avg: {avg}</StyledAggrItem>
+                  <StyledAggrItem>max: {max}</StyledAggrItem>
+                </StyledAggrBar>
                 <RangeFilter
                   filter={filter}
                   idx={idx}
@@ -62,6 +96,7 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter) {
                   toggleAnimation={toggleAnimation}
                   setFilter={onSetFilter}
                 />
+                <FilterStatusBar datasets={datasets} filter={filter} />
               </div>
             )}
           </FieldPanelWithFieldSelect>

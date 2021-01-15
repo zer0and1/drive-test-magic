@@ -21,10 +21,11 @@
 import React, {useCallback} from 'react';
 import MultiSelectFilterFactory from 'components/filters/multi-select-filter';
 import FieldPanelWithFieldSelectFactory from 'components/filters/filter-panels/filter-panel-with-field-select';
+import FilterStatusBarFactory from './filter-status-bar';
 
-MultiSelectFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, MultiSelectFilterFactory];
+MultiSelectFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, MultiSelectFilterFactory, FilterStatusBarFactory];
 
-function MultiSelectFilterPanelFactory(FieldPanelWithFieldSelect, MultiSelectFilter) {
+function MultiSelectFilterPanelFactory(FieldPanelWithFieldSelect, MultiSelectFilter, FilterStatusBar) {
   const MultiSelectFilterPanel = React.memo(
     ({
       idx,
@@ -62,6 +63,7 @@ function MultiSelectFilterPanelFactory(FieldPanelWithFieldSelect, MultiSelectFil
                   toggleAnimation={toggleAnimation}
                   setFilter={onSetFilter}
                 />
+                <FilterStatusBar datasets={datasets} filter={filter} />
               </div>
             )}
           </FieldPanelWithFieldSelect>

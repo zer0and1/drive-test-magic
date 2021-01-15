@@ -18,19 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {useCallback, useMemo} from 'react';
+import React, { useCallback, useMemo } from 'react';
 import TimeRangeFilterFactory from 'components/filters/time-range-filter';
-import {Clock} from 'components/common/icons';
+import { Clock } from 'components/common/icons';
 import SourceDataSelectorFactory from 'components/side-panel/common/source-data-selector';
 import FieldPanelWithFieldSelectFactory from 'components/filters/filter-panels/filter-panel-with-field-select';
+import FilterStatusBarFactory from './filter-status-bar';
 
 TimeRangeFilterPanelFactory.deps = [
   FieldPanelWithFieldSelectFactory,
   TimeRangeFilterFactory,
-  SourceDataSelectorFactory
+  SourceDataSelectorFactory,
+  FilterStatusBarFactory
 ];
 
-function TimeRangeFilterPanelFactory(FieldPanelWithFieldSelect, TimeRangeFilter) {
+function TimeRangeFilterPanelFactory(FieldPanelWithFieldSelect, TimeRangeFilter, FilterStatusBar) {
   const TimeRangeFilterPanel = React.memo(
     ({
       idx,
@@ -82,6 +84,7 @@ function TimeRangeFilterPanelFactory(FieldPanelWithFieldSelect, TimeRangeFilter)
                   toggleAnimation={toggleAnimation}
                   setFilter={onSetFilter}
                 />
+                <FilterStatusBar datasets={datasets} filter={filter} />
               </div>
             )}
           </FieldPanelWithFieldSelect>

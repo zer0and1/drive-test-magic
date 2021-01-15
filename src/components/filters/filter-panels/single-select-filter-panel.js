@@ -18,13 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {useCallback} from 'react';
+import React, { useCallback } from 'react';
 import SingleSelectFilterFactory from 'components/filters/single-select-filter';
 import FieldPanelWithFieldSelectFactory from 'components/filters/filter-panels/filter-panel-with-field-select';
+import FilterStatusBarFactory from './filter-status-bar';
 
-SingleSelectFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, SingleSelectFilterFactory];
+SingleSelectFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, SingleSelectFilterFactory, FilterStatusBarFactory];
 
-function SingleSelectFilterPanelFactory(FieldPanelWithFieldSelect, SingleSelectFilter) {
+function SingleSelectFilterPanelFactory(FieldPanelWithFieldSelect, SingleSelectFilter, FilterStatusBar) {
   const SingleSelectFilterPanel = React.memo(
     ({
       idx,
@@ -62,6 +63,7 @@ function SingleSelectFilterPanelFactory(FieldPanelWithFieldSelect, SingleSelectF
                   toggleAnimation={toggleAnimation}
                   setFilter={onSetFilter}
                 />
+                <FilterStatusBar datasets={datasets} filter={filter} />
               </div>
             )}
           </FieldPanelWithFieldSelect>

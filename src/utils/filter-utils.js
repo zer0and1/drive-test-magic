@@ -698,7 +698,7 @@ export function getNumericFieldDomain(data, valueAccessor) {
   // @ts-ignore
   const { histogram, enlargedHistogram } = getHistogram(domain, mappedValue);
 
-  return { domain, step, histogram, enlargedHistogram };
+  return { domain, step, histogram, enlargedHistogram, mappedValue };
 }
 
 /**

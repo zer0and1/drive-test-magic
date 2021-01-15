@@ -18,24 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {useMemo, useCallback} from 'react';
-import {StyledFilterContent} from 'components/common/styled-components';
+import React, { useMemo, useCallback } from 'react';
+import { StyledFilterContent } from 'components/common/styled-components';
 import PolygonFilterFactory from 'components/filters/polygon-filter';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
-import {EyeSeen} from 'components/common/icons';
-import {EyeUnseen} from 'components/common/icons';
+import { EyeSeen } from 'components/common/icons';
+import { EyeUnseen } from 'components/common/icons';
 import FilterPanelHeaderFactory from 'components/side-panel/filter-panel/filter-panel-header';
-import {StyledFilterPanel} from '../components';
+import { StyledFilterPanel } from '../components';
+import FilterStatusBarFactory from './filter-status-bar';
 
 import get from 'lodash.get';
 
 PolygonFilterPanelFactory.deps = [
   FilterPanelHeaderFactory,
   PolygonFilterFactory,
-  PanelHeaderActionFactory
+  PanelHeaderActionFactory,
+  FilterStatusBarFactory
 ];
 
-function PolygonFilterPanelFactory(FilterPanelHeader, PolygonFilter, PanelHeaderAction) {
+function PolygonFilterPanelFactory(FilterPanelHeader, PolygonFilter, PanelHeaderAction, FilterStatusBar) {
   const PolygonFilterPanel = React.memo(
     ({
       idx,
@@ -84,6 +86,7 @@ function PolygonFilterPanelFactory(FilterPanelHeader, PolygonFilter, PanelHeader
                 setLayers={onSetLayers}
                 toggleFilterFeature={toggleFilterFeature}
               />
+              <FilterStatusBar datasets={datasets} filter={filter} />
             </div>
           </StyledFilterContent>
         </div>

@@ -45,7 +45,7 @@ import { LAYER_BLENDINGS } from 'constants/default-settings';
 export function mergeFilters(state, filtersToMerge) {
   const merged = [];
   const unmerged = [];
-  const filterStack = [];
+  const filterStacks = [];
   const { datasets } = state;
   let updatedDatasets = datasets;
 
@@ -77,17 +77,22 @@ export function mergeFilters(state, filtersToMerge) {
             filter,
             layers
           );
-          
-          filterStack.push(updatedFilter);
 
-          const filteredDataset = filterDataset(dataset, filterStack, layers);
+          filterStacks.push(updatedFilter);
+
+          const { filteredIndexForDomain: filteredResultIndex } = filterDataset(dataset, filterStacks, layers);
 
           updatedDataset = {
             ...updatedDataset,
-            filteredIndexAcc: filteredDataset.filteredIndexForDomain,
+            filteredIndexAcc: filteredResultIndex,
           };
-
+          
           if (updatedFilter) {
+            updatedFilter = {
+              ...updatedFilter,
+              filteredResultIndex
+            };
+            
             return {
               ...acc,
               // merge filter props
