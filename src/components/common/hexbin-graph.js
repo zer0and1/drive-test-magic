@@ -18,44 +18,67 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {useMemo} from 'react';
-import styled from 'styled-components';
-import ApexCharts from "react-apexcharts";
-import {Line} from 'react-chartjs-2';
+import React, { Component } from 'react';
 import ReactHighcharts from 'react-highcharts';
 import _ from 'lodash';
-import {mean, min, max, median, deviation, variance, sum} from 'd3-array';
-import moment from 'moment';
+import { mean, min, max, median, deviation, variance, sum } from 'd3-array';
 
 function HexbinGraphFactory() {
-  const HexbinGraph = ({
-    visState,
-    index,
-    aggregation,
-    ymin,
-    ymax,
-    cellnames
-  }) => {
+  class HexbinGraph extends Component {
+    static chartState = {
+      index: null,
+      aggregation: null,
+      visState: { object: { points: [] } },
+    };
 
-    const lineChart = visState?.object?.points;
+    shouldComponentUpdate(nextProps) {
+      const { index: newIdx, aggregation: newAggr, visState: { object: { points: newPoints } } } = nextProps;
+      const { index: oldIdx, aggregation: oldAggr, visState: { object: { points: oldPoints } } } = HexbinGraph.chartState;
+      HexbinGraph.chartState = { index: newIdx, aggregation: newAggr, visState: nextProps.visState };
 
-    const data = (lineChart != undefined) ? lineChart.map((item) => {
-      item.value = item.data[index-1];
-      item.time = item.data[8]
-      // item.time = moment(item.data[8]).format('YYYY-MM-dd HH:mm:ss');
-      // item.time = new Date(new Date(item.data[8]).setMilliseconds(0)).toString()
-      item.enodeb = item.data[11]
-      return {value: item.value, time: item.time, enodeb: item.enodeb}
-    }) : [];
+      if (oldIdx != newIdx) {
+        return true;
+      }
+      
+      if (oldAggr != newAggr) {
+        return true;
+      }
 
-    // initial dataset
-    let result = data.reduce(function (r, o) {
-      var k = o.time + o.enodeb;
-      if (r[k]) {
-        if (o.value) r[k].values.push(o.value);
-      } else {
+      if (JSON.stringify(oldPoints) != JSON.stringify(newPoints)) {
+        return true;
+      }
+
+      return false;
+    }
+
+    render() {
+      const {
+        visState,
+        index,
+        aggregation,
+        ymin,
+        ymax,
+        cellnames
+      } = this.props;
+
+      const lineChart = visState?.object?.points;
+
+      const data = (lineChart != undefined) ? lineChart.map((item) => {
+        item.value = item.data[index - 1];
+        item.time = item.data[8]
+        // item.time = moment(item.data[8]).format('YYYY-MM-dd HH:mm:ss');
+        // item.time = new Date(new Date(item.data[8]).setMilliseconds(0)).toString()
+        item.enodeb = item.data[11]
+        return { value: item.value, time: item.time, enodeb: item.enodeb }
+      }) : [];
+
+      let result = data.reduce(function (r, o) {
+        var k = o.time + o.enodeb;
+        if (r[k]) {
+          if (o.value) r[k].values.push(o.value);
+        } else {
           r[k] = o;
-          r[k].values = [o.value]; 
+          r[k].values = [o.value];
           r[k].average = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
           r[k].sum = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
           r[k].max = o.value; // taking 'Maximum' attribute as an items counter(on the first phase)
@@ -63,9 +86,9 @@ function HexbinGraphFactory() {
           r[k].median = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
           r[k].stdev = 0; // taking 'Stdev' attribute as an items counter(on the first phase)
           r[k].v = 0; // taking 'variance' attribute as an items counter(on the first phase)
-      }
-      return r;
-    }, {});
+        }
+        return r;
+      }, {});
 
     const labels = Object.keys(_.groupBy(result, 'time')).map(item => {return new Date(item).getTime()});
     const diff = max(labels) - min(labels);
@@ -167,142 +190,143 @@ function HexbinGraphFactory() {
           default:
             v.y = mean(k.averageByTime);
           }
-        yvalues[i].push(v);
-      }
-    }
-
-    const colors = ['#2E93fA', '#66DA26', '#FF9800', '#7E36AF', '#00ECFF', '#f0ec26', '#E91E63'];
-
-    const series = [];
-    const annos = [];
-    let iter = 0;
-
-    for (var ids of enodebIds)
-    {
-      const item = {
-        name: ids,
-        type: 'line',
-        data: yvalues[ids]
-      }
-      const anno = {
-        value: mean(yvalues[ids].map(it => { return it.y })),
-        color: colors[iter++],
-        dashStyle: 'shortdash',
-        width: 1
-      }
-      series.push(item);
-      annos.push(anno);
-    }
-
-    const withZero = num => {
-      if (num < 10)
-        return '0' + num;
-      return num;
-    }
-
-    const config = {
-      chart: {
-        height: 350,
-        type: 'line',
-        backgroundColor: '#29323c'
-      },
-      title: {
-        text: null
-      },
-      colors: colors,
-      xAxis: {
-        type: 'datetime',
-        lineWidth: 1,
-        lineColor: '#4e5053',
-        gridLineWidth: 1,
-        gridLineColor: '#4e5053',
-        labels: {
-          style: {
-            color: '#e3e3e3'
-          }
+          yvalues[i].push(v);
         }
-      },
-      yAxis: {
-        tickAmount: 6,
+      }
+
+      const colors = ['#2E93fA', '#66DA26', '#FF9800', '#7E36AF', '#00ECFF', '#f0ec26', '#E91E63'];
+
+      const series = [];
+      const annos = [];
+      let iter = 0;
+
+      for (var ids of enodebIds) {
+        const item = {
+          name: ids,
+          type: 'line',
+          data: yvalues[ids]
+        }
+        const anno = {
+          value: mean(yvalues[ids].map(it => { return it.y })),
+          color: colors[iter++],
+          dashStyle: 'shortdash',
+          width: 1
+        }
+        series.push(item);
+        annos.push(anno);
+      }
+
+      const withZero = num => {
+        if (num < 10)
+          return '0' + num;
+        return num;
+      }
+
+      const config = {
+        chart: {
+          height: 350,
+          type: 'line',
+          backgroundColor: '#29323c'
+        },
         title: {
           text: null
         },
-        min: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymin : undefined,
-        max: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymax : undefined,
-        lineWidth: 0,
-        lineColor: '#4e5053',
-        gridLineWidth: 1,
-        gridLineColor: '#4e5053',
-        labels: {
-          style: {
-            color: '#e3e3e3'
+        colors: colors,
+        xAxis: {
+          type: 'datetime',
+          lineWidth: 1,
+          lineColor: '#4e5053',
+          gridLineWidth: 1,
+          gridLineColor: '#4e5053',
+          labels: {
+            style: {
+              color: '#e3e3e3'
+            }
           }
         },
-        plotLines: annos
-      },
-      series: series,
-      plotOptions: {
-        series: {
-          step: 'center',
-          animation: {
-            duration: 0
-          }
+        yAxis: {
+          tickAmount: 6,
+          title: {
+            text: null
+          },
+          min: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymin : undefined,
+          max: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymax : undefined,
+          lineWidth: 0,
+          lineColor: '#4e5053',
+          gridLineWidth: 1,
+          gridLineColor: '#4e5053',
+          labels: {
+            style: {
+              color: '#e3e3e3'
+            }
+          },
+          plotLines: annos
         },
-        line: {
-          events: {
-            legendItemClick: function() {
-              if (this.yAxis.plotLinesAndBands.length < enodebIds.length) {
-                this.yAxis.update({
-                  plotLines: annos
-                })
-              } else {
-                this.yAxis.plotLinesAndBands[this.index].destroy();
+        series: series,
+        plotOptions: {
+          series: {
+            step: 'center',
+            animation: {
+              duration: 0
+            }
+          },
+          line: {
+            events: {
+              legendItemClick: function () {
+                if (this.yAxis.plotLinesAndBands.length < enodebIds.length) {
+                  this.yAxis.update({
+                    plotLines: annos
+                  })
+                } else {
+                  this.yAxis.plotLinesAndBands[this.index].destroy();
+                }
               }
             }
           }
-        }
-      },
-      legend:{
-        align: 'right',
-        verticalAlign: 'middle',
-        itemStyle: {
+        },
+        legend: {
+          align: 'right',
+          verticalAlign: 'middle',
+          itemStyle: {
             color: '#e3e3e3',
-        },
-        layout: 'vertical',
-        useHTML: true,
-        itemHiddenStyle: {"color": "#616b75"},
-        labelFormatter: function () {
-          const color = this.color;
-          const val = this.yData;
-          return cellnames[this.name] + "<br/><span style='padding-left:3em'>" + 
-              "<span style='color:" + color + "'>#min:</span>" + min(val).toFixed(2) + 
-              "<span style='color:" + color + "'>#max:</span>" + max(val).toFixed(2) + 
-              "<span style='color:" + color + "'>#avg:</span>" + mean(val).toFixed(2) + 
-              "<span style='color:" + color + "'>#smp:</span>" + smps.filter(item => item.key === this.name)[0].value +
+          },
+          layout: 'vertical',
+          useHTML: true,
+          itemHiddenStyle: { "color": "#616b75" },
+          labelFormatter: function () {
+            const color = this.color;
+            const val = this.yData;
+            return cellnames[this.name] + "<br/><span style='padding-left:3em'>" + 
+                "<span style='color:" + color + "'>#min:</span>" + min(val).toFixed(2) + 
+                "<span style='color:" + color + "'>#max:</span>" + max(val).toFixed(2) + 
+                "<span style='color:" + color + "'>#avg:</span>" + mean(val).toFixed(2) + 
+                "<span style='color:" + color + "'>#smp:</span>" + smps.filter(item => item.key === this.name)[0].value +
               "</span>";
-        }
-      },
-      tooltip: {
-        shared: true,
-        backgroundColor: '#232630',
-        borderColor: '#19222c',
-        style: {
-          color: '#e3e3e3'
+          }
         },
-        xDateFormat: '%Y-%m-%d %H:00',
-        useHTML: true,
-        headerFormat: '<center>{point.key}</center><table>',
-        pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
+        tooltip: {
+          shared: true,
+          backgroundColor: '#232630',
+          borderColor: '#19222c',
+          style: {
+            color: '#e3e3e3'
+          },
+          xDateFormat: '%Y-%m-%d %H:00',
+          useHTML: true,
+          headerFormat: '<center>{point.key}</center><table>',
+          pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
             '<td style="text-align: right">{point.y}</td></tr>',
-        footerFormat: '</table>',
-        valueDecimals: 2
+          footerFormat: '</table>',
+          valueDecimals: 2
+        }
       }
-    }
 
-    return (
-      <ReactHighcharts config = {config}/>
-    );
-  };
+      return (
+        <ReactHighcharts config={config} />
+      );
+    }
+  }
+
   return HexbinGraph;
 }
 
