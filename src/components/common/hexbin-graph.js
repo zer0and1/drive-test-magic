@@ -48,7 +48,8 @@ function HexbinGraphFactory() {
       return {value: item.value, time: item.time, enodeb: item.enodeb}
     }) : [];
 
-    const result = data.reduce(function (r, o) {
+    // initial dataset
+    let result = data.reduce(function (r, o) {
       var k = o.time + o.enodeb;
       if (r[k]) {
         if (o.value) r[k].values.push(o.value);
@@ -66,7 +67,11 @@ function HexbinGraphFactory() {
       return r;
     }, {});
 
+    const labels = Object.keys(_.groupBy(result, 'time')).map(item => {return new Date(item).getTime()});
+    const diff = max(labels) - min(labels);
+
     Object.keys(result).forEach(function(k) {
+      // calculate aggregation values
       result[k].average = result[k].value != undefined ? mean(result[k].values).toFixed(2) : null;
       result[k].max = result[k].value != undefined ? max(result[k].values).toFixed(2) : null;
       result[k].min = result[k].value != undefined ? min(result[k].values).toFixed(2) : null;
@@ -74,59 +79,93 @@ function HexbinGraphFactory() {
       result[k].sum = result[k].value != undefined ? sum(result[k].values).toFixed(2) : null;
       result[k].stdev = result[k].values.length > 1 ? deviation(result[k].values).toFixed(2) : 0;
       result[k].v = result[k].values.length > 1 ? variance(result[k].values).toFixed(2) : 0;
+
+      // groupBy time with "some fixed values starting with 1h then like 4h, 1d, 4d, 10d, 1m, 3month"
+      let t = new Date(result[k].time)
+      if (diff > 3600000 * 24 * 30 * 36) {
+        // groupBy 3-month
+        result[k].groupTime = new Date(t.getFullYear(), Math.floor( t.getMonth() / 3 ) * 3).getTime()
+      } else if (diff > 3600000 * 24 * 30 * 12) {
+        // groupBy 1-month
+        result[k].groupTime = new Date(t.getFullYear(), t.getMonth()).getTime()
+      } else if (diff > 3600000 * 24 * 30 * 3) {
+        // groupBy 10-days
+        result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), Math.floor(( min(t.getDate(), 30) - 1 ) / 10 ) * 10 + 1).getTime()
+      } else if (diff > 3600000 * 24 * 30) {
+        // groupBy 4-days
+        result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), Math.floor(( t.getDate() - 1 ) / 4 ) * 4 + 1).getTime()
+      } else if (diff > 3600000 * 24 * 6) {
+        // groupBy 1-days
+        result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()
+      } else if (diff > 3600000 * 24 * 2) {
+        // groupBy 4-hours
+        result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), t.getDate(), Math.floor( t.getHours() / 4 ) * 4).getTime()
+      } else {
+        // groupBy 1-hour
+        result[k].groupTime = new Date(t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()).getTime()
+      }
+
     })
 
-    const labels = Object.keys(_.groupBy(result, 'time')).map(item => {return new Date(item).getTime()});
-    const diff = max(labels) - min(labels);
+    const smps = Object.values(_.groupBy(result, 'enodeb')).map(item => {return {"key": item[0].enodeb, "value": item.length}});
+
+    result = Object.values(result).reduce(function (r, o) {
+      var k = o.groupTime;
+      if (r[k]) {
+        if (o.value) {
+          r[k].valuesByTime.push(o.value);
+          r[k].averageByTime.push(o.average);
+          r[k].sumByTime.push(o.sum);
+          r[k].maxByTime.push(o.max);
+          r[k].minByTime.push(o.min);
+          r[k].stdevByTime.push(o.stdev);
+          r[k].vByTime.push(o.v);
+        }
+      } else {
+          r[k] = o;
+          r[k].valuesByTime = [o.value]; 
+          r[k].averageByTime = [o.average]; // taking 'Minimum' attribute as an items counter(on the first phase)
+          r[k].sumByTime = [o.sum]; // taking 'Minimum' attribute as an items counter(on the first phase)
+          r[k].maxByTime = [o.max]; // taking 'Maximum' attribute as an items counter(on the first phase)
+          r[k].minByTime = [o.min]; // taking 'Minimum' attribute as an items counter(on the first phase)
+          r[k].medianByTime = [o.median]; // taking 'Minimum' attribute as an items counter(on the first phase)
+          r[k].stdevByTime = [o.stdev]; // taking 'Stdev' attribute as an items counter(on the first phase)
+          r[k].vByTime = [o.v]; // taking 'variance' attribute as an items counter(on the first phase)
+      }
+      return r;
+    }, {});
 
     const dataset = _.groupBy(result, 'enodeb');
     const enodebIds = Object.keys(dataset)
-
-    console.log(dataset)
-    if (diff > 3600000 * 24 * 30 * 36) {
-      // groupBy 3m
-    } else if (diff > 3600000 * 24 * 30 * 12) {
-      // groupBy 1m
-    } else if (diff > 3600000 * 24 * 30 * 3) {
-      // groupBy 10d
-    } else if (diff > 3600000 * 24 * 10 * 30) {
-      // groupBy 4d
-    } else if (diff > 3600000 * 24 * 10 * 30) {
-      // groupBy 1d
-    } else if (diff > 3600000 * 24 * 10 * 30) {
-      // groupBy 4h
-    } else {
-      // groupBy 1h
-    }
 
     const yvalues = [];
     for (var i of enodebIds) {
       yvalues[i] = []
       for (var k of dataset[i]) {
         let v = {
-          x: new Date(k.time).getTime()
+          x: k.groupTime
         };
         switch (aggregation) {
           case 'maximum':
-            v.y = parseFloat(k.max);
+            v.y = max(k.maxByTime);
             break;
           case 'minimum':
-            v.y = parseFloat(k.min);
+            v.y = min(k.minByTime);
             break;
           case 'median':
-            v.y = parseFloat(k.median);
+            v.y = median(k.medianByTime);
             break;
           case 'sum':
-            v.y = parseFloat(k.sum);
+            v.y = sum(k.sumByTime);
             break;
           case 'stdev':
-            v.y = parseFloat(k.stdev);
+            v.y = deviation(k.stdevByTime);
             break;
           case 'variance':
-            v.y = parseFloat(k.v);
+            v.y = variance(k.vByTime);
             break;
           default:
-            v.y = parseFloat(k.average);
+            v.y = mean(k.averageByTime);
           }
         yvalues[i].push(v);
       }
@@ -239,7 +278,7 @@ function HexbinGraphFactory() {
               "<span style='color:" + color + "'>#min:</span>" + min(val).toFixed(2) + 
               "<span style='color:" + color + "'>#max:</span>" + max(val).toFixed(2) + 
               "<span style='color:" + color + "'>#avg:</span>" + mean(val).toFixed(2) + 
-              "<span style='color:" + color + "'>#smp:</span>" + val.length +
+              "<span style='color:" + color + "'>#smp:</span>" + smps.filter(item => item.key === this.name)[0].value +
               "</span>";
         }
       },
@@ -250,7 +289,7 @@ function HexbinGraphFactory() {
         style: {
           color: '#e3e3e3'
         },
-        xDateFormat: '%Y-%m-%d %H',
+        xDateFormat: '%Y-%m-%d %H:00',
         useHTML: true,
         headerFormat: '<center>{point.key}</center><table>',
         pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
