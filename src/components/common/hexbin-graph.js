@@ -19,9 +19,60 @@
 // THE SOFTWARE.
 
 import React, { Component } from 'react';
-import ReactHighcharts from 'react-highcharts';
+import zingchart from 'zingchart/es6';
+import ZingChart from 'zingchart-react';
 import _ from 'lodash';
 import { mean, min, max, median, deviation, variance, sum } from 'd3-array';
+
+const colors = ['#2E93fA', '#66DA26', '#FF9800', '#7E36AF', '#00ECFF', '#f0ec26', '#E91E63'];
+
+let chartConfig = {
+  type: 'line',
+  options: {
+    contextMenu: {
+      visible: true
+    },
+  },
+  theme: 'dark',
+  backgroundColor:"#29323c",
+  plot: {
+    aspect: 'jumped'
+  },
+  scaleX: {
+    transform: {
+      type: "date",
+      all: "%d %M, %H:00"
+    },
+    guide: {
+      lineColor: '#4e5053',
+      visible: true
+    },
+    labels: []
+  },
+  crosshairX: {
+    // plotLabel: {
+    //   headerText: '%kl<br/>'
+    // },
+    // scaleLabel: {
+    //   visible: false
+    // }
+  },
+  scaleY: {
+    guide: {
+      lineColor: '#4e5053'
+    },
+    markers: []
+  },
+  legend: {
+    align: 'right',
+    verticalAlign: 'middle'
+  },
+  tooltip: {
+    visible: false
+  },
+  series: []
+}
+
 
 function HexbinGraphFactory() {
   class HexbinGraph extends Component {
@@ -63,17 +114,54 @@ function HexbinGraphFactory() {
 
       const lineChart = visState?.object?.points;
 
+      const timePeriod = (lineChart != undefined) ? 
+                          Object.values(lineChart).map(item => {return new Date(item.data[8]).getTime()}) :
+                          undefined;
+      const diff = (timePeriod != undefined) ? max(timePeriod) - min(timePeriod) : 0;
+
+      let func = (t => {
+        if (diff > 3600000 * 24 * 30 * 36) {
+          // groupBy 3-month
+          return new Date(t.getFullYear(), Math.floor( t.getMonth() / 3 ) * 3).getTime()
+        }
+        if (diff > 3600000 * 24 * 30 * 12) {
+          // groupBy 1-month
+          return new Date(t.getFullYear(), t.getMonth()).getTime()
+        }
+        if (diff > 3600000 * 24 * 30 * 3) {
+          // groupBy 10-days
+          return new Date(t.getFullYear(), t.getMonth(), Math.floor(( min(t.getDate(), 30) - 1 ) / 10 ) * 10 + 1).getTime()
+        }
+        if (diff > 3600000 * 24 * 30) {
+          // groupBy 4-days
+          return new Date(t.getFullYear(), t.getMonth(), Math.floor(( t.getDate() - 1 ) / 4 ) * 4 + 1).getTime()
+        }
+        if (diff > 3600000 * 24 * 6) {
+          // groupBy 1-days
+          return new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()
+        }
+        if (diff > 3600000 * 24 * 2) {
+          // groupBy 4-hours
+          return new Date(t.getFullYear(), t.getMonth(), t.getDate(), Math.floor( t.getHours() / 4 ) * 4).getTime()
+        }
+        // groupBy 1-hour
+        return new Date(t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()).getTime()
+      });
+
       const data = (lineChart != undefined) ? lineChart.map((item) => {
-        item.value = item.data[index - 1];
-        item.time = item.data[8]
-        // item.time = moment(item.data[8]).format('YYYY-MM-dd HH:mm:ss');
-        // item.time = new Date(new Date(item.data[8]).setMilliseconds(0)).toString()
-        item.enodeb = item.data[11]
-        return { value: item.value, time: item.time, enodeb: item.enodeb }
+        const obj = {
+          value : item.data[index - 1],
+          enodeb : item.data[11],
+
+          // groupBy time with "some fixed values starting with 1h then like 4h, 1d, 4d, 10d, 1m, 3month"
+          groupTime : func(new Date(item.data[8]))
+        }
+
+        return obj
       }) : [];
 
       let result = data.reduce(function (r, o) {
-        var k = o.time + o.enodeb;
+        var k = o.groupTime + o.enodeb;
         if (r[k]) {
           if (o.value) r[k].values.push(o.value);
         } else {
@@ -90,32 +178,6 @@ function HexbinGraphFactory() {
         return r;
       }, {});
 
-      const labels = Object.keys(_.groupBy(result, 'time')).map(item => {return new Date(item).getTime()});
-      const diff = max(labels) - min(labels);
-      let startDate, endDate, flag = false;
-
-      let func = (t => {
-        if (diff > 3600000 * 24 * 30 * 36) {
-          return new Date(t.getFullYear(), Math.floor( t.getMonth() / 3 ) * 3).getTime()
-        }
-        if (diff > 3600000 * 24 * 30 * 12) {
-          return new Date(t.getFullYear(), t.getMonth()).getTime()
-        }
-        if (diff > 3600000 * 24 * 30 * 3) {
-          return new Date(t.getFullYear(), t.getMonth(), Math.floor(( min(t.getDate(), 30) - 1 ) / 10 ) * 10 + 1).getTime()
-        }
-        if (diff > 3600000 * 24 * 30) {
-          return new Date(t.getFullYear(), t.getMonth(), Math.floor(( t.getDate() - 1 ) / 4 ) * 4 + 1).getTime()
-        }
-        if (diff > 3600000 * 24 * 6) {
-          return new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()
-        }
-        if (diff > 3600000 * 24 * 2) {
-          return new Date(t.getFullYear(), t.getMonth(), t.getDate(), Math.floor( t.getHours() / 4 ) * 4).getTime()
-        }
-        return new Date(t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()).getTime()
-      });
-
       Object.keys(result).forEach(function(k) {
         // calculate aggregation values
         result[k].average = result[k].value != undefined ? mean(result[k].values).toFixed(2) : null;
@@ -125,157 +187,45 @@ function HexbinGraphFactory() {
         result[k].sum = result[k].value != undefined ? sum(result[k].values).toFixed(2) : null;
         result[k].stdev = result[k].values.length > 1 ? deviation(result[k].values).toFixed(2) : 0;
         result[k].v = result[k].values.length > 1 ? variance(result[k].values).toFixed(2) : 0;
-
-        // groupBy time with "some fixed values starting with 1h then like 4h, 1d, 4d, 10d, 1m, 3month"
-        let t = new Date(result[k].time)
-        if (diff > 3600000 * 24 * 30 * 36) {
-          // groupBy 3-month
-          result[k].groupTime = func(t)
-          if (!flag) {
-            t = new Date(min(labels))
-            t.setMonth(t.getMonth() - 3)
-            startDate = func(t)
-            t = new Date(max(labels))
-            t.setMonth(t.getMonth() + 3)
-            endDate = func(t)
-          }
-        } else if (diff > 3600000 * 24 * 30 * 12) {
-          // groupBy 1-month
-          result[k].groupTime = func(t)
-          if (!flag) {
-            t = new Date(min(labels))
-            t.setMonth(t.getMonth() - 1)
-            startDate = func(t)
-            t = new Date(max(labels))
-            t.setMonth(t.getMonth() + 1)
-            endDate = func(t)
-          }
-        } else if (diff > 3600000 * 24 * 30 * 3) {
-          // groupBy 10-days
-          result[k].groupTime = func(t)
-          if (!flag) {
-            t = new Date(min(labels))
-            t.setDate(t.getDate() - 10)
-            startDate = func(t)
-            t = new Date(max(labels))
-            t.setDate(t.getDate() + 10)
-            endDate = func(t)
-          }
-        } else if (diff > 3600000 * 24 * 30) {
-          // groupBy 4-days
-          result[k].groupTime = func(t)
-          if (!flag) {
-            t = new Date(min(labels))
-            t.setDate(t.getDate() - 4)
-            startDate = func(t)
-            t = new Date(max(labels))
-            t.setDate(t.getDate() + 4)
-            endDate = func(t)
-          }
-        } else if (diff > 3600000 * 24 * 6) {
-          // groupBy 1-days
-          result[k].groupTime = func(t)
-          if (!flag) {
-            t = new Date(min(labels) - 3600000 * 24)
-            startDate = func(t)
-            t = new Date(max(labels) + 3600000 * 24)
-            endDate = func(t)
-          }
-        } else if (diff > 3600000 * 24 * 2) {
-          // groupBy 4-hours
-          result[k].groupTime = func(t)
-          if (!flag) {
-            t = new Date(min(labels) - 3600000 * 4)
-            startDate = func(t)
-            t = new Date(max(labels) + 3600000 * 4)
-            endDate = func(t)
-          }
-        } else {
-          // groupBy 1-hour
-          result[k].groupTime = func(t)
-          if (!flag) {
-            t = new Date(min(labels) - 3600000)
-            startDate = func(t)
-            t = new Date(max(labels) + 3600000)
-            endDate = func(t)
-          }
-        }
-        flag = true;
       })
 
-      const smps = Object.values(_.groupBy(result, 'enodeb')).map(item => {return {"key": item[0].enodeb, "value": item.length}});
-
-      result = Object.values(result).reduce(function (r, o) {
-        var k = o.groupTime;
-        if (r[k]) {
-          if (o.value) {
-            r[k].valuesByTime.push(o.value);
-            r[k].averageByTime.push(o.average);
-            r[k].sumByTime.push(o.sum);
-            r[k].maxByTime.push(o.max);
-            r[k].minByTime.push(o.min);
-            r[k].stdevByTime.push(o.stdev);
-            r[k].vByTime.push(o.v);
-          }
-        } else {
-            r[k] = o;
-            r[k].valuesByTime = [o.value]; 
-            r[k].averageByTime = [o.average]; // taking 'Minimum' attribute as an items counter(on the first phase)
-            r[k].sumByTime = [o.sum]; // taking 'Minimum' attribute as an items counter(on the first phase)
-            r[k].maxByTime = [o.max]; // taking 'Maximum' attribute as an items counter(on the first phase)
-            r[k].minByTime = [o.min]; // taking 'Minimum' attribute as an items counter(on the first phase)
-            r[k].medianByTime = [o.median]; // taking 'Minimum' attribute as an items counter(on the first phase)
-            r[k].stdevByTime = [o.stdev]; // taking 'Stdev' attribute as an items counter(on the first phase)
-            r[k].vByTime = [o.v]; // taking 'variance' attribute as an items counter(on the first phase)
-        }
-        return r;
-      }, {});
+      const smps = Object.values(_.groupBy(data, 'enodeb')).map(item => {return {"key": item[0].enodeb, "value": item.length}});
 
       const dataset = _.groupBy(result, 'enodeb');
       const enodebIds = Object.keys(dataset)
 
+      const labels = Object.keys(_.groupBy(result, 'groupTime')).reverse()
+
       const yvalues = [];
       for (var i of enodebIds) {
         yvalues[i] = []
-        yvalues[i].push({
-          x: endDate,
-          y: -0x3f3f3f3f
-        })
-        for (var k of dataset[i]) {
-          let v = {
-            x: k.groupTime
-          };
+        for (var k of labels) {
+          let v = null;
           switch (aggregation) {
           case 'maximum':
-            v.y = max(k.maxByTime);
+            v = result[k+i] !== undefined ? result[k+i]?.max : null;
             break;
           case 'minimum':
-            v.y = min(k.minByTime);
+            v = result[k+i] !== undefined ? result[k+i]?.min : null;
             break;
           case 'median':
-            v.y = median(k.medianByTime);
+            v = result[k+i] !== undefined ? result[k+i]?.median : null;
             break;
           case 'sum':
-            v.y = sum(k.sumByTime);
+            v = result[k+i] !== undefined ? result[k+i]?.sum : null;
             break;
           case 'stdev':
-            v.y = deviation(k.stdevByTime);
+            v = result[k+i] !== undefined ? result[k+i]?.stdev : null;
             break;
           case 'variance':
-            v.y = variance(k.vByTime);
+            v = result[k+i] !== undefined ? result[k+i]?.v : null;
             break;
           default:
-            v.y = mean(k.averageByTime);
+            v = result[k+i] !== undefined ? result[k+i]?.average : null;
           }
           yvalues[i].push(v);
         }
-        yvalues[i].push({
-          x: startDate,
-          y: -0x3f3f3f3f
-        })
       }
-
-      const colors = ['#2E93fA', '#66DA26', '#FF9800', '#7E36AF', '#00ECFF', '#f0ec26', '#E91E63'];
 
       const series = [];
       const annos = [];
@@ -283,128 +233,62 @@ function HexbinGraphFactory() {
 
       for (var ids of enodebIds) {
         const item = {
-          name: ids,
-          type: 'line',
-          data: yvalues[ids]
+          text: ids,
+          lineWidth: 10,
+          lineColor: colors[iter],
+          marker: {
+            backgroundColor: colors[iter]
+          },
+          legendText: cellnames[ids] + "<br/>" + 
+                      "<span style='color:" + colors[iter] + "'>#avg:</span>" + mean(yvalues[ids]).toFixed(2) + 
+                      "<span style='color:" + colors[iter] + "'>#max:</span>" + max(yvalues[ids]) + 
+                      "<span style='color:" + colors[iter] + "'>#min:</span>" + min(yvalues[ids]) + 
+                      "<span style='color:" + colors[iter] + "'>#smp:</span>" + smps.filter(item => item.key === ids)[0].value,
+          values: yvalues[ids].map(num => num != null ? Number(num) : null)
         }
         const anno = {
-          value: mean( yvalues[ids].map(it => { return it.y }).slice(1, yvalues[ids].length - 1) ),
-          color: colors[iter++],
-          dashStyle: 'shortdash',
-          width: 1,
-          id: ids,
-          zIndex: 10
+          type: 'line',
+          range: [mean( yvalues[ids] )],
+          lineColor: colors[iter++],
+          lineStyle: 'dashed',
+          alpha: 1,
+          id: ids
         }
         series.push(item);
         annos.push(anno);
       }
 
-      console.log(series)
-
-      const withZero = num => {
-        if (num < 10)
-          return '0' + num;
-        return num;
+      chartConfig = {
+        ...chartConfig,
+        scaleX: {
+          ...chartConfig.scaleX,
+          labels: labels
+        },
+        scaleY: {
+          ...chartConfig.scaleY,
+          minValue: ymin,
+          maxValue: ymax,
+          markers: annos
+        },
+        series: series
       }
 
-      const config = {
-        chart: {
-          height: 350,
-          type: 'line',
-          backgroundColor: '#29323c'
-        },
-        title: {
-          text: null
-        },
-        colors: colors,
-        xAxis: {
-          type: 'datetime',
-          lineWidth: 1,
-          lineColor: '#4e5053',
-          gridLineWidth: 1,
-          gridLineColor: '#4e5053',
-          labels: {
-            style: {
-              color: '#e3e3e3'
-            }
+      const legendItemClick = (e) => {
+        chartConfig.scaleY.markers.filter(item => item.id === e.plottext)[0].alpha ^= 1;
+        zingchart.exec('hexbinGraph', 'modify', {
+          data : {
+            scaleY: chartConfig.scaleY
           }
-        },
-        yAxis: {
-          tickAmount: 6,
-          title: {
-            text: null
-          },
-          min: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymin : undefined,
-          max: aggregation == 'average' || aggregation == 'minimum' || aggregation == 'maximum' ? ymax : undefined,
-          lineWidth: 0,
-          lineColor: '#4e5053',
-          gridLineWidth: 1,
-          gridLineColor: '#4e5053',
-          labels: {
-            style: {
-              color: '#e3e3e3'
-            }
-          },
-          plotLines: annos
-        },
-        series: series,
-        plotOptions: {
-          series: {
-            step: 'center',
-            animation: {
-              duration: 0
-            }
-          },
-          line: {
-            events: {
-              legendItemClick: function () {
-                annos.filter(item => item.id === this.name)[0].width ^= 1;
-                this.yAxis.update({
-                  plotLines: annos
-                })
-              }
-            }
-          }
-        },
-        legend: {
-          align: 'right',
-          verticalAlign: 'middle',
-          itemStyle: {
-            color: '#e3e3e3',
-          },
-          layout: 'vertical',
-          useHTML: true,
-          itemHiddenStyle: { "color": "#616b75" },
-          labelFormatter: function () {
-            const color = this.color;
-            const val = this.yData;
-            return cellnames[this.name] + "<br/><span style='padding-left:3em'>" + 
-                "<span style='color:" + color + "'>#min:</span>" + min(val.slice(1, val.length - 1)).toFixed(2) + 
-                "<span style='color:" + color + "'>#max:</span>" + max(val.slice(1, val.length - 1)).toFixed(2) + 
-                "<span style='color:" + color + "'>#avg:</span>" + mean(val.slice(1, val.length - 1)).toFixed(2) + 
-                "<span style='color:" + color + "'>#smp:</span>" + smps.filter(item => item.key === this.name)[0].value +
-              "</span>";
-          }
-        },
-        tooltip: {
-          shared: true,
-          backgroundColor: '#232630',
-          borderColor: '#19222c',
-          style: {
-            color: '#e3e3e3'
-          },
-          xDateFormat: '%Y-%m-%d %H:00',
-          useHTML: true,
-          headerFormat: '<center>{point.key}</center><table>',
-          pointFormat: '<tr><td style="color: {series.color}">{series.name}: </td>' +
-            '<td style="text-align: right">{point.y}</td></tr>',
-          footerFormat: '</table>',
-          valueDecimals: 2
-        }
+        });
       }
 
       return (
-        <ReactHighcharts config={config} />
+        <ZingChart
+          id='hexbinGraph'
+          data={chartConfig}
+          legend_item_click={legendItemClick}
+          legend_marker_click={legendItemClick}
+        />
       );
     }
   }
