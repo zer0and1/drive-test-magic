@@ -9159,3 +9159,20 @@ zen-observable@^0.8.14:
   version "0.8.15"
   resolved "https://registry.yarnpkg.com/zen-observable/-/zen-observable-0.8.15.tgz#96415c512d8e3ffd920afd3889604e30b9eaac15"
   integrity sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==
+
+"zingchart-constants@github:zingchart/zingchart-constants#master":
+  version "1.0.2"
+  resolved "https://codeload.github.com/zingchart/zingchart-constants/tar.gz/2cb0b3a55bbae8ee6fb943161fdd5b71618bc95f"
+
+zingchart-react@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/zingchart-react/-/zingchart-react-3.1.0.tgz#a394264ad316402cdd48679c031161510aabca4c"
+  integrity sha512-emVB4wEmyR9TlZV1LzksSZ+NwG6voroDqJaMTbOpLF5JDSw/nppf4HWn4rLgQYsdb6uizEp2Pacqj+IXhFZtKg==
+  dependencies:
+    zingchart latest
+    zingchart-constants "github:zingchart/zingchart-constants#master"
+
+zingchart@latest:
+  version "2.9.2"
+  resolved "https://registry.yarnpkg.com/zingchart/-/zingchart-2.9.2.tgz#5bc47bd0ddbe13c970fc1b12fb06ac2d5144f485"
+  integrity sha512-IjPLnRExUgrIGnlaw6rsAzWCX4qjuOCmwXRTwtLjAesmHNK9lQMdbA3sDtzflCog1zDUfnV6OeDu1daGHMbcpw==
