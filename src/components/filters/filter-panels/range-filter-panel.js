@@ -31,7 +31,7 @@ import { numToStr } from 'utils/data-utils';
 const StyledAggrBar = styled.div`
   display: flex;
   width: 100%;
-  color: ${props => props.color ? props.color : 'red'};
+  color: ${props => props.color ? props.color : '#999999'};
   font-family: ${props => props.fontFamily};
   font-size: 12px;
   font-weight: bold;
@@ -40,7 +40,8 @@ const StyledAggrBar = styled.div`
 const StyledAggrItem = styled.div`
   float: left;
   width: 33.33%;
-  text-align: center;
+  text-align: ${props => props.align ? props.align : 'center'};
+  ${props => props.align == 'left' ? 'margin-left: 6px;' : (props.align == 'right' ? 'margin-right: 6px;' : null)}
 `
 
 RangeFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, RangeFilterFactory, FilterStatusBarFactory];
@@ -61,13 +62,13 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter, FilterS
       toggleAnimation
     }) => {
       const onSetFilter = useCallback(value => setFilter(idx, 'value', value), [idx, setFilter]);
-      const { dataId, fieldIdx } = filter;
+      const { dataId, fieldIdx, filterInputIndex } = filter;
       const dataset = datasets?.[dataId[0]];
       let min = 0, max = 0, avg = 0, color = 'red';
 
-      if (dataset) {
+      if (dataset && filterInputIndex) {
         const { allData, color: rgb } = dataset;
-        const fieldData = allData.map(d => d[fieldIdx[0]]);
+        const fieldData = filterInputIndex.map(idx => allData[idx]).map(d => d[fieldIdx[0]]);
         min = numToStr(_.min(fieldData), 1);
         max = numToStr(_.max(fieldData), 1);
         avg = numToStr(_.mean(fieldData), 1);
@@ -88,10 +89,10 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter, FilterS
           >
             {filter.type && !filter.enlarged && (
               <div className="filter-panel__filter">
-                <StyledAggrBar color={color}>
-                  <StyledAggrItem>min: {min}</StyledAggrItem>
-                  <StyledAggrItem>avg: {avg}</StyledAggrItem>
-                  <StyledAggrItem>max: {max}</StyledAggrItem>
+                <StyledAggrBar>
+                  <StyledAggrItem align="left">min: {min}</StyledAggrItem>
+                  <StyledAggrItem align="center">avg: {avg}</StyledAggrItem>
+                  <StyledAggrItem align="right">max: {max}</StyledAggrItem>
                 </StyledAggrBar>
                 <RangeFilter
                   filter={filter}

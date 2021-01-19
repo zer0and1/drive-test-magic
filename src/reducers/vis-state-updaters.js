@@ -49,6 +49,7 @@ import {
   getFilterIdInFeature,
   getFilterPlot,
   isInRange,
+  applyFiltersToDatasets,
   LIMITED_FILTER_EFFECT_PROPS,
   updateFilterDataId
 } from 'utils/filter-utils';
@@ -672,6 +673,17 @@ export function setFilterUpdater(state, action) {
     ? [datasetIds[valueIndex]]
     : datasetIds;
 
+  // if (idx == newState.filters.length - 1) {
+  //   const filteredDatasets = applyFiltersToDatasets(
+  //     datasetIdsToFilter,
+  //     newState.datasets,
+  //     newState.filters,
+  //     newState.layers
+  //   );
+
+  //   newState = set(['datasets'], filteredDatasets, newState);
+  // }
+  // else 
   if (FILTER_UPDATER_PROPS.dataId != prop) {
     newState = updateFilters(newState, datasetIdsToFilter);
   }
@@ -684,31 +696,23 @@ export function setFilterUpdater(state, action) {
 }
 
 export function updateFilters(state, datasetIds) {
-  const filters = state.filters.map(f => ([
-    'animationWindow', 
-    'dataId', 
-    'enlarged', 
-    'id', 
-    'name', 
-    'plotType', 
-    'type', 
-    'value', 
-    'yAxis', 
-    'layerId', 
-    'fixedDomain'
-  ].reduce((acc, field) => ({...acc, [field]: f[field]}), {}))).filter(d => d.type);
-
-  const datasets = datasetIds.reduce((acc, id) => ({
-    ...acc,
-    [id]: {
-      ...acc[id],
-      filteredIndexAcc: acc[id].allIndexes,
-      filteredIndexForDomain: acc[id].allIndexes,
-      filteredIndex: acc[id].allIndexes,
-      filterRecord: {}
-    }
-  }), state.datasets);
-
+  // const filters = state.filters.map(f => (
+  //   Object.keys(DEFAULT_FILTER_STRUCTURE).reduce(
+  //     (acc, field) => ({
+  //       ...acc, 
+  //       [field]: f[field]
+  //     }), {})
+  //   )
+  // ).filter(d => d.type);
+  const filters = state.filters.filter(d => d.type);
+  // const datasets = datasetIds.reduce((acc, id) => ({
+  //   ...acc,
+  //   [id]: {
+  //     ...acc[id],
+  //     filteredIndexAcc: acc[id].allIndexes,
+  //   }
+  // }), state.datasets);
+  const { datasets } = state;
   const merged = mergeFilters({ ...state, filters: [], datasets, filterToBeMerged: [] }, filters);
 
   return merged;
@@ -747,7 +751,7 @@ export const setFilterPlotUpdater = (state, { idx, newProp, valueIndex = 0 }) =>
 /**
  * Add a new filter
  * @memberof visStateUpdaters
- * @type {typeof import('./vis-state-updaters').addFilterUpdater}
+ * @type {typeof (import'./vis-state-updaters').addFilterUpdater}
  * @public
  */
 export const addFilterUpdater = (state, action) => {
@@ -792,7 +796,8 @@ export const moveUpFilterUpdater = (state, { filterId }) => {
     return updateFilters(newState, toArray(destDataId));
   }
 
-  return newState;};
+  return newState;
+};
 
 /**
  * Move down a filter
@@ -976,11 +981,17 @@ export const removeFilterUpdater = (state, action) => {
 
   let newState = set(['filters'], newFilters, state);
   newState = set(['editor'], newEditor, newState);
-  
+
   if (type) {
-    newState = updateFilters(newState, toArray(dataId));
+    if (newFilters.length) {
+      newState = updateFilters(newState, toArray(dataId));
+    }
+    else {
+      const filteredDatasets = applyFiltersToDatasets(dataId, newState.datasets, newFilters, newState.layers);
+      newState = set(['datasets'], filteredDatasets, newState);
+    }
   }
-  
+
   return {
     ...updateAllLayerDomainData(newState, dataId, undefined)
   };
@@ -993,7 +1004,7 @@ export const removeFilterUpdater = (state, action) => {
  * @public
  */
 export const addLayerUpdater = (state, action) => {
-  const defaultDataset = Object.keys(state.datasets)[0];
+  const defaultDataset = Object.values(state.datasets).sort((a, b) => a.label > b.label ? 1 : -1)[0].id;
   const newLayer = new Layer({
     isVisible: true,
     isConfigActive: true,

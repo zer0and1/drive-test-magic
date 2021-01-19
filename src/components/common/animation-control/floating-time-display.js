@@ -111,7 +111,7 @@ export default function FloatingTimeDisplayFactory() {
         const groupTime = Array.isArray(currentTime) ? currentTime : [currentTime];
         return groupTime.reduce(
           (accu, curr) => {
-            const displayDateTime = moment.utc(curr).format(format);
+            const displayDateTime = moment(curr).format(format);
             const [displayDate, displayTime] = displayDateTime.split(' ');
 
             if (!accu.displayDate.includes(displayDate)) {

@@ -81,15 +81,18 @@ export function mergeFilters(state, filtersToMerge) {
           if (updatedFilter) {
             filterStacks.push(updatedFilter);
             const { filteredIndexForDomain: filteredResultIndex } = filterDataset(dataset, filterStacks, layers);
+            
+            updatedFilter = {
+              ...updatedFilter,
+              filteredResultIndex,
+              filterInputIndex: updatedDataset.filteredIndexAcc || updatedDataset.allIndexes
+            };
+            
             updatedDataset = {
               ...updatedDataset,
               filteredIndexAcc: filteredResultIndex,
             };
-            updatedFilter = {
-              ...updatedFilter,
-              filteredResultIndex
-            };
-
+            
             return {
               ...acc,
               // merge filter props

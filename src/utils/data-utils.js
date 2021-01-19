@@ -118,7 +118,8 @@ export function getSampleData(data, sampleSize = 500, getValue = d => d) {
 export function timeToUnixMilli(value, format) {
   if (notNullorUndefined(value)) {
     return typeof value === 'string'
-      ? moment.utc(value, format).valueOf()
+      // ? moment.utc(value, format).valueOf()
+      ? new Date(value).getTime()
       : format === 'x'
       ? value * 1000
       : value;
@@ -366,7 +367,7 @@ export function applyDefaultFormat(tooltipFormat) {
       return d3Format(tooltipFormat.format);
     case TOOLTIP_FORMAT_TYPES.DATE:
     case TOOLTIP_FORMAT_TYPES.DATE_TIME:
-      return v => moment.utc(v).format(tooltipFormat.format);
+      return v => moment(v).format(tooltipFormat.format);
     case TOOLTIP_FORMAT_TYPES.PERCENTAGE:
       return v => `${d3Format(TOOLTIP_FORMATS.DECIMAL_DECIMAL_FIXED_2.format)(v)}%`;
     case TOOLTIP_FORMAT_TYPES.BOOLEAN:
@@ -394,7 +395,7 @@ export function applyCustomFormat(format, field) {
       return d3Format(format);
     case ALL_FIELD_TYPES.date:
     case ALL_FIELD_TYPES.timestamp:
-      return v => moment.utc(v).format(format);
+      return v => moment(v).format(format);
     default:
       return v => v;
   }

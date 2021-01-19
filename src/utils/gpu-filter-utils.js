@@ -178,7 +178,7 @@ const getFilterValueAccessor = (channels, dataId, fields) => (
       filter.type === FILTER_TYPES.timeRange
         ? field.filterProps && Array.isArray(field.filterProps.mappedValue)
           ? field.filterProps.mappedValue[getIndex(d)]
-          : moment.utc(getData(d)[fieldIndex]).valueOf()
+          : new Date(getData(d)[fieldIndex]).getTime()
         : getData(d)[fieldIndex];
 
     return notNullorUndefined(value) ? value - filter.domain[0] : Number.MIN_SAFE_INTEGER;

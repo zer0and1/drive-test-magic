@@ -556,6 +556,9 @@ export const setSessionCheckedUpdater = (state, { payload: checked }) => {
       return withTask(newState, createActionTask(loadSession, null));
     }
   }
+  else if (!state.queryTestResult) {
+    return withTask(newState, createActionTask(testQuery));
+  }
 
   return newState;
 };

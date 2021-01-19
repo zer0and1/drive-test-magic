@@ -47,7 +47,7 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
     const hadEmptyFilter = filters.some(f => !f.name);
     const hadDataset = Object.keys(datasets).length;
     const onClickAddFilter = useCallback(() => {
-      const defaultDataset = (Object.keys(datasets).length && Object.keys(datasets)[0]) || null;
+      const defaultDataset = (Object.keys(datasets).length && Object.values(datasets).sort((a, b) => a.label > b.label ? 1 : -1)[0].id) || null;
       addFilter(defaultDataset);
     }, [datasets, addFilter]);
 

@@ -49,7 +49,7 @@ const defaultFormat = d => d;
 
 const getTimeLabelFormat = domain => {
   const formatter = getTimeWidgetHintFormatter(domain);
-  return val => moment.utc(val).format(formatter);
+  return val => moment(val).format(formatter);
 };
 
 const getNumericLabelFormat = domain => {

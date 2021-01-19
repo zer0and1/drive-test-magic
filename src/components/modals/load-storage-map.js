@@ -214,7 +214,7 @@ const VisualizationItem = ({vis, onClick}) => {
         <span className="vis_item-description">{vis.description}</span>
       )}
       <span className="vis_item-modification-date">
-        Last modified {moment.utc(vis.lastModification).fromNow()}
+        Last modified {moment(vis.lastModification).fromNow()}
       </span>
     </StyledVisualizationItem>
   );

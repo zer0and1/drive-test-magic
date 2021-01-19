@@ -32,7 +32,7 @@ TimeRangeFilterPanelFactory.deps = [
   FilterStatusBarFactory
 ];
 
-function TimeRangeFilterPanelFactory(FieldPanelWithFieldSelect, TimeRangeFilter, FilterStatusBar) {
+function TimeRangeFilterPanelFactory(FieldPanelWithFieldSelect, TimeRangeFilter, SourceDataSelector, FilterStatusBar) {
   const TimeRangeFilterPanel = React.memo(
     ({
       idx,
@@ -84,8 +84,10 @@ function TimeRangeFilterPanelFactory(FieldPanelWithFieldSelect, TimeRangeFilter,
                   toggleAnimation={toggleAnimation}
                   setFilter={onSetFilter}
                 />
-                <FilterStatusBar datasets={datasets} filter={filter} />
               </div>
+            )}
+            {filter.type && (
+              <FilterStatusBar datasets={datasets} filter={filter} />
             )}
           </FieldPanelWithFieldSelect>
         </>

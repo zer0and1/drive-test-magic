@@ -119,7 +119,7 @@ function LineChartFactory() {
           {isEnlarged && <YAxis tickTotal={3} />}
           {hoveredDP && enableChartHover && !brushing ? (
             <Hint value={hoveredDP}>
-              <HintContent {...hoveredDP} format={val => moment.utc(val).format(hintFormatter)} />
+              <HintContent {...hoveredDP} format={val => moment(val).format(hintFormatter)} />
             </Hint>
           ) : null}
         </XYPlot>

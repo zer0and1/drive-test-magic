@@ -88,7 +88,7 @@ export default function TimeRangeSliderFactory(PlaybackControls, RangeSlider, Ti
         const groupTime = Array.isArray(currentTime) ? currentTime : [currentTime];
         return groupTime.reduce(
           (accu, curr) => {
-            const displayDateTime = moment.utc(curr).format(format);
+            const displayDateTime = moment(curr).format(format);
             const [displayDate, displayTime] = displayDateTime.split(' ');
 
             if (!accu.displayDate.includes(displayDate)) {
@@ -192,13 +192,13 @@ const TimeValueWrapper = styled.div`
 
 const TimeTitle = ({value, isEnlarged, timeFormat = DEFAULT_TIME_FORMAT}) => (
   <TimeValueWrapper isEnlarged={isEnlarged} className="time-range-slider__time-title">
-    <TimeValue key={0} value={moment.utc(value[0]).format(timeFormat)} split={!isEnlarged} />
+    <TimeValue key={0} value={moment(value[0]).format(timeFormat)} split={!isEnlarged} />
     {isEnlarged ? (
       <div className="horizontal-bar">
         <Minus height="12px" />
       </div>
     ) : null}
-    <TimeValue key={1} value={moment.utc(value[1]).format(timeFormat)} split={!isEnlarged} />
+    <TimeValue key={1} value={moment(value[1]).format(timeFormat)} split={!isEnlarged} />
   </TimeValueWrapper>
 );
 
