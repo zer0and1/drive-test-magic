@@ -77,6 +77,8 @@ function GraphWidgetFactory(HexbinGraph) {
         return r;
       }, []);
 
+      const pos = this.props.visState.coordinate;
+
       return (
         <GraphBottomWidgetInner className="bottom-widget--inner">
           <TopSectionWrapper>
@@ -85,7 +87,7 @@ function GraphWidgetFactory(HexbinGraph) {
               <CenterFlexbox className="bottom-widget__icon">
                 <LineChart height="15px" />
               </CenterFlexbox>
-              <SelectTextBold>{aggregation + " of " + fieldName}</SelectTextBold>
+              <SelectTextBold>History Trend for {fieldName} @ {pos[0].toFixed(6)}N {pos[1].toFixed(6)}E</SelectTextBold>
             </StyledTitle>
             <CenterFlexbox>
               <IconRoundSmall>
