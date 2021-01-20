@@ -121,6 +121,11 @@ export default class Slider extends Component {
 
   _normalizeValue(val) {
     const {minValue, step, marks} = this.props;
+
+    if (val <= minValue || val >= maxValue) {
+      return val;
+    }
+
     return normalizeSliderValue(val, minValue, step, marks);
   }
 
@@ -130,12 +135,18 @@ export default class Slider extends Component {
     if (this._isVal0InRange(val)) {
       this.props.onSlider0Change(val);
     }
+    else {
+      this.props.onSlider0Change(this.props.minValue);
+    }
   };
 
   slide1Listener = x => {
     const val = this._getValue(this.props.minValue, x);
     if (this._isVal1InRange(val)) {
       this.props.onSlider1Change(val);
+    }
+    else {
+      this.props.onSlider1Change(this.props.maxValue);
     }
   };
 

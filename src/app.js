@@ -44,7 +44,6 @@ import {loadCloudMap} from 'actions';
 import {CLOUD_PROVIDERS} from './app-cloud-providers';
 import {KEPLER_GL_NAME} from 'constants/default-settings';
 
-import $ from 'jquery';
 import 'gasparesganga-jquery-loading-overlay';
 
 const KeplerGl = require('./components').injectComponents([

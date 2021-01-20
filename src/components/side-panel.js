@@ -229,7 +229,8 @@ export default function SidePanelFactory(
         setOperationMode: minionStateActions.setOperationMode,
         setSleepInterval: minionStateActions.setSleepInterval,
         increaseSessionId: minionStateActions.increaseSessionId,
-        sendCommand: minionStateActions.sendCommand
+        setCommand: minionStateActions.setCommand,
+        sendCommand: minionStateActions.sendCommand,
       };
 
       const layerManagerActions = {

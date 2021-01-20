@@ -85,6 +85,7 @@ export const INITIAL_MINION_STATE = {
   sessionId: null,
   lastAck: null,
   command: null,
+  isCommandExecuting: false,
 };
 
 /**
@@ -241,15 +242,24 @@ export function increaseSessionIdUpdater(state) {
 }
 
 /**
- * Send command to selected minion
- * @type {typeof import('./minion-state-updaters').sendCommand}
+ * Set command to selected minion
+ * @type {typeof import('./minion-state-updaters').setCommand}
  *
  */
-export function sendCommandUpdater(state, { command }) {
-  alert(command);
+export function setCommandUpdater(state, { command }) {
   return {
     ...state,
     command
   };
+}
+
+/**
+ * Send command to selected minion
+ * @type {typeof import('./minion-state-updaters').setCommand}
+ *
+ */
+export function sendCommandUpdater(state) {
+  alert(state.command);
+  return state;
 }
 

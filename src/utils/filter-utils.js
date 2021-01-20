@@ -579,9 +579,7 @@ export function getFilterRecord(dataId, filters, opt = {}) {
 
   filters.forEach(f => {
     if (isValidFilterValue(f.type, f.value) && toArray(f.dataId).includes(dataId)) {
-      (f.fixedDomain || opt.ignoreDomain
-        ? filterRecord.fixedDomain
-        : filterRecord.dynamicDomain
+      (filterRecord.dynamicDomain
       ).push(f);
 
       (f.gpu && !opt.cpuOnly ? filterRecord.gpu : filterRecord.cpu).push(f);
@@ -989,18 +987,18 @@ export function applyFilterFieldName(filter, dataset, fieldName, filterDatasetIn
   // TIP: The following codes is not needed because real-time filter 
   // updating always recalculate all filter informations
 
-  const fieldWithFilterProps = {
-    ...field,
-    filterProps
-  };
+  // const fieldWithFilterProps = {
+  //   ...field,
+  //   filterProps
+  // };
 
-  const newFields = Object.assign([...fields], {[fieldIndex]: fieldWithFilterProps});
+  // const newFields = Object.assign([...fields], {[fieldIndex]: fieldWithFilterProps});
 
   return {
     filter: newFilter,
     dataset: {
       ...dataset,
-      fields: newFields
+      // fields: newFields
     }
   };
 }

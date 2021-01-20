@@ -65,7 +65,7 @@ let chartConfig = {
   },
   legend: {
     align: 'right',
-    verticalAlign: 'middle'
+    verticalAlign: 'top'
   },
   tooltip: {
     visible: false

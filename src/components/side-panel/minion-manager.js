@@ -27,7 +27,6 @@ import moment from 'moment-timezone';
 import $ from 'jquery';
 import JqxGrid, { jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxgrid';
 import JqxSplitter from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxsplitter';
-import 'gasparesganga-jquery-loading-overlay';
 
 import GPSGroupFactory from './minion-panel/gps-group';
 import SignalSampleGroupFactory from './minion-panel/signal-sample-group';
@@ -58,12 +57,14 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       setSleepInterval: PropTypes.func.isRequired,
       setOperationMode: PropTypes.func.isRequired,
       increaseSessionId: PropTypes.func.isRequired,
+      setCommand: PropTypes.func.isRequired,
       sendCommand: PropTypes.func.isRequired,
       sleepInterval: PropTypes.number,
       operationMode: PropTypes.string,
       lastAck: PropTypes.string,
       sessionId: PropTypes.number,
       command: PropTypes.string,
+      isCommandExecuting: PropTypes.bool,
       details: PropTypes.object,
     };
 
@@ -190,6 +191,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         setSleepInterval,
         setOperationMode,
         increaseSessionId,
+        setCommand,
         sendCommand,
       } = this.props;
 
@@ -204,6 +206,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         setSleepInterval,
         setOperationMode,
         increaseSessionId,
+        setCommand,
         sendCommand,
       }
       return (

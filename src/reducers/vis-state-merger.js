@@ -42,7 +42,7 @@ import { LAYER_BLENDINGS } from 'constants/default-settings';
  *
  * @type {typeof import('./vis-state-merger').mergeFilters}
  */
-export function mergeFilters(state, filtersToMerge) {
+export function mergeFilters(state, filtersToMerge, filterIdx) {
   const merged = [];
   const unmerged = [];
   const filterStacks = [];
@@ -69,7 +69,7 @@ export function mergeFilters(state, filtersToMerge) {
           dataset = {
             ...dataset,
             filterRecord: {},
-            filteredIndexAcc: (idx == 0 ? dataset.allIndexes : dataset.filteredIndexAcc)
+            filteredIndexAcc: dataset.filteredIndexAcc || dataset.allIndexes
           };
 
           let { filter: updatedFilter, dataset: updatedDataset } = validateFilterWithData(
@@ -81,28 +81,28 @@ export function mergeFilters(state, filtersToMerge) {
           if (updatedFilter) {
             filterStacks.push(updatedFilter);
             const { filteredIndexForDomain: filteredResultIndex } = filterDataset(dataset, filterStacks, layers);
-            
+
             updatedFilter = {
               ...updatedFilter,
               filteredResultIndex,
-              filterInputIndex: updatedDataset.filteredIndexAcc || updatedDataset.allIndexes
+              filterInputIndex: updatedDataset.filteredIndexAcc
             };
-            
+
             updatedDataset = {
               ...updatedDataset,
               filteredIndexAcc: filteredResultIndex,
             };
-            
+
             return {
               ...acc,
               // merge filter props
-              filter: acc.filter
-                ? {
-                  ...acc.filter,
-                  ...mergeFilterDomainStep(acc, updatedFilter)
-                }
-                : updatedFilter,
-
+              // filter: acc.filter
+              //   ? {
+              //     ...acc.filter,
+              //     ...mergeFilterDomainStep(acc, updatedFilter)
+              //   }
+              //   : updatedFilter,
+              filter: updatedFilter,
               applyToDatasets: [...acc.applyToDatasets, datasetId],
 
               augmentedDatasets: {

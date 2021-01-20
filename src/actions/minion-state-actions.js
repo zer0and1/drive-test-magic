@@ -116,18 +116,29 @@ export function increaseSessionId() {
 }
 
 /**
- * Set minion sleep interval
+ * Set minion command
  * @memberof minionStateActions
- * @type {typeof import('./minion-state-actions').sendCommand}
+ * @type {typeof import('./minion-state-actions').setCommand}
  * @return action
  */
-export function sendCommand(command) {
+export function setCommand(command) {
   return {
-    type: ActionTypes.SEND_COMMAND,
+    type: ActionTypes.SET_COMMAND,
     command
   };
 }
 
+/**
+ * Send minion command
+ * @memberof minionStateActions
+ * @type {typeof import('./minion-state-actions').setCommand}
+ * @return action
+ */
+export function sendCommand() {
+  return {
+    type: ActionTypes.SEND_COMMAND,
+  };
+}
 
 /**
  * This declaration is needed to group actions in docs

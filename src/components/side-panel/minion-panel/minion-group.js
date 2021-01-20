@@ -77,7 +77,7 @@ function MinionGroupFactory(PanelHeaderAction) {
     }
 
     render() {
-      return <div>
+      return <div className="minion-panel__group">
         <StyledMinionGroupHeader style={{ marginBottom: this.state.toggled ? '0px' : '5px' }}>
           <StyledPanelHeader onClick={this.toggle.bind(this)}>
             <PanelHeaderContent>

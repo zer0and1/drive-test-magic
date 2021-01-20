@@ -132,6 +132,10 @@ export default function RangeSliderFactory(RangePlot) {
     _roundValToStep = val => {
       const {range, step} = this.props;
 
+      if (val >= range[1] || val <= range[0]) {
+        return val;
+      } 
+
       return roundValToStep(range[0], step, val);
     };
 

@@ -6,6 +6,7 @@ import { Button } from 'components/common/styled-components';
 import JqxDropDownList from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxdropdownlist';
 import PropTypes from 'prop-types';
 import { MINION_COMMANDS } from 'constants/default-settings';
+import $ from 'jquery';
 
 const StyledButton = styled(Button)`
   background-color: ${props => props.active ? props.theme.activeColor : props.theme.panelBackground};
@@ -46,7 +47,8 @@ function CommandGroupFactory(MinionGroup) {
       sessionId: null,
       operationMode: null,
       lastAck: null,
-      command: null
+      command: null,
+      isCommandExecuting: null,
     };
 
     static propTypes = {
@@ -55,24 +57,37 @@ function CommandGroupFactory(MinionGroup) {
       operationMode: PropTypes.string,
       lastAck: PropTypes.string,
       command: PropTypes.string,
+      isCommandExecuting: PropTypes.bool,
 
       setSleepInterval: PropTypes.func.isRequired,
       setOperationMode: PropTypes.func.isRequired,
       increaseSessionId: PropTypes.func.isRequired,
-      sendCommand: PropTypes.func.isRequired
+      setCommand: PropTypes.func.isRequired,
+      sendCommand: PropTypes.func.isRequired,
     };
 
     shouldComponentUpdate(nextProps) {
+      if (nextProps.isCommandExecuting) {
+        $('.minion-panel__group').LoadingOverlay('show');
+      }
+      else {
+        $('.minion-panel__group').LoadingOverlay('hide', true);
+      }
+
       const changed = Object.keys(CommandGroup.STATE).reduce((acc, key) => acc || CommandGroup.STATE[key] != nextProps[key], false);
+      CommandGroup.STATE = { ...nextProps };
       return changed;
-    }
-    
-    _sendCommand() {
-      const cmd = this.refs.commandSelector.getSelectedItem();
-      cmd && this.props.sendCommand(cmd.value);
     }
 
     render() {
+      const {
+        operationMode,
+        sleepInterval,
+        sessionId,
+        lastAck,
+        command
+      } = this.props;
+
       return (
         <MinionGroup groupIcon={Gear} label="Command" toggled={true}>
           <table style={{ tableLayout: 'fixed', width: '100%' }}>
@@ -82,19 +97,19 @@ function CommandGroupFactory(MinionGroup) {
                 <td colSpan="2">
                   <StyledMode
                     onClick={() => this.props.setOperationMode('idle')}
-                    active={this.props.operationMode == 'idle'}
+                    active={operationMode == 'idle'}
                   >
                     Idle
                   </StyledMode>
                   <StyledMode
                     onClick={() => this.props.setOperationMode('store')}
-                    active={this.props.operationMode == 'store'}
+                    active={operationMode == 'store'}
                   >
                     Store
                   </StyledMode>
                   <StyledMode
                     onClick={() => this.props.setOperationMode('report')}
-                    active={this.props.operationMode == 'report'}
+                    active={operationMode == 'report'}
                     last={true}
                   >
                     Report
@@ -106,35 +121,35 @@ function CommandGroupFactory(MinionGroup) {
                 <td colSpan="2">
                   <StyledInterval
                     onClick={() => this.props.setSleepInterval(0.5)}
-                    active={this.props.sleepInterval == 0.5}
+                    active={sleepInterval == 0.5}
                   >
                     0.5s
                   </StyledInterval>
                   <StyledInterval
                     onClick={() => this.props.setSleepInterval(2)}
-                    active={this.props.sleepInterval == 2}
+                    active={sleepInterval == 2}
                   >
                     2s
                   </StyledInterval>
                   <StyledInterval
                     onClick={() => this.props.setSleepInterval(10)}
-                    active={this.props.sleepInterval == 10}
+                    active={sleepInterval == 10}
                   >
                     10s
                   </StyledInterval>
                   <StyledInterval
                     onClick={() => this.props.setSleepInterval(60)}
-                    active={this.props.sleepInterval == 60}
+                    active={sleepInterval == 60}
                     last={true}
                   >
                     60s
-                    </StyledInterval>
+                  </StyledInterval>
                 </td>
               </tr>
               <tr>
                 <td>Session ID:</td>
                 <td colSpan="2">
-                  <StyledLabel>{this.props.sessionId}</StyledLabel>
+                  <StyledLabel>{sessionId}</StyledLabel>
                   <StyledButton onClick={this.props.increaseSessionId}>+1</StyledButton>
                 </td>
               </tr>
@@ -148,17 +163,18 @@ function CommandGroupFactory(MinionGroup) {
                     style={{ float: 'left', marginRight: '10px' }}
                     theme='metrodark'
                     source={MINION_COMMANDS}
-                    selectedIndex={MINION_COMMANDS.findIndex(cmd => cmd == this.props.command)}
+                    selectedIndex={MINION_COMMANDS.findIndex(cmd => cmd == command)}
                     itemHeight={20}
                     autoDropDownHeight={true}
                     enableBrowserBoundsDetection={true}
+                    onChange={({ args: { item: { value: cmd } } }) => this.props.setCommand(cmd)}
                   />
-                  <StyledButton onClick={this._sendCommand.bind(this)}>SEND</StyledButton>
+                  <StyledButton onClick={this.props.sendCommand}>SEND</StyledButton>
                 </td>
               </tr>
               <tr>
                 <td>Last ACK:</td>
-                <td colSpan="2">dt-minion-1/ack</td>
+                <td colSpan="2">{lastAck}</td>
               </tr>
             </tbody>
           </table>
