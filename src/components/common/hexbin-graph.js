@@ -80,13 +80,13 @@ function HexbinGraphFactory() {
     static chartState = {
       index: null,
       aggregation: null,
-      visState: { object: { points: [] } },
+      lineChart: []
     };
 
     shouldComponentUpdate(nextProps) {
-      const { index: newIdx, aggregation: newAggr, visState: { object: { points: newPoints } } } = nextProps;
-      const { index: oldIdx, aggregation: oldAggr, visState: { object: { points: oldPoints } } } = HexbinGraph.chartState;
-      HexbinGraph.chartState = { index: newIdx, aggregation: newAggr, visState: nextProps.visState };
+      const { index: newIdx, aggregation: newAggr, lineChart: newPoints } = nextProps;
+      const { index: oldIdx, aggregation: oldAggr, lineChart: oldPoints } = HexbinGraph.chartState;
+      HexbinGraph.chartState = { index: newIdx, aggregation: newAggr, lineChart: nextProps.lineChart };
 
       if (oldIdx != newIdx) {
         return true;
@@ -105,32 +105,20 @@ function HexbinGraphFactory() {
 
     render() {
       const {
-        visState,
+        lineChart,
         index,
         aggregation,
         ymin,
         ymax,
-        cellnames
+        cellnames,
+        starttime,
+        endtime,
+        bins
       } = this.props;
 
-      const lineChart = visState?.object?.points;
-      if (lineChart == undefined) return;
+      const step = bins * 3600000;
 
-      const timePeriod = Object.values(lineChart).map(item => {return new Date(item.data[8]).getTime()});
-
-      let st = new Date(min(timePeriod));
-      const starttime = new Date(st.getFullYear(), st.getMonth(), st.getDate(), st.getHours()).getTime()
-      st = new Date(max(timePeriod));
-      const endtime = new Date(st.getFullYear(), st.getMonth(), st.getDate(), st.getHours()).getTime()
-
-      const diff = endtime - starttime;
-
-      let step = 1;
-      for (step of [1,4,8,24,48,96,168,336,730])
-        if (diff / 3600000 / step < 42) break;
-      step *= 3600000;
-
-      const data = (lineChart != undefined) ? lineChart.map((item) => {
+      const data = lineChart.map((item) => {
         const obj = {
           value : item.data[index - 1],
           enodeb : item.data[11],
@@ -138,9 +126,8 @@ function HexbinGraphFactory() {
           // groupBy time with "some fixed values starting with 1h then like 4h, 1d, 4d, 10d, 1m, 3month"
           groupTime : Math.floor((new Date(item.data[8]).getTime() - starttime) / step) * step + starttime
         }
-
         return obj
-      }) : [];
+      });
 
       let result = data.reduce(function (r, o) {
         var k = o.groupTime + o.enodeb;
@@ -177,10 +164,10 @@ function HexbinGraphFactory() {
       const enodebIds = Object.keys(dataset)
 
       let labels = [];
-      for (var i in _.range(50)){
+      for (var i of _.range(-1,50)){
         var t = starttime + i * step;
-        if (t > endtime) break;
         labels.push(t)
+        if (t > endtime) break;
       }
 
       const yvalues = [];
@@ -260,7 +247,7 @@ function HexbinGraphFactory() {
         ...chartConfig,
         scaleX: {
           ...chartConfig.scaleX,
-          minValue: starttime,
+          minValue: starttime-step,
           step: step
         },
         scaleY: {
@@ -272,8 +259,22 @@ function HexbinGraphFactory() {
         series: series
       }
 
+      let key = false;
+      document.addEventListener('keydown', function(event) {
+        if(event.shiftKey) key = true;
+      })
+      document.addEventListener('keyup', function(event) {
+        key = false;
+      })
+
       const legendItemClick = (e) => {
         chartConfig.scaleY.markers.filter(item => item.id === e.plottext)[0].alpha ^= 1;
+        if (key) {
+          key = false;
+          Object.values(chartConfig.scaleY.markers).forEach(function(k) {
+            k.alpha^=1
+          })
+        }
         zingchart.exec('hexbinGraph', 'modify', {
           data : {
             scaleY: chartConfig.scaleY
