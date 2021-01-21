@@ -870,9 +870,10 @@ export function addMarker(payload) {
  * @type {typeof import('./vis-state-actions').removeMarker}
  * @return action
  */
-export function removeMarker() {
+export function removeMarker(id) {
   return {
-    type: ActionTypes.REMOVE_MARKER
+    type: ActionTypes.REMOVE_MARKER,
+    id
   };
 };
 

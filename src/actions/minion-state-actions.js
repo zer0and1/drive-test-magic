@@ -131,12 +131,40 @@ export function setCommand(command) {
 /**
  * Send minion command
  * @memberof minionStateActions
- * @type {typeof import('./minion-state-actions').setCommand}
+ * @type {typeof import('./minion-state-actions').sendCommand}
  * @return action
  */
 export function sendCommand() {
   return {
     type: ActionTypes.SEND_COMMAND,
+  };
+}
+
+/**
+ * Set mqtt client connected
+ * @memberof minionStateActions
+ * @type {typeof import('./minion-state-actions').setMqttClient}
+ * @return action
+ */
+export function setMqttClient(mqttClient) {
+  return {
+    type: ActionTypes.SET_MQTT_CLIENT,
+    mqttClient
+  };
+}
+
+
+/**
+ * Set mqtt message received
+ * @memberof minionStateActions
+ * @type {typeof import('./minion-state-actions').setMqttMessage}
+ * @return action
+ */
+export function setMqttMessage(topic, message) {
+  return {
+    type: ActionTypes.SET_MQTT_MESSAGE,
+    mqttTopic: topic,
+    mqttMessage: message,
   };
 }
 

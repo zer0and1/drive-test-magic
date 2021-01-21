@@ -86,6 +86,9 @@ export const INITIAL_MINION_STATE = {
   lastAck: null,
   command: null,
   isCommandExecuting: false,
+  mqttClient: null,
+  mqttMessage: null,
+  mqttTopic: null
 };
 
 /**
@@ -99,9 +102,9 @@ export function loadMinionsUpdater(state, { onLoaded }) {
     result => {
       const minions = result.data.signal_db_minions;
       const sample = result.data.signal_db_signal_samples?.[0];
-      
+
       onLoaded(minions?.[state.selectedMinionIdx], minions);
-      
+
       return loadMinionsSuccess(minions, sample);
     },
     error => loadMinionsError(error)
@@ -148,13 +151,13 @@ export function calcLevel(val, factor, type) {
  *
  */
 export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
-  const newState = {
+  let newState = {
     ...state,
     isLoadingMinions: false,
     details: {}
   };
 
-  if (state.selectedMinionIdx < 0 || ! signalSample) {
+  if (state.selectedMinionIdx < 0 || !signalSample) {
     return newState;
   }
 
@@ -198,6 +201,12 @@ export function loadMinionsErrorUpdater(state, { error }) {
  *
  */
 export function setSelectedMinionUpdater(state, { name, idx }) {
+  const { mqttClient } = state;
+
+  if (mqttClient) {
+    mqttClient.subscribe(`${name}/ack`);
+  }
+
   return {
     ...state,
     selectedMinionName: name,
@@ -211,9 +220,23 @@ export function setSelectedMinionUpdater(state, { name, idx }) {
  *
  */
 export function setSleepIntervalUpdater(state, { interval }) {
+  const { mqttClient, selectedMinionName } = state;
+
+  if (!mqttClient || !selectedMinionName) {
+    return state;
+  }
+
+  const topic = `${selectedMinionName}/interval`;
+  mqttClient.subscribe(topic, err => {
+    if (!err) {
+      mqttClient.publish(topic, interval);
+    }
+  });
+
   return {
     ...state,
-    sleepInterval: interval
+    sleepInterval: interval,
+    isCommandExecuting: true
   };
 }
 
@@ -223,9 +246,23 @@ export function setSleepIntervalUpdater(state, { interval }) {
  *
  */
 export function setOperationModeUpdater(state, { mode }) {
+  const { mqttClient, selectedMinionName } = state;
+
+  if (!mqttClient || !selectedMinionName) {
+    return state;
+  }
+
+  const topic = `${selectedMinionName}/operation_mode`;
+  mqttClient.subscribe(topic, err => {
+    if (!err) {
+      mqttClient.publish(topic, mode);
+    }
+  });
+
   return {
     ...state,
-    operationMode: mode
+    operationMode: mode,
+    isCommandExecuting: true
   };
 }
 
@@ -235,10 +272,25 @@ export function setOperationModeUpdater(state, { mode }) {
  *
  */
 export function increaseSessionIdUpdater(state) {
-  return {
+  const { mqttClient, selectedMinionName } = state;
+
+  if (!mqttClient || !selectedMinionName) {
+    return state;
+  }
+
+  const newState = {
     ...state,
-    sessionId: state.sessionId == null ? 1 : state.sessionId + 1
+    sessionId: state.sessionId == null ? 1 : state.sessionId + 1,
+    isCommandExecuting: true
   };
+  const topic = `${selectedMinionName}/session_id`;
+  mqttClient.subscribe(topic, err => {
+    if (!err) {
+      mqttClient.publish(topic, newState.sessionId);
+    }
+  });
+
+  return newState;
 }
 
 /**
@@ -259,7 +311,52 @@ export function setCommandUpdater(state, { command }) {
  *
  */
 export function sendCommandUpdater(state) {
-  alert(state.command);
-  return state;
+  const { mqttClient, selectedMinionName } = state;
+
+  if (!mqttClient || !selectedMinionName) {
+    return state;
+  }
+
+  const topic = `${selectedMinionName}/command`;
+  mqttClient.subscribe(topic, err => {
+    if (!err) {
+      mqttClient.publish(topic, state.command);
+    }
+  });
+
+  return {
+    ...state,
+    isCommandExecuting: true
+  };
 }
 
+/**
+ * Set mqtt client connected
+ * @type {typeof import('./minion-state-updaters').setMqttClientUpdater}
+ *
+ */
+export function setMqttClientUpdater(state, { mqttClient }) {
+  // alert('mqtt client has been connected to the broker successfully');
+
+  return {
+    ...state,
+    mqttClient
+  };
+}
+
+/**
+ * Set mqtt message received
+ * @type {typeof import('./minion-state-updaters').setMqttMessageUpdater}
+ *
+ */
+export function setMqttMessageUpdater(state, { mqttTopic, mqttMessage }) {
+  // alert(`message received from mqtt broker=> topic:${mqttTopic.toString()} message:${mqttMessage.toString()}`);
+
+  return {
+    ...state,
+    isCommandExecuting: false,
+    mqttTopic,
+    mqttMessage,
+    lastAck: mqttTopic == `${state.selectedMinionName}/ack` ? mqttMessage : state.lastAck
+  };
+}

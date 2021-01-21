@@ -18,31 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
-import styled, {ThemeProvider} from 'styled-components';
+import styled, { ThemeProvider } from 'styled-components';
 import window from 'global/window';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 
-import {theme} from './styles';
+import { theme } from './styles';
 import Banner from './components/banner';
-import Announcement, {FormLink} from './components/announcement';
-import {replaceLoadDataModal} from './factories/load-data-modal';
-import {replaceMapControl} from './factories/map-control';
-import {replacePanelHeader} from './factories/panel-header';
-import {AUTH_TOKENS} from './constants/default-settings';
-import {messages} from './constants/localization';
+import Announcement, { FormLink } from './components/announcement';
+import { replaceLoadDataModal } from './factories/load-data-modal';
+import { replaceMapControl } from './factories/map-control';
+import { replacePanelHeader } from './factories/panel-header';
+import { AUTH_TOKENS } from './constants/default-settings';
+import { messages } from './constants/localization';
 
 import {
-  loadRemoteMap,
-  loadSampleConfigurations,
   onExportFileSuccess,
   onLoadCloudMapSuccess
 } from 'actions/main.js';
 
-import {loadCloudMap} from 'actions';
-import {CLOUD_PROVIDERS} from './app-cloud-providers';
-import {KEPLER_GL_NAME} from 'constants/default-settings';
+import { loadCloudMap } from 'actions';
+import { CLOUD_PROVIDERS } from './app-cloud-providers';
+import { KEPLER_GL_NAME } from 'constants/default-settings';
 
 import 'gasparesganga-jquery-loading-overlay';
 
@@ -52,36 +50,8 @@ const KeplerGl = require('./components').injectComponents([
   replacePanelHeader()
 ]);
 
-import {addNotification} from './actions/index.js';
-
-import { ApolloProvider } from '@apollo/client';
+import { addNotification } from './actions/index.js';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
-import mqtt from 'mqtt';
-
-const apolloClient = new ApolloClient({
-  uri: 'https://charming-hawk-93.hasura.app/v1/graphql',
-  cache: new InMemoryCache()
-});
-
-global.apolloClient = apolloClient;
-
-// const mqttClient  = mqtt.connect('mqtt://test.mosquitto.org')
- 
-// mqttClient.on('connect', function () {
-//   mqttClient.subscribe('presence', function (err) {
-//     if (!err) {
-//       mqttClient.publish('presence', 'Hello mqtt')
-//     }
-//   })
-// });
- 
-// mqttClient.on('message', function (topic, message) {
-//   // message is Buffer
-//   console.log(message.toString())
-//   mqttClient.end()
-// });
-
-// global.mqttClient = mqttClient;
 
 const BannerHeight = 48;
 const BannerKey = `banner-${FormLink}`;
@@ -123,9 +93,16 @@ class App extends Component {
   };
 
   componentDidMount() {
+    const apolloClient = new ApolloClient({
+      uri: 'https://charming-hawk-93.hasura.app/v1/graphql',
+      cache: new InMemoryCache()
+    });
+    
+    global.apolloClient = apolloClient;
+    
     // if we pass an id as part of the url
     // we ry to fetch along map configurations
-    const {params: {id, provider} = {}, location: {query = {}} = {}} = this.props;
+    const { params: { id, provider } = {}, location: { query = {} } = {} } = this.props;
 
     const cloudProvider = CLOUD_PROVIDERS.find(c => c.name === provider);
     if (cloudProvider) {
@@ -141,11 +118,11 @@ class App extends Component {
   }
 
   _showBanner = () => {
-    this.setState({showBanner: true});
+    this.setState({ showBanner: true });
   };
 
   _hideBanner = () => {
-    this.setState({showBanner: false});
+    this.setState({ showBanner: false });
   };
 
   _disableBanner = () => {
@@ -155,10 +132,10 @@ class App extends Component {
 
   _loadMockNotifications = () => {
     const notifications = [
-      [{message: 'Welcome to Kepler.gl'}, 3000],
-      [{message: 'Something is wrong', type: 'error'}, 1000],
-      [{message: 'I am getting better', type: 'warning'}, 1000],
-      [{message: 'Everything is fine', type: 'success'}, 1000]
+      [{ message: 'Welcome to Kepler.gl' }, 3000],
+      [{ message: 'Something is wrong', type: 'error' }, 1000],
+      [{ message: 'I am getting better', type: 'warning' }, 1000],
+      [{ message: 'Everything is fine', type: 'success' }, 1000]
     ];
 
     this._addNotifications(notifications);
@@ -228,24 +205,22 @@ class App extends Component {
             }}
           >
             <AutoSizer>
-              {({height, width}) => (
-                <ApolloProvider client={apolloClient}>
-                  <KeplerGl
-                    appName={KEPLER_GL_NAME}
-                    mapboxApiAccessToken={AUTH_TOKENS.MAPBOX_TOKEN}
-                    id="map"
-                    /*
-                     * Specify path to keplerGl state, because it is not mount at the root
-                     */
-                    getState={state => state.main.keplerGl}
-                    width={width}
-                    height={height}
-                    cloudProviders={CLOUD_PROVIDERS}
-                    localeMessages={messages}
-                    onExportToCloudSuccess={onExportFileSuccess}
-                    onLoadCloudMapSuccess={onLoadCloudMapSuccess}
-                  />
-                </ApolloProvider>
+              {({ height, width }) => (
+                <KeplerGl
+                  appName={KEPLER_GL_NAME}
+                  mapboxApiAccessToken={AUTH_TOKENS.MAPBOX_TOKEN}
+                  id="map"
+                  /*
+                   * Specify path to keplerGl state, because it is not mount at the root
+                   */
+                  getState={state => state.main.keplerGl}
+                  width={width}
+                  height={height}
+                  cloudProviders={CLOUD_PROVIDERS}
+                  localeMessages={messages}
+                  onExportToCloudSuccess={onExportFileSuccess}
+                  onLoadCloudMapSuccess={onLoadCloudMapSuccess}
+                />
               )}
             </AutoSizer>
           </div>
@@ -256,6 +231,6 @@ class App extends Component {
 }
 
 const mapStateToProps = state => state;
-const dispatchToProps = dispatch => ({dispatch});
+const dispatchToProps = dispatch => ({ dispatch });
 
 export default connect(mapStateToProps, dispatchToProps)(App);

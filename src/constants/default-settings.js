@@ -50,7 +50,7 @@ export const ACTION_PREFIX = '@@kepler.gl/';
 export const CLOUDFRONT = 'https://d1a3f4spazzrp4.cloudfront.net/kepler.gl';
 export const ICON_PREFIX = `${CLOUDFRONT}/geodude`;
 export const DEFAULT_MAPBOX_API_URL = 'https://api.mapbox.com';
-
+export const MQTT_BROKER_URL = 'ws://159.89.0.130:9001';
 export const MINION_COMMANDS = [
   'Command1',
   'Command2',
@@ -947,7 +947,6 @@ export const AUTH_TOKENS = {
   EXPORT_MAPBOX_TOKEN: process.env.MapboxExportToken, // eslint-disable-line
   CARTO_CLIENT_ID: process.env.CartoClientId // eslint-disable-line
 };
-
 
 export const SIGNAL_QUALITY = {
   rssi: [-44, -65, -75, -85, -100],

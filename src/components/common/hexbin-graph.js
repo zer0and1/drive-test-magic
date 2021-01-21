@@ -28,14 +28,16 @@ const colors = ['#2E93fA', '#66DA26', '#FF9800', '#7E36AF', '#00ECFF', '#f0ec26'
 
 let chartConfig = {
   type: 'line',
-  options: {
-    contextMenu: {
-      visible: true
-    },
-  },
+  options: {},
   theme: 'dark',
   backgroundColor:"#29323c",
+  plotarea:{ 
+    margin: 'dynamic'
+  },
   plot: {
+    highlight: true,
+    tooltipText: "%t views: %v<br>%k",
+    shadow: 0,
     aspect: 'jumped'
   },
   scaleX: {
@@ -46,8 +48,7 @@ let chartConfig = {
     guide: {
       lineColor: '#4e5053',
       visible: true
-    },
-    labels: []
+    }
   },
   crosshairX: {
     // plotLabel: {
@@ -64,8 +65,8 @@ let chartConfig = {
     markers: []
   },
   legend: {
-    align: 'right',
-    verticalAlign: 'top'
+    adjustLayout: true,
+    marginTop: -20 
   },
   tooltip: {
     visible: false
@@ -113,40 +114,21 @@ function HexbinGraphFactory() {
       } = this.props;
 
       const lineChart = visState?.object?.points;
+      if (lineChart == undefined) return;
 
-      const timePeriod = (lineChart != undefined) ? 
-                          Object.values(lineChart).map(item => {return new Date(item.data[8]).getTime()}) :
-                          undefined;
-      const diff = (timePeriod != undefined) ? max(timePeriod) - min(timePeriod) : 0;
+      const timePeriod = Object.values(lineChart).map(item => {return new Date(item.data[8]).getTime()});
 
-      let func = (t => {
-        if (diff > 3600000 * 24 * 30 * 36) {
-          // groupBy 3-month
-          return new Date(t.getFullYear(), Math.floor( t.getMonth() / 3 ) * 3).getTime()
-        }
-        if (diff > 3600000 * 24 * 30 * 12) {
-          // groupBy 1-month
-          return new Date(t.getFullYear(), t.getMonth()).getTime()
-        }
-        if (diff > 3600000 * 24 * 30 * 3) {
-          // groupBy 10-days
-          return new Date(t.getFullYear(), t.getMonth(), Math.floor(( min(t.getDate(), 30) - 1 ) / 10 ) * 10 + 1).getTime()
-        }
-        if (diff > 3600000 * 24 * 30) {
-          // groupBy 4-days
-          return new Date(t.getFullYear(), t.getMonth(), Math.floor(( t.getDate() - 1 ) / 4 ) * 4 + 1).getTime()
-        }
-        if (diff > 3600000 * 24 * 6) {
-          // groupBy 1-days
-          return new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime()
-        }
-        if (diff > 3600000 * 24 * 2) {
-          // groupBy 4-hours
-          return new Date(t.getFullYear(), t.getMonth(), t.getDate(), Math.floor( t.getHours() / 4 ) * 4).getTime()
-        }
-        // groupBy 1-hour
-        return new Date(t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()).getTime()
-      });
+      let st = new Date(min(timePeriod));
+      const starttime = new Date(st.getFullYear(), st.getMonth(), st.getDate(), st.getHours()).getTime()
+      st = new Date(max(timePeriod));
+      const endtime = new Date(st.getFullYear(), st.getMonth(), st.getDate(), st.getHours()).getTime()
+
+      const diff = endtime - starttime;
+
+      let step = 1;
+      for (step of [1,4,8,24,48,96,168,336,730])
+        if (diff / 3600000 / step < 42) break;
+      step *= 3600000;
 
       const data = (lineChart != undefined) ? lineChart.map((item) => {
         const obj = {
@@ -154,7 +136,7 @@ function HexbinGraphFactory() {
           enodeb : item.data[11],
 
           // groupBy time with "some fixed values starting with 1h then like 4h, 1d, 4d, 10d, 1m, 3month"
-          groupTime : func(new Date(item.data[8]))
+          groupTime : Math.floor((new Date(item.data[8]).getTime() - starttime) / step) * step + starttime
         }
 
         return obj
@@ -194,7 +176,12 @@ function HexbinGraphFactory() {
       const dataset = _.groupBy(result, 'enodeb');
       const enodebIds = Object.keys(dataset)
 
-      const labels = Object.keys(_.groupBy(result, 'groupTime')).reverse()
+      let labels = [];
+      for (var i in _.range(50)){
+        var t = starttime + i * step;
+        if (t > endtime) break;
+        labels.push(t)
+      }
 
       const yvalues = [];
       for (var i of enodebIds) {
@@ -258,11 +245,23 @@ function HexbinGraphFactory() {
         annos.push(anno);
       }
 
+      const GetSortOrder = () => {
+        return (a, b) => {
+          const aVal = smps.filter(item => item.key === a.text)[0].value;
+          const bVal = smps.filter(item => item.key === b.text)[0].value;
+          if (aVal < bVal)
+            return 1;
+          return -1;
+        }
+      }
+      series.sort(GetSortOrder())
+
       chartConfig = {
         ...chartConfig,
         scaleX: {
           ...chartConfig.scaleX,
-          labels: labels
+          minValue: starttime,
+          step: step
         },
         scaleY: {
           ...chartConfig.scaleY,
@@ -285,6 +284,7 @@ function HexbinGraphFactory() {
       return (
         <ZingChart
           id='hexbinGraph'
+          height={350}
           data={chartConfig}
           legend_item_click={legendItemClick}
           legend_marker_click={legendItemClick}

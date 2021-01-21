@@ -279,7 +279,6 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
       let layerPinnedProp = null;
       const position = { x: mousePosition[0], y: mousePosition[1] };
       let pinnedPosition = {};
-      let markedPosition = {};
       
       layerHoverProp = getLayerHoverProp({
         interactionConfig,
@@ -297,11 +296,10 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
 
       const hasTooltip = pinned || clicked;
       const hasComparisonTooltip = compareMode || (!clicked && !pinned);
-      const hasMarker = marked;
+      const viewport = new WebMercatorViewport(mapState);
 
       if (hasTooltip) {
         // project lnglat to screen so that tooltip follows the object on zoom
-        const viewport = new WebMercatorViewport(mapState);
         const lngLat = clicked ? clicked.lngLat : pinned.coordinate;
         pinnedPosition = this._getHoverXY(viewport, lngLat);
         layerPinnedProp = getLayerHoverProp({
@@ -317,11 +315,6 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
           layerHoverProp.primaryData = layerPinnedProp.data;
           layerHoverProp.compareType = interactionConfig.tooltip.config.compareType;
         }
-      }
-
-      if (hasMarker) {
-        const viewport = new WebMercatorViewport(mapState);
-        markedPosition = this._getHoverXY(viewport, marked.lngLat);
       }
 
       const commonProp = {
@@ -351,14 +344,14 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
               coordinate={interactionConfig.coordinate.enabled && coordinate}
             />
           )}
-          {hasMarker && (
+          {marked.map(marker => (
             <MapMarker
               {...commonProp}
-              {...markedPosition}
-              info={marked.info}
-              color={marked.color}
+              {...this._getHoverXY(viewport, marker.lngLat)}
+              info={marker.info}
+              color={marker.color}
             />
-          )}
+          ))}
         </div>
       );
     }

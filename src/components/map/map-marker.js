@@ -24,27 +24,13 @@ import { Place } from 'components/common/icons';
 import { injectIntl } from 'react-intl';
 import styled from 'styled-components';
 
-const MARKER_WIDTH = 56;
-const MARKER_HEIGHT = 84;
-const LABLE_MAX_WIDTH = 150;
+const MARKER_WIDTH = 160;
+const MARKER_HEIGHT = 80;
 
 const StyledMarker = styled(Place)`
-  left: ${props => props.x  - MARKER_WIDTH * props.scale / 2}px;
+  left: ${props => props.x - MARKER_WIDTH * props.scale / 2}px;
   top: ${props => props.y - MARKER_HEIGHT * props.scale}px;
   position: absolute;
-`;
-
-const StyledLabel = styled.div`
-  position: absolute;
-  left: ${props => props.x  - LABLE_MAX_WIDTH * props.scale / 2}px;
-  top: ${props => props.y}px;
-  width: ${props => LABLE_MAX_WIDTH * props.scale}px;
-  color: ${props => props.color};
-  font-size: ${props => Math.floor(15 * props.scale)}px;
-  font-weight: bold;
-  text-align: center;
-  white-space: nowrap;
-  user-select: none;
 `;
 
 const StyledMarkerWrapper = styled.div`
@@ -68,17 +54,12 @@ export default function MapMarkerFactory() {
     }
 
     render() {
-      const {mapW, color, x, y, info: {label}} = this.props;
+      const { mapW, x, y, info: { mode, name } } = this.props;
       const scale = mapW / 1920;
 
       return (
         <StyledMarkerWrapper>
-          <StyledMarker color={color} x={x} y={y} scale={scale} />
-          {label && (
-            <StyledLabel color={color} x={x} y={y} scale={scale}>
-              {label}
-            </StyledLabel>
-          )}
+          <StyledMarker x={x} y={y} scale={scale} mode={mode} name={name}/>
         </StyledMarkerWrapper>
       );
     }

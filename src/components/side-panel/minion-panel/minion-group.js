@@ -21,6 +21,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { ArrowDown, ArrowUp } from 'components/common/icons';
+import LoadingDialog from 'components/modals/loading-dialog';
 
 import {
   PanelHeaderContent,
@@ -65,7 +66,8 @@ MinionGroupFactory.deps = [PanelHeaderActionFactory];
 function MinionGroupFactory(PanelHeaderAction) {
   class MinionGroup extends Component {
     static defaultProps = {
-      toggled: true
+      toggled: true,
+      disabled: false,
     };
 
     state = {
@@ -77,7 +79,7 @@ function MinionGroupFactory(PanelHeaderAction) {
     }
 
     render() {
-      return <div className="minion-panel__group">
+      return <div className="minion-panel__group" id={this.props.id}>
         <StyledMinionGroupHeader style={{ marginBottom: this.state.toggled ? '0px' : '5px' }}>
           <StyledPanelHeader onClick={this.toggle.bind(this)}>
             <PanelHeaderContent>
@@ -95,13 +97,13 @@ function MinionGroupFactory(PanelHeaderAction) {
             />
           </StyledPanelHeader>
         </StyledMinionGroupHeader>
-        {this.state.toggled && (
+        {this.state.toggled ? (
           <StyledMinionGroupWrapper>
             <StyledMinionGroupContent>
               {this.props.children}
             </StyledMinionGroupContent>
           </StyledMinionGroupWrapper>
-        )}
+        ) : null}
       </div>
     }
   }

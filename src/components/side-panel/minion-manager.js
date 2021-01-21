@@ -88,6 +88,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     panelRatio = 0.2;
     minionSortColumn = null;
     minionSortDirection = null;
+    isResizingPanel = false;
 
     strRenderer(row, columnproperties, value) {
       return `<div style='text-align: center; margin-top: 5px;'>${value}</div>`
@@ -96,13 +97,16 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     convertToHRTime(dateString) {
       const date = moment(dateString).format('YYYY-MM-DD HH:mm:ss');
       const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
-      const diff = moment(now).diff(moment(date), 'seconds');
-
-      if (diff < 120) {
+      let diff = moment(now).diff(moment(date), 'seconds');
+      
+      if (diff < 120 && diff > 0) {
         const mins = Math.floor(diff / 60);
         const secs = diff % 60;
 
         return mins ? `${mins}m ${secs}s ago` : `${secs}s ago`;
+      }
+      else if (diff <= 0) {
+        return 'Just Now';
       }
 
       return date;
@@ -130,7 +134,15 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       this._mounted = false;
     }
 
-    onMinionsLoaded(selectedMinionData, minions) {
+    shouldComponentUpdate() {
+      if (this.isResizingPanel) {
+        return false;
+      }
+
+      return true;
+    }
+
+    onMinionsLoaded(selected, minions) {
       if (this._mounted == false) {
         return;
       }
@@ -139,38 +151,34 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       $('#minion-group').LoadingOverlay('hide', true);
 
       this.minionSource.localdata = minions;
-      // this.minionSource.sortcolumn = this.minionSortColumn;
-      // this.minionSource.sortdirection = this.minionSortDirection;
       this.refs.minionGrid.updatebounddata('sort');
 
       this.timeoutId = setTimeout(this.props.loadMinions.bind(this), 3000, this.onMinionsLoaded.bind(this));
-      this.props.selectedMinionName && this.trackMinion(selectedMinionData);
+      this.trackMinion(minions);
     }
 
-    trackMinion({ latitude, longitude, name: minionName }) {
-      if (!latitude || !longitude || !minionName) {
-        this.props.removeMarker();
-        return;
-      }
+    trackMinion(minions) {
+      this.props.removeMarker();
+      this.props.addMarker(
+        minions.map(m => ({ 
+          lngLat: [m.longitude, m.latitude], 
+          info: {
+            mode: m.operation_mode,
+            name: m.name
+          },
+          id: m.name
+        }))
+      );
 
-      this.props.onMouseMove({ point: [0, 0], lngLat: [longitude, latitude] });
-      this.props.addMarker({
-        center: true,
-        lng: longitude,
-        lat: latitude,
-        color: 'red',
-        info: {
-          label: minionName
-        }
-      });
-      this.props.updateMap({
-        latitude,
-        longitude,
-      });
+      // this.props.updateMap({
+      //   latitude,
+      //   longitude,
+      // });
     }
 
     onPanelResize({ args }) {
       this.panelRatio = args.panels[0].size / this.props.height;
+      this.isResizingPanel = false;
     }
 
     minionRowselect({ args: { row: { name }, rowindex } }) {
@@ -193,6 +201,9 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         increaseSessionId,
         setCommand,
         sendCommand,
+        setMqttClient,
+        setMqttMessage,
+        isCommandExecuting,
       } = this.props;
 
       const commandGroupFields = {
@@ -200,7 +211,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         operationMode,
         lastAck,
         sessionId,
-        command
+        command,
+        isCommandExecuting,
       };
       const commandGroupActions = {
         setSleepInterval,
@@ -208,6 +220,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         increaseSessionId,
         setCommand,
         sendCommand,
+        setMqttClient,
+        setMqttMessage,
       }
       return (
         <div className="minion-manager">
@@ -219,6 +233,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
             panels={[{ size: height * this.panelRatio, collapsible: false }, { size: height * (1 - this.panelRatio), collapsible: true }]}
             orientation={"horizontal"}
             onResize={this.onPanelResize.bind(this)}
+            onResizeStart={() => {this.isResizingPanel = true}}
           >
             <div className={"splitter-panel"} id="minion-grid">
               <JqxGrid
@@ -240,6 +255,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 altrows={true}
                 enabletooltips={true}
                 editable={false}
+                enablehover={false}
                 onRowselect={this.minionRowselect}
                 onSort={({ args: { sortinformation: { sortcolumn, sortdirection } } }) => {
                   this.minionSortColumn = sortcolumn;

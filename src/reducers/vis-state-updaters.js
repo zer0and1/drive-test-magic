@@ -27,7 +27,7 @@ import xor from 'lodash.xor';
 import copy from 'copy-to-clipboard';
 import { parseFieldValue } from 'utils/data-utils';
 // Tasks
-import { LOAD_FILE_TASK, UNWRAP_TASK, PROCESS_FILE_DATA, DELAY_TASK } from 'tasks/tasks';
+import { LOAD_FILE_TASK, UNWRAP_TASK, PROCESS_FILE_DATA, DELAY_TASK, ACTION_TASK } from 'tasks/tasks';
 // Actions
 import {
   loadFilesErr,
@@ -76,12 +76,12 @@ import { pick_, merge_ } from './composer-helpers';
 import { processFileContent, removeLayer } from 'actions/vis-state-actions';
 
 import KeplerGLSchema, { CURRENT_VERSION, visStateSchema } from 'schemas';
-import { ACTION_TASK } from 'tasks/tasks';
 import { updateDataset, reloadDataset } from 'actions/provider-actions';
 import { applyProfile } from 'actions/map-profile-actions';
 
 import { mergeFilters } from './vis-state-merger';
 import { YAxis } from 'react-vis';
+import { onMouseMove } from '../actions';
 
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
@@ -190,7 +190,7 @@ export const INITIAL_VIS_STATE = {
   layerBlending: 'normal',
   hoverInfo: undefined,
   clicked: undefined,
-  marked: undefined,
+  marked: [],
   mousePos: {},
 
   // this is used when user split maps
@@ -2064,15 +2064,28 @@ export function toggleEditorVisibilityUpdater(state) {
  * @type {typeof import('./vis-state-updaters').addMarkerUpdater}
  * @public
  */
-export function addMarkerUpdater(state, { payload: { color, lng, lat, info } }) {
-  return {
-    ...state,
-    marked: {
-      lngLat: [lng, lat],
-      color,
-      info
-    }
+export function addMarkerUpdater(state, { payload }) {
+  let task, newState;
+
+  if (Array.isArray(payload)) {
+    newState = {
+      ...state,
+      marked: state.marked.concat(payload)
+    };
+    task = ACTION_TASK().map(_ => onMouseMove({ point: [0, 0], lngLat: payload?.[0].lngLat }));
   }
+  else {
+    task = ACTION_TASK().map(_ => onMouseMove({ point: [0, 0], lngLat: payload.lngLat }));
+    newState = {
+      ...state,
+      marked: [
+        ...state.marked,
+        payload
+      ]
+    };
+  }
+
+  return withTask(newState, task);
 }
 
 /**
@@ -2081,10 +2094,10 @@ export function addMarkerUpdater(state, { payload: { color, lng, lat, info } }) 
  * @type {typeof import('./vis-state-updaters').removeMakerUpdater}
  * @public
  */
-export function removeMarkerUpdater(state) {
+export function removeMarkerUpdater(state, { id }) {
   return {
     ...state,
-    marked: null
+    marked: (!id ? [] : state.marked.filter(m => m.id != id))
   }
 }
 
