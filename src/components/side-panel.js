@@ -233,6 +233,7 @@ export default function SidePanelFactory(
         sendCommand: minionStateActions.sendCommand,
         setMqttClient: minionStateActions.setMqttClient,
         setMqttMessage: minionStateActions.setMqttMessage,
+        loadMinionCommand: minionStateActions.loadMinionCommand,
       };
 
       const layerManagerActions = {

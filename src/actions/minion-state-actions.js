@@ -168,6 +168,19 @@ export function setMqttMessage(topic, message) {
   };
 }
 
+export function loadMinionCommand() {
+  return {
+    type: ActionTypes.LOAD_MINION_COMMAND
+  }
+}
+
+export function loadMinionCommandSuccess(commands) {
+  return {
+    type: ActionTypes.LOAD_MINION_COMMAND_SUCCESS,
+    commands
+  }
+}
+
 /**
  * This declaration is needed to group actions in docs
  */

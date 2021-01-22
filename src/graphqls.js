@@ -57,42 +57,10 @@ query MyQuery {
 }
 `;
 
-export const GQL_GET_SIGNAL_SAMPLES = gql`
+export const GQL_GET_MINION_COMMANDS = () => gql`
 query MyQuery {
-  signal_db_signal_samples_view (limit: 1000) {
-    aux
-    bs_latitude
-    bs_longitude
-    cell_id
-    cell_name
-    connection_state
-    connection_type
-    cqi
-    date
-    dl_chan_bandwidth
-    duplex_mode
-    enodeb_id
-    freq_arfcn
-    freq_band
-    freq_mhz_dl
-    freq_mhz_ul
-    latitude
-    longitude
-    mcc_mnc
-    minion_dl_rate
-    minion_id
-    minion_module_firmware
-    minion_module_type
-    minion_state
-    minion_target_ping_ms
-    minion_ul_rate
-    pcid
-    rsrp_rscp
-    rsrq
-    rssi
-    session_id
-    sinr_ecio
-    ul_chan_bandwidth
+  signal_db_minion_commands {
+    id, command
   }
 }
 `;

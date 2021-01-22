@@ -51,6 +51,7 @@ function CommandGroupFactory(MinionGroup) {
       lastAck: null,
       command: null,
       isCommandExecuting: null,
+      commands: null,
       isLoaded: false
     };
     static mqttClient = mqtt.connect(MQTT_BROKER_URL);
@@ -67,10 +68,15 @@ function CommandGroupFactory(MinionGroup) {
       increaseSessionId: PropTypes.func.isRequired,
       setCommand: PropTypes.func.isRequired,
       sendCommand: PropTypes.func.isRequired,
+      setMqttClient: PropTypes.func.isRequired,
+      setMqttMessage: PropTypes.func.isRequired,
+      loadMinionCommand: PropTypes.func.isRequired,
     };
 
     componentDidMount() {
       if (CommandGroup.state.isLoaded == false) {
+        this.props.loadMinionCommand();
+        
         const client = CommandGroup.mqttClient;
         client.on('connect', () => {
           this.props.setMqttClient(CommandGroup.mqttClient);
@@ -78,7 +84,6 @@ function CommandGroupFactory(MinionGroup) {
   
         client.on('message', (topic, message) => {
           this.props.setMqttMessage(topic, message);
-          client.end();
         });
   
         client.on('error', err => console.log(err));
@@ -86,7 +91,7 @@ function CommandGroupFactory(MinionGroup) {
         CommandGroup.state.isLoaded = true;
       }
     }
-
+    
     shouldComponentUpdate(nextProps) {
       const keys = Object.keys(CommandGroup.state)
       const changed = keys.reduce((acc, key) => acc || CommandGroup.state[key] != nextProps[key], false);
@@ -102,6 +107,7 @@ function CommandGroupFactory(MinionGroup) {
         sessionId,
         lastAck,
         command,
+        commands,
         isCommandExecuting,
       } = this.props;
 
@@ -183,8 +189,8 @@ function CommandGroupFactory(MinionGroup) {
                       height={20}
                       style={{ float: 'left', marginRight: '10px' }}
                       theme='metrodark'
-                      source={MINION_COMMANDS}
-                      selectedIndex={MINION_COMMANDS.findIndex(cmd => cmd == command)}
+                      source={commands}
+                      selectedIndex={commands.findIndex(cmd => cmd == command)}
                       itemHeight={20}
                       autoDropDownHeight={true}
                       enableBrowserBoundsDetection={true}

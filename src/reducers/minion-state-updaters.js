@@ -20,8 +20,8 @@
 
 import { disableStackCapturing, withTask } from 'react-palm/tasks';
 import { GRAPHQL_QUERY_TASK } from 'tasks/tasks';
-import { GQL_GET_MINIONS } from 'graphqls';
-import { loadMinionsSuccess, loadMinionsError } from 'actions/minion-state-actions';
+import { GQL_GET_MINIONS, GQL_GET_MINION_COMMANDS } from 'graphqls';
+import { loadMinionsSuccess, loadMinionsError, loadMinionCommandSuccess } from 'actions/minion-state-actions';
 import { SIGNAL_QUALITY } from 'constants/default-settings';
 
 // react-palm
@@ -85,6 +85,7 @@ export const INITIAL_MINION_STATE = {
   sessionId: null,
   lastAck: null,
   command: null,
+  commands: [],
   isCommandExecuting: false,
   mqttClient: null,
   mqttMessage: null,
@@ -227,6 +228,7 @@ export function setSleepIntervalUpdater(state, { interval }) {
   }
 
   const topic = `${selectedMinionName}/interval`;
+  console.log(`send command: ${topic}`)
   mqttClient.subscribe(topic, err => {
     if (!err) {
       mqttClient.publish(topic, interval);
@@ -253,6 +255,7 @@ export function setOperationModeUpdater(state, { mode }) {
   }
 
   const topic = `${selectedMinionName}/operation_mode`;
+  console.log(`send command: ${topic}`)
   mqttClient.subscribe(topic, err => {
     if (!err) {
       mqttClient.publish(topic, mode);
@@ -284,6 +287,7 @@ export function increaseSessionIdUpdater(state) {
     isCommandExecuting: true
   };
   const topic = `${selectedMinionName}/session_id`;
+  console.log(`send command: ${topic}`)
   mqttClient.subscribe(topic, err => {
     if (!err) {
       mqttClient.publish(topic, newState.sessionId);
@@ -318,6 +322,7 @@ export function sendCommandUpdater(state) {
   }
 
   const topic = `${selectedMinionName}/command`;
+  console.log(`send command: ${topic}`)
   mqttClient.subscribe(topic, err => {
     if (!err) {
       mqttClient.publish(topic, state.command);
@@ -336,7 +341,7 @@ export function sendCommandUpdater(state) {
  *
  */
 export function setMqttClientUpdater(state, { mqttClient }) {
-  // alert('mqtt client has been connected to the broker successfully');
+  console.log('mqtt client has been connected to the broker successfully');
 
   return {
     ...state,
@@ -350,7 +355,7 @@ export function setMqttClientUpdater(state, { mqttClient }) {
  *
  */
 export function setMqttMessageUpdater(state, { mqttTopic, mqttMessage }) {
-  // alert(`message received from mqtt broker=> topic:${mqttTopic.toString()} message:${mqttMessage.toString()}`);
+  console.log(`message received from mqtt broker=> topic:${mqttTopic.toString()} message:${mqttMessage.toString()}`);
 
   return {
     ...state,
@@ -359,4 +364,21 @@ export function setMqttMessageUpdater(state, { mqttTopic, mqttMessage }) {
     mqttMessage,
     lastAck: mqttTopic == `${state.selectedMinionName}/ack` ? mqttMessage : state.lastAck
   };
+}
+
+export function loadMinionCommandUpdater(state) {
+  const query = GQL_GET_MINION_COMMANDS();
+  const task = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only'}).bimap(
+    res => loadMinionCommandSuccess(res.data.signal_db_minion_commands),
+    err => {}
+  );
+
+  return withTask(state, task);
+}
+
+export function loadMinionCommandSuccessUpdater(state,  { commands }) {
+  return {
+    ...state,
+    commands: commands.map(c => c.command)
+  }
 }

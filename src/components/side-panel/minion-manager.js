@@ -98,7 +98,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       const date = moment(dateString).format('YYYY-MM-DD HH:mm:ss');
       const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
       let diff = moment(now).diff(moment(date), 'seconds');
-      
+
       if (diff < 120 && diff > 0) {
         const mins = Math.floor(diff / 60);
         const secs = diff % 60;
@@ -160,8 +160,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     trackMinion(minions) {
       this.props.removeMarker();
       this.props.addMarker(
-        minions.map(m => ({ 
-          lngLat: [m.longitude, m.latitude], 
+        minions.map(m => ({
+          lngLat: [m.longitude, m.latitude],
           info: {
             mode: m.operation_mode,
             name: m.name
@@ -188,41 +188,27 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     render() {
-      const {
-        width,
-        height,
-        sleepInterval,
-        operationMode,
-        lastAck,
-        sessionId,
-        command,
-        setSleepInterval,
-        setOperationMode,
-        increaseSessionId,
-        setCommand,
-        sendCommand,
-        setMqttClient,
-        setMqttMessage,
-        isCommandExecuting,
-      } = this.props;
-
+      const { width, height } = this.props;
       const commandGroupFields = {
-        sleepInterval,
-        operationMode,
-        lastAck,
-        sessionId,
-        command,
-        isCommandExecuting,
+        sleepInterval: this.props.sleepInterval,
+        operationMode: this.props.operationMode,
+        lastAck: this.props.lastAck,
+        sessionId: this.props.sessionId,
+        command: this.props.command,
+        commands: this.props.commands,
+        isCommandExecuting: this.props.isCommandExecuting,
       };
       const commandGroupActions = {
-        setSleepInterval,
-        setOperationMode,
-        increaseSessionId,
-        setCommand,
-        sendCommand,
-        setMqttClient,
-        setMqttMessage,
-      }
+        setSleepInterval: this.props.setSleepInterval,
+        setOperationMode: this.props.setOperationMode,
+        increaseSessionId: this.props.increaseSessionId,
+        setCommand: this.props.setCommand,
+        sendCommand: this.props.sendCommand,
+        setMqttClient: this.props.setMqttClient,
+        setMqttMessage: this.props.setMqttMessage,
+        loadMinionCommand: this.props.loadMinionCommand,
+      };
+
       return (
         <div className="minion-manager">
           <JqxSplitter
@@ -233,7 +219,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
             panels={[{ size: height * this.panelRatio, collapsible: false }, { size: height * (1 - this.panelRatio), collapsible: true }]}
             orientation={"horizontal"}
             onResize={this.onPanelResize.bind(this)}
-            onResizeStart={() => {this.isResizingPanel = true}}
+            onResizeStart={() => { this.isResizingPanel = true }}
           >
             <div className={"splitter-panel"} id="minion-grid">
               <JqxGrid

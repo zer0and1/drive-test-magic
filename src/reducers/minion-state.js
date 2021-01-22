@@ -48,6 +48,10 @@ const actionHandler = {
   [ActionTypes.SET_MQTT_CLIENT]: minionStateUpdaters.setMqttClientUpdater,
 
   [ActionTypes.SET_MQTT_MESSAGE]: minionStateUpdaters.setMqttMessageUpdater,
+
+  [ActionTypes.LOAD_MINION_COMMAND]: minionStateUpdaters.loadMinionCommandUpdater,
+
+  [ActionTypes.LOAD_MINION_COMMAND_SUCCESS]: minionStateUpdaters.loadMinionCommandSuccessUpdater,
 };
 
 // construct vis-state reducer
