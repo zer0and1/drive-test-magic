@@ -50,11 +50,14 @@ function SignalSampleGroupFactory(MinionGroup) {
     const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
     const diff = moment(now).diff(moment(date), 'seconds');
 
-    if (diff < 120) {
+    if (diff < 120 && diff > 10) {
       const mins = Math.floor(diff / 60);
       const secs = diff % 60;
 
       return mins ? `${mins}m ${secs}s ago` : `${secs}s ago`;
+    }
+    else if (diff <= 10) {
+      return 'Just Now';
     }
 
     return null;

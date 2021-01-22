@@ -86,8 +86,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
     timeoutId = 0;
     panelRatio = 0.2;
-    minionSortColumn = null;
-    minionSortDirection = null;
+    sortCol = null;
+    sortDir = null;
     isResizingPanel = false;
 
     strRenderer(row, columnproperties, value) {
@@ -99,13 +99,13 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
       let diff = moment(now).diff(moment(date), 'seconds');
 
-      if (diff < 120 && diff > 0) {
+      if (diff < 120 && diff > 10) {
         const mins = Math.floor(diff / 60);
         const secs = diff % 60;
 
         return mins ? `${mins}m ${secs}s ago` : `${secs}s ago`;
       }
-      else if (diff <= 0) {
+      else if (diff <= 10) {
         return 'Just Now';
       }
 
@@ -151,9 +151,9 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       $('#minion-group').LoadingOverlay('hide', true);
 
       this.minionSource.localdata = minions;
-      this.refs.minionGrid.updatebounddata('sort');
+      this.refs.minionGrid.updatebounddata();
 
-      this.timeoutId = setTimeout(this.props.loadMinions.bind(this), 3000, this.onMinionsLoaded.bind(this));
+      this.timeoutId = setTimeout(this.props.loadMinions.bind(this), 5000, this.onMinionsLoaded.bind(this));
       this.trackMinion(minions);
     }
 
@@ -244,9 +244,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 enablehover={false}
                 onRowselect={this.minionRowselect}
                 onSort={({ args: { sortinformation: { sortcolumn, sortdirection } } }) => {
-                  this.minionSortColumn = sortcolumn;
-                  this.minionSortDirection = sortcolumn ? (sortdirection.ascending ? 'asc' : 'desc') : null;
+                  this.sortCol = sortcolumn;
+                  this.sortDir = sortcolumn ? (sortdirection.ascending ? 'asc' : 'desc') : null;
                 }}
+                onBindingcomplete={() => this.refs.minionGrid.sortby(this.sortCol, this.sortDir)}
               />
             </div>
             <StyledMinionGroup className={"splitter-panel"} id="minion-group">

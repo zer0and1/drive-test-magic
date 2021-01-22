@@ -178,8 +178,9 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
   return {
     ...newState,
     details,
-    operationMode: details.operation_mode,
-    sessionId: details.session_id,
+    operationMode: state.operationMode || details.operation_mode,
+    sessionId: state.sessionId || details.session_id,
+    sleepInterval: state.sleepInterval || details.sleep_interval
   }
 }
 
@@ -228,7 +229,6 @@ export function setSleepIntervalUpdater(state, { interval }) {
   }
 
   const topic = `${selectedMinionName}/interval`;
-  console.log(`send command: ${topic}`)
   mqttClient.subscribe(topic, err => {
     if (!err) {
       mqttClient.publish(topic, interval);
@@ -237,7 +237,6 @@ export function setSleepIntervalUpdater(state, { interval }) {
 
   return {
     ...state,
-    sleepInterval: interval,
     isCommandExecuting: true
   };
 }
@@ -255,7 +254,6 @@ export function setOperationModeUpdater(state, { mode }) {
   }
 
   const topic = `${selectedMinionName}/operation_mode`;
-  console.log(`send command: ${topic}`)
   mqttClient.subscribe(topic, err => {
     if (!err) {
       mqttClient.publish(topic, mode);
@@ -264,7 +262,6 @@ export function setOperationModeUpdater(state, { mode }) {
 
   return {
     ...state,
-    operationMode: mode,
     isCommandExecuting: true
   };
 }
@@ -281,20 +278,17 @@ export function increaseSessionIdUpdater(state) {
     return state;
   }
 
-  const newState = {
-    ...state,
-    sessionId: state.sessionId == null ? 1 : state.sessionId + 1,
-    isCommandExecuting: true
-  };
   const topic = `${selectedMinionName}/session_id`;
-  console.log(`send command: ${topic}`)
   mqttClient.subscribe(topic, err => {
     if (!err) {
-      mqttClient.publish(topic, newState.sessionId);
+      mqttClient.publish(topic, state.sessionId + 1);
     }
   });
 
-  return newState;
+  return {
+    ...state,
+    isCommandExecuting: true
+  };
 }
 
 /**
@@ -354,29 +348,37 @@ export function setMqttClientUpdater(state, { mqttClient }) {
  * @type {typeof import('./minion-state-updaters').setMqttMessageUpdater}
  *
  */
-export function setMqttMessageUpdater(state, { mqttTopic, mqttMessage }) {
-  console.log(`message received from mqtt broker=> topic:${mqttTopic.toString()} message:${mqttMessage.toString()}`);
+export function setMqttMessageUpdater(state, { mqttTopic: topic, mqttMessage: payload }) {
+  const { selectedMinionName } = state;
+  topic = topic.toString();
+  payload = payload.toString();
+
+  const reflections = {
+    [`${selectedMinionName}/ack`]: { lastAck: payload },
+    [`${selectedMinionName}/command`]: { command: payload },
+    [`${selectedMinionName}/operation_mode`]: { operationMode: payload },
+    [`${selectedMinionName}/interval`]: { sleepInterval: parseFloat(payload) },
+    [`${selectedMinionName}/session_id`]: { sessionId: parseInt(payload) },
+  };
 
   return {
     ...state,
     isCommandExecuting: false,
-    mqttTopic,
-    mqttMessage,
-    lastAck: mqttTopic == `${state.selectedMinionName}/ack` ? mqttMessage : state.lastAck
+    ...(reflections?.[topic])
   };
 }
 
 export function loadMinionCommandUpdater(state) {
   const query = GQL_GET_MINION_COMMANDS();
-  const task = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only'}).bimap(
+  const task = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     res => loadMinionCommandSuccess(res.data.signal_db_minion_commands),
-    err => {}
+    err => { }
   );
 
   return withTask(state, task);
 }
 
-export function loadMinionCommandSuccessUpdater(state,  { commands }) {
+export function loadMinionCommandSuccessUpdater(state, { commands }) {
   return {
     ...state,
     commands: commands.map(c => c.command)

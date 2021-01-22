@@ -344,12 +344,13 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
               coordinate={interactionConfig.coordinate.enabled && coordinate}
             />
           )}
-          {marked.map(marker => (
+          {marked.map((marker, idx) => (
             <MapMarker
               {...commonProp}
               {...this._getHoverXY(viewport, marker.lngLat)}
               info={marker.info}
               color={marker.color}
+              key={idx}
             />
           ))}
         </div>
