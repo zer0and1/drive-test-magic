@@ -178,9 +178,9 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
   return {
     ...newState,
     details,
-    operationMode: state.operationMode || details.operation_mode,
-    sessionId: state.sessionId || details.session_id,
-    sleepInterval: state.sleepInterval || details.sleep_interval
+    operationMode: state.operationMode || minionDetails.operation_mode,
+    sessionId: state.sessionId || minionDetails.session_id,
+    sleepInterval: state.sleepInterval || minionDetails.sleep_interval
   }
 }
 
@@ -274,11 +274,12 @@ export function setOperationModeUpdater(state, { mode }) {
 export function increaseSessionIdUpdater(state) {
   const { mqttClient, selectedMinionName } = state;
 
-  if (!mqttClient || !selectedMinionName) {
+  if (!selectedMinionName) {
     return state;
   }
 
   const topic = `${selectedMinionName}/session_id`;
+  alert(topic);
   mqttClient.subscribe(topic, err => {
     if (!err) {
       mqttClient.publish(topic, state.sessionId + 1);

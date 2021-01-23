@@ -76,22 +76,22 @@ function CommandGroupFactory(MinionGroup) {
     componentDidMount() {
       if (CommandGroup.state.isLoaded == false) {
         this.props.loadMinionCommand();
-        
+
         const client = CommandGroup.mqttClient;
         client.on('connect', () => {
           this.props.setMqttClient(CommandGroup.mqttClient);
         });
-  
+
         client.on('message', (topic, message) => {
           this.props.setMqttMessage(topic, message);
         });
-  
+
         client.on('error', err => console.log(err));
 
         CommandGroup.state.isLoaded = true;
       }
     }
-    
+
     shouldComponentUpdate(nextProps) {
       const keys = Object.keys(CommandGroup.state)
       const changed = keys.reduce((acc, key) => acc || CommandGroup.state[key] != nextProps[key], false);
@@ -113,99 +113,94 @@ function CommandGroupFactory(MinionGroup) {
 
       return (
         <MinionGroup groupIcon={Gear} label="Command" toggled={true}>
-          {isCommandExecuting && (
-            <LoadingDialog size={32} height='120px' />
-          )}
-          {isCommandExecuting || (
-            <table style={{ tableLayout: 'fixed', width: '100%' }}>
-              <tbody>
-                <tr>
-                  <td>Operation Mode:</td>
-                  <td colSpan="2">
-                    <StyledMode
-                      onClick={() => this.props.setOperationMode('idle')}
-                      active={operationMode == 'idle'}
-                    >
-                      Idle
+          <table style={{ tableLayout: 'fixed', width: '100%' }}>
+            <tbody>
+              <tr>
+                <td>Operation Mode:</td>
+                <td colSpan="2">
+                  <StyledMode
+                    onClick={() => this.props.setOperationMode('idle')}
+                    active={operationMode == 'idle'}
+                  >
+                    Idle
                   </StyledMode>
-                    <StyledMode
-                      onClick={() => this.props.setOperationMode('store')}
-                      active={operationMode == 'store'}
-                    >
-                      Store
+                  <StyledMode
+                    onClick={() => this.props.setOperationMode('store')}
+                    active={operationMode == 'store'}
+                  >
+                    Store
                   </StyledMode>
-                    <StyledMode
-                      onClick={() => this.props.setOperationMode('report')}
-                      active={operationMode == 'report'}
-                      last={true}
-                    >
-                      Report
+                  <StyledMode
+                    onClick={() => this.props.setOperationMode('report')}
+                    active={operationMode == 'report'}
+                    last={true}
+                  >
+                    Report
                   </StyledMode>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Sleep Interval:</td>
-                  <td colSpan="2">
-                    <StyledInterval
-                      onClick={() => this.props.setSleepInterval(0.5)}
-                      active={sleepInterval == 0.5}
-                    >
-                      0.5s
+                </td>
+              </tr>
+              <tr>
+                <td>Sleep Interval:</td>
+                <td colSpan="2">
+                  <StyledInterval
+                    onClick={() => this.props.setSleepInterval(0.5)}
+                    active={sleepInterval == 0.5}
+                  >
+                    0.5s
                   </StyledInterval>
-                    <StyledInterval
-                      onClick={() => this.props.setSleepInterval(2)}
-                      active={sleepInterval == 2}
-                    >
-                      2s
+                  <StyledInterval
+                    onClick={() => this.props.setSleepInterval(2)}
+                    active={sleepInterval == 2}
+                  >
+                    2s
                   </StyledInterval>
-                    <StyledInterval
-                      onClick={() => this.props.setSleepInterval(10)}
-                      active={sleepInterval == 10}
-                    >
-                      10s
+                  <StyledInterval
+                    onClick={() => this.props.setSleepInterval(10)}
+                    active={sleepInterval == 10}
+                  >
+                    10s
                   </StyledInterval>
-                    <StyledInterval
-                      onClick={() => this.props.setSleepInterval(60)}
-                      active={sleepInterval == 60}
-                      last={true}
-                    >
-                      60s
+                  <StyledInterval
+                    onClick={() => this.props.setSleepInterval(60)}
+                    active={sleepInterval == 60}
+                    last={true}
+                  >
+                    60s
                   </StyledInterval>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Session ID:</td>
-                  <td colSpan="2">
-                    <StyledLabel>{sessionId}</StyledLabel>
-                    <StyledButton onClick={this.props.increaseSessionId}>+1</StyledButton>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Command:</td>
-                  <td colSpan="2">
-                    <JqxDropDownList
-                      ref='commandSelector'
-                      width={100}
-                      height={20}
-                      style={{ float: 'left', marginRight: '10px' }}
-                      theme='metrodark'
-                      source={commands}
-                      selectedIndex={commands.findIndex(cmd => cmd == command)}
-                      itemHeight={20}
-                      autoDropDownHeight={true}
-                      enableBrowserBoundsDetection={true}
-                      onChange={({ args: { item: { value: cmd } } }) => this.props.setCommand(cmd)}
-                    />
-                    <StyledButton onClick={this.props.sendCommand}>SEND</StyledButton>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Last ACK:</td>
-                  <td colSpan="2">{lastAck}</td>
-                </tr>
-              </tbody>
-            </table>
-          )}
+                </td>
+              </tr>
+              <tr>
+                <td>Session ID:</td>
+                <td colSpan="2">
+                  <StyledLabel>{sessionId}</StyledLabel>
+                  <StyledButton onClick={this.props.increaseSessionId}>+1</StyledButton>
+                </td>
+              </tr>
+              <tr>
+                <td>Command:</td>
+                <td colSpan="2">
+                  <JqxDropDownList
+                    ref='commandSelector'
+                    width={100}
+                    height={20}
+                    style={{ float: 'left', marginRight: '10px' }}
+                    theme='metrodark'
+                    source={commands}
+                    selectedIndex={commands.findIndex(cmd => cmd == command)}
+                    itemHeight={20}
+                    autoDropDownHeight={true}
+                    enableBrowserBoundsDetection={true}
+                    onChange={({ args: { item: { value: cmd } } }) => this.props.setCommand(cmd)}
+                  />
+                  <StyledButton onClick={this.props.sendCommand}>SEND</StyledButton>
+                </td>
+              </tr>
+              <tr>
+                <td>Last ACK:</td>
+                <td colSpan="2">{lastAck}</td>
+              </tr>
+            </tbody>
+          </table>
         </MinionGroup>
       );
     }
