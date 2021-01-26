@@ -41,9 +41,9 @@ SignalSampleGroupFactory.deps = [MinionGroupFactory];
 
 function SignalSampleGroupFactory(MinionGroup) {
 
-  const makeTimeLabel = (value) => {
+  const makeTimeLabel = (value, mode) => {
     if (!value) {
-      return null;
+      return '';
     }
 
     const date = moment(value).format('YYYY-MM-DD HH:mm:ss');
@@ -54,17 +54,17 @@ function SignalSampleGroupFactory(MinionGroup) {
       const mins = Math.floor(diff / 60);
       const secs = diff % 60;
 
-      return mins ? `${mins}m ${secs}s ago` : `${secs}s ago`;
+      return mins ? ` - ${mins}m ${secs}s ago` : ` - ${secs}s ago`;
     }
-    else if (diff <= 10) {
-      return 'Just Now';
+    else if (diff <= 10 && mode == 'report') {
+      return ' - Just Now';
     }
 
-    return null;
+    return '';
   };
 
   const SignalSampleGroup = ({ data }) => (
-    <MinionGroup groupIcon={Minion} label={`Signal Sample${makeTimeLabel(data.lastupdate) ? ' - ' + makeTimeLabel(data.lastupdate) : ''}`}>
+    <MinionGroup groupIcon={Minion} label={`Signal Sample${makeTimeLabel(data.lastupdate, data.operation_mode)}`}>
       <table style={{ tableLayout: 'fixed', width: '100%' }}>
         <tbody>
           <tr>

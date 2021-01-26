@@ -56,7 +56,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       setSelectedMinion: PropTypes.func.isRequired,
       setSleepInterval: PropTypes.func.isRequired,
       setOperationMode: PropTypes.func.isRequired,
-      increaseSessionId: PropTypes.func.isRequired,
+      setSessionId: PropTypes.func.isRequired,
+      sendSessionCommand: PropTypes.func.isRequired,
       setCommand: PropTypes.func.isRequired,
       sendCommand: PropTypes.func.isRequired,
       sleepInterval: PropTypes.number,
@@ -162,10 +163,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       this.props.addMarker(
         minions.map(m => ({
           lngLat: [m.longitude, m.latitude],
-          info: {
-            mode: m.operation_mode,
-            name: m.name
-          },
+          info: m,
           id: m.name
         }))
       );
@@ -201,7 +199,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       const commandGroupActions = {
         setSleepInterval: this.props.setSleepInterval,
         setOperationMode: this.props.setOperationMode,
-        increaseSessionId: this.props.increaseSessionId,
+        setSessionId: this.props.setSessionId,
+        sendSessionCommand: this.props.sendSessionCommand,
         setCommand: this.props.setCommand,
         sendCommand: this.props.sendCommand,
         setMqttClient: this.props.setMqttClient,

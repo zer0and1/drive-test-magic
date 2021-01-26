@@ -106,12 +106,26 @@ export function setSleepInterval(interval) {
 /**
  * Increase minion session id
  * @memberof minionStateActions
- * @type {typeof import('./minion-state-actions').increaseSessionId}
+ * @type {typeof import('./minion-state-actions').sendSessionCommand}
  * @return action
  */
-export function increaseSessionId() {
+export function sendSessionCommand(isIncrement) {
   return {
-    type: ActionTypes.INCREASE_SESSION_ID
+    type: ActionTypes.SEND_SESSION_COMMAND,
+    isIncrement
+  };
+}
+
+/**
+ * Set minion session id
+ * @memberof minionStateActions
+ * @type {typeof import('./minion-state-actions').setSessionId}
+ * @return action
+ */
+export function setSessionId(sessionId) {
+  return {
+    type: ActionTypes.SET_SESSION_ID,
+    sessionId
   };
 }
 

@@ -23,6 +23,7 @@ import PropTypes from 'prop-types';
 import { Place } from 'components/common/icons';
 import { injectIntl } from 'react-intl';
 import styled from 'styled-components';
+import moment from 'moment';
 
 const MARKER_WIDTH = 160;
 const MARKER_HEIGHT = 80;
@@ -54,9 +55,25 @@ export default function MapMarkerFactory() {
     }
 
     render() {
-      const { mapW, x, y, info: { mode, name } } = this.props;
+      const { mapW, x, y, info: { operation_mode, name, lastupdate, gps_fix_lastupdate } } = this.props;
       const scale = mapW / 1920;
+      let mode = operation_mode;
 
+      const lastFix = moment(gps_fix_lastupdate).format('YYYY-MM-DD HH:mm:ss');
+      const lastUpdate = moment(lastupdate).format('YYYY-MM-DD HH:mm:ss');
+      const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+      const fixDiff = moment(now).diff(moment(lastFix), 'seconds');
+      const updateDiff = moment(now).diff(moment(lastUpdate), 'seconds');
+
+      if (fixDiff > 120) {
+        if (updateDiff < 120) {
+          mode = 'no fix';          
+        }
+        else {
+          mode = 'offline';
+        }
+      }
+      
       return (
         <StyledMarkerWrapper>
           <StyledMarker x={x} y={y} scale={scale} mode={mode} name={name}/>

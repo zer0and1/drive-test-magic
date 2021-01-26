@@ -25,19 +25,22 @@ import styled from 'styled-components';
 
 const MODE_COLOR_MAP = {
   'idle': '#B31212',
-  'report': 'green'
+  'report': 'green',
+  'store': 'green',
+  'no fix': 'darkgray',
+  'offline': 'black'
 };
 
 const StyledBase = styled(Base)`
   @font-face { font-family:"Clan Pro Medium";font-variant:normal;font-style:normal;font-weight:500;src:url("#FontID1") format(svg)}
   @font-face { font-family:"Clan Pro";font-variant:normal;font-style:normal;font-weight:bold;src:url("#FontID0") format(svg)}
-  .str1 {stroke:#2B2A29;stroke-width:3;stroke-miterlimit:22.9256}
-  .str0 {stroke:#2B2A29;stroke-width:1;stroke-miterlimit:22.9256}
+  .str1 {stroke:black;stroke-width:3;stroke-miterlimit:22.9256}
+  .str0 {stroke:black;stroke-width:1;stroke-miterlimit:22.9256}
   .fil3 {fill:none}
   .fil4 {fill:#FEFEFE}
   .fil0 {fill:#C5C6C6}
   .fil5 {fill:#5B5B5B}
-  .fil1 {fill:#2B2A29}
+  .fil1 {fill:black}
   .fil2 {fill:${props => MODE_COLOR_MAP[props.mode]}}
   .fnt1 {text-align: center; font-weight:500;font-size:323.55px;font-family:'Clan Pro Medium'}
   .fnt0 {text-align: center; font-weight:bold;font-size:323.55px;font-family:'Clan Pro'}
@@ -72,10 +75,10 @@ export default class Place extends Component {
           <path d="m101.10921,41.23187c0.42078,-0.28647 0.62779,-0.21297 1.80986,-0.21297l45.19634,0c5.53009,0 10.05454,-4.5002 10.05454,-10.0009l0,-18.46729c0,-5.5007 -4.52444,-10.0009 -10.05454,-10.0009l-78.85729,0c-5.53009,0 -10.05454,4.5002 -10.05454,10.0009l0,18.46729c0,0.83321 0,1.67238 0,2.51314c0,0.84116 0,1.6831 0,2.52227c0,0.83917 -0.04172,1.67675 0,2.50519c0.08264,1.65529 0.16966,1.96918 0.50859,2.9355c0.24873,0.68778 0.41482,1.08591 0.76407,1.71767c0,0 0.57613,0.99215 0.91029,1.56867c4.21094,7.25413 13.17361,22.69373 18.68662,32.1928c6.5572,-11.29581 13.11481,-22.59281 19.67121,-33.88862c0.39893,-0.68778 0.76327,-1.35014 1.36484,-1.85277c0,0.00001 -0.13803,0.00001 0,0.00002z" className="fil3 str1" />
           <line y2="41.0332" x2="59.55086" y1="41.0332" x1="101.97183" className="fil3 str1" />
           <g transform="matrix(0.039947564277541356,0,0,0.03973340124483171,761.7921221258214,419.99516665128823) ">
-            <text className="fil4 fnt0" y="-10155.19498" x="-17175.96136">{name}</text>
+            <text className="fil4 fnt0" textAnchor="middle" y="-10155.19498" x="-16350">{name}</text>
           </g>
           <g transform="matrix(0.039947564277541356,0,0,0.03973340124483171,802.4862770127534,437.65745817264093) ">
-            <text className="fil5 fnt1" y="-10145.76655" x="-17964.04603">{mode}</text>
+            <text className="fil5 fnt1" textAnchor="middle" y="-10145.76655" x="-17400">{mode}</text>
           </g>
         </g>
       </StyledBase>

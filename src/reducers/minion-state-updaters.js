@@ -23,6 +23,7 @@ import { GRAPHQL_QUERY_TASK } from 'tasks/tasks';
 import { GQL_GET_MINIONS, GQL_GET_MINION_COMMANDS } from 'graphqls';
 import { loadMinionsSuccess, loadMinionsError, loadMinionCommandSuccess } from 'actions/minion-state-actions';
 import { SIGNAL_QUALITY } from 'constants/default-settings';
+import moment from 'moment';
 
 // react-palm
 // disable capture exception for react-palm call to withTask
@@ -231,7 +232,10 @@ export function setSleepIntervalUpdater(state, { interval }) {
   const topic = `${selectedMinionName}/interval`;
   mqttClient.subscribe(topic, err => {
     if (!err) {
-      mqttClient.publish(topic, interval);
+      mqttClient.publish(topic, interval.toString());
+    }
+    else {
+      console.log(err)
     }
   });
 
@@ -268,27 +272,42 @@ export function setOperationModeUpdater(state, { mode }) {
 
 /**
  * Set minion sleep interval
- * @type {typeof import('./minion-state-updaters').increaseSessionId}
+ * @type {typeof import('./minion-state-updaters').sendSessionCommandUpdater}
  *
  */
-export function increaseSessionIdUpdater(state) {
-  const { mqttClient, selectedMinionName } = state;
+export function sendSessionCommandUpdater(state, { isIncrement }) {
+  const { mqttClient, selectedMinionName, sessionId } = state;
 
-  if (!selectedMinionName) {
+  if (!mqttClient || !selectedMinionName) {
     return state;
   }
 
   const topic = `${selectedMinionName}/session_id`;
-  alert(topic);
   mqttClient.subscribe(topic, err => {
     if (!err) {
-      mqttClient.publish(topic, state.sessionId + 1);
+      mqttClient.publish(topic, isIncrement ? 'increment' : sessionId.toString());
+    }
+    else {
+      console.log(err);
     }
   });
 
   return {
     ...state,
-    isCommandExecuting: true
+    isCommandExecuting: true,
+    sessionId: isIncrement ? parseInt(state.sessionId) + 1 : state.sessionId 
+  };
+}
+
+/**
+ * Set minion session id
+ * @type {typeof import('./minion-state-updaters').setSessionId}
+ *
+ */
+export function setSessionIdUpdater(state, { sessionId }) {
+  return {
+    ...state,
+    sessionId
   };
 }
 
@@ -355,7 +374,7 @@ export function setMqttMessageUpdater(state, { mqttTopic: topic, mqttMessage: pa
   payload = payload.toString();
 
   const reflections = {
-    [`${selectedMinionName}/ack`]: { lastAck: payload },
+    [`${selectedMinionName}/ack`]: { lastAck: payload + moment().format(' @ HH:mm:ss') },
     [`${selectedMinionName}/command`]: { command: payload },
     [`${selectedMinionName}/operation_mode`]: { operationMode: payload },
     [`${selectedMinionName}/interval`]: { sleepInterval: parseFloat(payload) },

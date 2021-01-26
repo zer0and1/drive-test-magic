@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import MinionGroupFactory from './minion-group';
 import { Gear, Spinner } from 'components/common/icons';
 import styled from 'styled-components';
-import { Button } from 'components/common/styled-components';
+import { Button, Input } from 'components/common/styled-components';
 import JqxDropDownList from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxdropdownlist';
 import PropTypes from 'prop-types';
-import { MINION_COMMANDS, MQTT_BROKER_URL } from 'constants/default-settings';
+import { MQTT_BROKER_URL } from 'constants/default-settings';
 import LoadingDialog from 'components/modals/loading-dialog';
 
 import mqtt from 'mqtt';
@@ -40,11 +40,12 @@ const StyledLabel = styled.div`
   margin-right: 5px;
 `;
 
+
 CommandGroupFactory.deps = [MinionGroupFactory];
 
 function CommandGroupFactory(MinionGroup) {
   class CommandGroup extends Component {
-    static state = {
+    static observers = {
       sleepInterval: null,
       sessionId: null,
       operationMode: null,
@@ -57,7 +58,7 @@ function CommandGroupFactory(MinionGroup) {
     static mqttClient = mqtt.connect(MQTT_BROKER_URL);
     static propTypes = {
       sleepInterval: PropTypes.number,
-      sessionId: PropTypes.number,
+      sessionId: PropTypes.string,
       operationMode: PropTypes.string,
       lastAck: PropTypes.string,
       command: PropTypes.string,
@@ -65,7 +66,8 @@ function CommandGroupFactory(MinionGroup) {
 
       setSleepInterval: PropTypes.func.isRequired,
       setOperationMode: PropTypes.func.isRequired,
-      increaseSessionId: PropTypes.func.isRequired,
+      sendSessionCommand: PropTypes.func.isRequired,
+      setSessionId: PropTypes.func.isRequired,
       setCommand: PropTypes.func.isRequired,
       sendCommand: PropTypes.func.isRequired,
       setMqttClient: PropTypes.func.isRequired,
@@ -74,7 +76,7 @@ function CommandGroupFactory(MinionGroup) {
     };
 
     componentDidMount() {
-      if (CommandGroup.state.isLoaded == false) {
+      if (CommandGroup.observers.isLoaded == false) {
         this.props.loadMinionCommand();
 
         const client = CommandGroup.mqttClient;
@@ -88,14 +90,14 @@ function CommandGroupFactory(MinionGroup) {
 
         client.on('error', err => console.log(err));
 
-        CommandGroup.state.isLoaded = true;
+        CommandGroup.observers.isLoaded = true;
       }
     }
 
-    shouldComponentUpdate(nextProps) {
-      const keys = Object.keys(CommandGroup.state)
-      const changed = keys.reduce((acc, key) => acc || CommandGroup.state[key] != nextProps[key], false);
-      CommandGroup.state = keys.reduce((acc, key) => ({ ...acc, [key]: nextProps[key] }), {});
+    shouldComponentUpdate(nextProps, nextState) {
+      const keys = Object.keys(CommandGroup.observers)
+      const changed = keys.reduce((acc, key) => acc || CommandGroup.observers[key] != nextProps[key], false);
+      CommandGroup.observers = keys.reduce((acc, key) => ({ ...acc, [key]: nextProps[key] }), {});
 
       return changed;
     }
@@ -104,10 +106,10 @@ function CommandGroupFactory(MinionGroup) {
       const {
         operationMode,
         sleepInterval,
-        sessionId,
         lastAck,
         command,
         commands,
+        sessionId,
         isCommandExecuting,
       } = this.props;
 
@@ -172,8 +174,28 @@ function CommandGroupFactory(MinionGroup) {
               <tr>
                 <td>Session ID:</td>
                 <td colSpan="2">
-                  <StyledLabel>{sessionId}</StyledLabel>
-                  <StyledButton onClick={this.props.increaseSessionId}>+1</StyledButton>
+                  <Input
+                    style={{
+                      float: 'left',
+                      height: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginRight: '5px',
+                      width: '50px',
+                      textAlign: 'center',
+                    }}
+                    type="number"
+                    value={sessionId}
+                    onChange={e => {
+                      this.props.setSessionId(e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.KeyCode === 13) {
+                        this.props.sendSessionCommand(false);
+                      }
+                    }}
+                  />
+                  <StyledButton onClick={() => this.props.sendSessionCommand(true)}>+1</StyledButton>
                 </td>
               </tr>
               <tr>

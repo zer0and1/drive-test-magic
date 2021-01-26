@@ -39,7 +39,9 @@ const actionHandler = {
 
   [ActionTypes.SET_OPERATION_MODE]: minionStateUpdaters.setOperationModeUpdater,
 
-  [ActionTypes.INCREASE_SESSION_ID]: minionStateUpdaters.increaseSessionIdUpdater,
+  [ActionTypes.SET_SESSION_ID]: minionStateUpdaters.setSessionIdUpdater,
+
+  [ActionTypes.SEND_SESSION_COMMAND]: minionStateUpdaters.sendSessionCommandUpdater,
 
   [ActionTypes.SET_COMMAND]: minionStateUpdaters.setCommandUpdater,
 
