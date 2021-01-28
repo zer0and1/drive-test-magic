@@ -822,13 +822,13 @@ export const unregisterDatasetErrorUpdater = (state, { payload: error }) => {
   };
 };
 
-export const updateDatasetUpdater = (state, { payload: info }) => {
+export const updateDatasetUpdater = (state, { payload: { id, label, query, type, sessions, enabled } }) => {
   const mutation = GQL_UPDATE_DATASET();
   const updateDatasetTask = GRAPHQL_MUTATION_TASK({
-    variables: info,
+    variables: { id, label, query, type, sessions, enabled },
     mutation
   }).bimap(
-    res => updateDatasetSuccess(info),
+    res => updateDatasetSuccess(res),
     err => updateDatasetError(err)
   );
   const newState = { ...state, isUpdateing: true };
@@ -938,7 +938,7 @@ export const initDatasetUpdater = (state, { payload: oldDataset }) => {
 export const reloadDatasetUpdater = (state, { payload: dataset }) => {
   const { query: qstr, sessions } = dataset;
   const query = gql(restrictSession(qstr, sessions));
-  const task = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only'}).map(
+  const task = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).map(
     result => {
       const data = makeDataset(query, result.data[extractOperation(query)], sessions);
       return addDataToMap({

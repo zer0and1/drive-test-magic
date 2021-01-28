@@ -40,7 +40,7 @@ import {
 
 import { loadCloudMap } from 'actions';
 import { CLOUD_PROVIDERS } from './app-cloud-providers';
-import { KEPLER_GL_NAME } from 'constants/default-settings';
+import { KEPLER_GL_NAME, HASURA_SERVER_API_ENDPOINT, HASURA_COLLABORATOR_TOKEN } from 'constants/default-settings';
 
 import 'gasparesganga-jquery-loading-overlay';
 
@@ -52,6 +52,7 @@ const KeplerGl = require('./components').injectComponents([
 
 import { addNotification } from './actions/index.js';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { createHttpLink } from "apollo-link-http";
 
 const BannerHeight = 48;
 const BannerKey = `banner-${FormLink}`;
@@ -94,12 +95,17 @@ class App extends Component {
 
   componentDidMount() {
     const apolloClient = new ApolloClient({
-      uri: 'https://charming-hawk-93.hasura.app/v1/graphql',
+      link: createHttpLink({
+        uri: HASURA_SERVER_API_ENDPOINT,
+        // headers: {
+        //   'hasura-collaborator-token': HASURA_COLLABORATOR_TOKEN,
+        // }
+      }),
       cache: new InMemoryCache()
     });
-    
+
     global.apolloClient = apolloClient;
-    
+
     // if we pass an id as part of the url
     // we ry to fetch along map configurations
     const { params: { id, provider } = {}, location: { query = {} } = {} } = this.props;

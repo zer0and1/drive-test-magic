@@ -20,7 +20,7 @@ query MyQuery {
     sleep_interval
     aux
   }
-  signal_db_signal_samples(where:{minion_id: {_eq: "${minionId}"}, date: {}}, limit: 1) {
+  signal_db_signal_samples(where:{minion_id: {_eq: "${minionId}"}}, order_by: {date: desc }, limit: 1) {
     id
     date
     minion_id

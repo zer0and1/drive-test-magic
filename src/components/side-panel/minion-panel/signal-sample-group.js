@@ -41,7 +41,34 @@ SignalSampleGroupFactory.deps = [MinionGroupFactory];
 
 function SignalSampleGroupFactory(MinionGroup) {
 
-  const makeTimeLabel = (value, mode) => {
+  const timeDifference = (elapsed) => {
+    var msPerMinute = 60;
+    var msPerHour = msPerMinute * 60;
+    var msPerDay = msPerHour * 24;
+    var msPerMonth = msPerDay * 30;
+    var msPerYear = msPerDay * 365;
+
+    if (elapsed < msPerMinute) {
+      return Math.round(elapsed) + ' seconds ago';
+    }
+    else if (elapsed < msPerHour) {
+      return Math.round(elapsed / msPerMinute) + ' minutes ago';
+    }
+    else if (elapsed < msPerDay) {
+      return Math.round(elapsed / msPerHour) + ' hours ago';
+    }
+    else if (elapsed < msPerMonth) {
+      return 'approx ' + Math.round(elapsed / msPerDay) + ' days ago';
+    }
+    else if (elapsed < msPerYear) {
+      return 'approx ' + Math.round(elapsed / msPerMonth) + ' months ago';
+    }
+    else {
+      return 'approx ' + Math.round(elapsed / msPerYear) + ' years ago';
+    }
+  };
+
+  const makeTimeLabel = (value) => {
     if (!value) {
       return '';
     }
@@ -50,21 +77,16 @@ function SignalSampleGroupFactory(MinionGroup) {
     const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
     const diff = moment(now).diff(moment(date), 'seconds');
 
-    if (diff < 120 && diff > 10) {
-      const mins = Math.floor(diff / 60);
-      const secs = diff % 60;
-
-      return mins ? ` - ${mins}m ${secs}s ago` : ` - ${secs}s ago`;
+    if (diff > 10) {
+      return ' - ' + timeDifference(diff);
     }
-    else if (diff <= 10 && mode == 'report') {
+    else {
       return ' - Just Now';
     }
-
-    return '';
   };
 
   const SignalSampleGroup = ({ data }) => (
-    <MinionGroup groupIcon={Minion} label={`Signal Sample${makeTimeLabel(data.lastupdate, data.operation_mode)}`}>
+    <MinionGroup groupIcon={Minion} label={`Signal Sample${makeTimeLabel(data.date)}`}>
       <table style={{ tableLayout: 'fixed', width: '100%' }}>
         <tbody>
           <tr>

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -27,9 +27,9 @@ import {
   CenterFlexbox,
   BottomWidgetInner
 } from './styled-components';
-import {Close, LineChart} from './icons';
+import { Close, LineChart } from './icons';
 import HexbinGraphFactory from './hexbin-graph';
-import {min, max} from 'd3-array';
+import { min, max } from 'd3-array';
 
 const TOP_SECTION_HEIGHT = '36px';
 
@@ -76,9 +76,9 @@ function GraphWidgetFactory(HexbinGraph) {
       const fieldIndex = layer?.config?.colorField?.tableFieldIndex;
       const aggregation = layer?.config?.visConfig?.colorAggregation;
 
-      const ymin = min(allData.map(function(el){return el[fieldIndex-1]}));
-      const ymax = max(allData.map(function(el){return el[fieldIndex-1]}));
-      const cellnames = allData.reduce(function(r, o) {
+      const ymin = min(allData.map(function (el) { return el[fieldIndex - 1] }));
+      const ymax = max(allData.map(function (el) { return el[fieldIndex - 1] }));
+      const cellnames = allData.reduce(function (r, o) {
         if (!r[o[11]])
           r[o[11]] = o[4];
         return r;
@@ -90,7 +90,7 @@ function GraphWidgetFactory(HexbinGraph) {
       const lineChart = visState?.object?.points;
       if (lineChart == undefined) return;
 
-      const timePeriod = Object.values(lineChart).map(item => {return new Date(item.data[8]).getTime()});
+      const timePeriod = Object.values(lineChart).map(item => new Date(item.data?.[8]).getTime());
 
       let st = new Date(min(timePeriod));
       const starttime = new Date(st.getFullYear(), st.getMonth(), st.getDate(), st.getHours()).getTime()
@@ -100,13 +100,13 @@ function GraphWidgetFactory(HexbinGraph) {
       const diff = endtime - starttime;
 
       let bins = 1;
-      for (bins of [1,4,8,24,48,96,168,336,730])
+      for (bins of [1, 4, 8, 24, 48, 96, 168, 336, 730])
         if (diff / 3600000 / bins < 42) break;
 
       return (
         <GraphBottomWidgetInner className="bottom-widget--inner">
           <TopSectionWrapper>
-            <CenterFlexbox/>
+            <CenterFlexbox />
             <StyledTitle className="bottom-widget__field">
               <CenterFlexbox className="bottom-widget__icon">
                 <LineChart height="15px" />

@@ -185,7 +185,7 @@ function CommandGroupFactory(MinionGroup) {
                       textAlign: 'center',
                     }}
                     type="number"
-                    value={sessionId}
+                    value={sessionId || ''}
                     onChange={e => {
                       this.props.setSessionId(e.target.value);
                     }}

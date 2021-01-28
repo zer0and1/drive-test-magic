@@ -24,14 +24,23 @@ import ZingChart from 'zingchart-react';
 import _ from 'lodash';
 import { mean, min, max, median, deviation, variance, sum } from 'd3-array';
 
-const colors = ['#2E93fA', '#66DA26', '#FF9800', '#7E36AF', '#00ECFF', '#f0ec26', '#E91E63'];
+const colors = [
+  '#2E93fA',
+  '#66DA26',
+  '#FF9800',
+  '#7E36AF',
+  '#00ECFF',
+  '#f0ec26', 
+  '#E91E63', 
+  '#d31e1e',
+];
 
 let chartConfig = {
   type: 'line',
   options: {},
   theme: 'dark',
-  backgroundColor:"#29323c",
-  plotarea:{ 
+  backgroundColor: "#29323c",
+  plotarea: {
     margin: 'dynamic'
   },
   plot: {
@@ -66,7 +75,7 @@ let chartConfig = {
   },
   legend: {
     adjustLayout: true,
-    marginTop: -20 
+    marginTop: -20
   },
   tooltip: {
     visible: false
@@ -91,7 +100,7 @@ function HexbinGraphFactory() {
       if (oldIdx != newIdx) {
         return true;
       }
-      
+
       if (oldAggr != newAggr) {
         return true;
       }
@@ -120,11 +129,11 @@ function HexbinGraphFactory() {
 
       const data = lineChart.map((item) => {
         const obj = {
-          value : item.data[index - 1],
-          enodeb : item.data[11],
+          value: item.data[index - 1],
+          enodeb: item.data[11],
 
           // groupBy time with "some fixed values starting with 1h then like 4h, 1d, 4d, 10d, 1m, 3month"
-          groupTime : Math.floor((new Date(item.data[8]).getTime() - starttime) / step) * step + starttime
+          groupTime: Math.floor((new Date(item.data[8]).getTime() - starttime) / step) * step + starttime
         }
         return obj
       });
@@ -147,7 +156,7 @@ function HexbinGraphFactory() {
         return r;
       }, {});
 
-      Object.keys(result).forEach(function(k) {
+      Object.keys(result).forEach(function (k) {
         // calculate aggregation values
         result[k].average = result[k].value != undefined ? mean(result[k].values).toFixed(2) : null;
         result[k].max = result[k].value != undefined ? max(result[k].values).toFixed(2) : null;
@@ -158,13 +167,13 @@ function HexbinGraphFactory() {
         result[k].v = result[k].values.length > 1 ? variance(result[k].values).toFixed(2) : 0;
       })
 
-      const smps = Object.values(_.groupBy(data, 'enodeb')).map(item => {return {"key": item[0].enodeb, "value": item.length}});
+      const smps = Object.values(_.groupBy(data, 'enodeb')).map(item => { return { "key": item[0].enodeb, "value": item.length } });
 
       const dataset = _.groupBy(result, 'enodeb');
       const enodebIds = Object.keys(dataset)
 
       let labels = [];
-      for (var i of _.range(-1,50)){
+      for (var i of _.range(-1, 50)) {
         var t = starttime + i * step;
         labels.push(t)
         if (t > endtime) break;
@@ -176,26 +185,26 @@ function HexbinGraphFactory() {
         for (var k of labels) {
           let v = null;
           switch (aggregation) {
-          case 'maximum':
-            v = result[k+i] !== undefined ? result[k+i]?.max : null;
-            break;
-          case 'minimum':
-            v = result[k+i] !== undefined ? result[k+i]?.min : null;
-            break;
-          case 'median':
-            v = result[k+i] !== undefined ? result[k+i]?.median : null;
-            break;
-          case 'sum':
-            v = result[k+i] !== undefined ? result[k+i]?.sum : null;
-            break;
-          case 'stdev':
-            v = result[k+i] !== undefined ? result[k+i]?.stdev : null;
-            break;
-          case 'variance':
-            v = result[k+i] !== undefined ? result[k+i]?.v : null;
-            break;
-          default:
-            v = result[k+i] !== undefined ? result[k+i]?.average : null;
+            case 'maximum':
+              v = result[k + i] !== undefined ? result[k + i]?.max : null;
+              break;
+            case 'minimum':
+              v = result[k + i] !== undefined ? result[k + i]?.min : null;
+              break;
+            case 'median':
+              v = result[k + i] !== undefined ? result[k + i]?.median : null;
+              break;
+            case 'sum':
+              v = result[k + i] !== undefined ? result[k + i]?.sum : null;
+              break;
+            case 'stdev':
+              v = result[k + i] !== undefined ? result[k + i]?.stdev : null;
+              break;
+            case 'variance':
+              v = result[k + i] !== undefined ? result[k + i]?.v : null;
+              break;
+            default:
+              v = result[k + i] !== undefined ? result[k + i]?.average : null;
           }
           yvalues[i].push(v);
         }
@@ -213,16 +222,16 @@ function HexbinGraphFactory() {
           marker: {
             backgroundColor: colors[iter]
           },
-          legendText: cellnames[ids] + "<br/>" + 
-                      "<span style='color:" + colors[iter] + "'>#avg:</span>" + mean(yvalues[ids]).toFixed(2) + 
-                      "<span style='color:" + colors[iter] + "'>#max:</span>" + max(yvalues[ids]) + 
-                      "<span style='color:" + colors[iter] + "'>#min:</span>" + min(yvalues[ids]) + 
-                      "<span style='color:" + colors[iter] + "'>#smp:</span>" + smps.filter(item => item.key === ids)[0].value,
+          legendText: cellnames[ids] + "<br/>" +
+            "<span style='color:" + colors[iter] + "'>#avg:</span>" + mean(yvalues[ids]).toFixed(2) +
+            "<span style='color:" + colors[iter] + "'>#max:</span>" + max(yvalues[ids]) +
+            "<span style='color:" + colors[iter] + "'>#min:</span>" + min(yvalues[ids]) +
+            "<span style='color:" + colors[iter] + "'>#smp:</span>" + smps.filter(item => item.key === ids)[0].value,
           values: yvalues[ids].map(num => num != null ? Number(num) : null)
         }
         const anno = {
           type: 'line',
-          range: [mean( yvalues[ids] )],
+          range: [mean(yvalues[ids])],
           lineColor: colors[iter++],
           lineStyle: 'dashed',
           alpha: 1,
@@ -247,7 +256,7 @@ function HexbinGraphFactory() {
         ...chartConfig,
         scaleX: {
           ...chartConfig.scaleX,
-          minValue: starttime-step,
+          minValue: starttime - step,
           step: step
         },
         scaleY: {
@@ -260,10 +269,10 @@ function HexbinGraphFactory() {
       }
 
       let key = false;
-      document.addEventListener('keydown', function(event) {
-        if(event.shiftKey) key = true;
+      document.addEventListener('keydown', function (event) {
+        if (event.shiftKey) key = true;
       })
-      document.addEventListener('keyup', function(event) {
+      document.addEventListener('keyup', function (event) {
         key = false;
       })
 
@@ -271,12 +280,12 @@ function HexbinGraphFactory() {
         chartConfig.scaleY.markers.filter(item => item.id === e.plottext)[0].alpha ^= 1;
         if (key) {
           key = false;
-          Object.values(chartConfig.scaleY.markers).forEach(function(k) {
-            k.alpha^=1
+          Object.values(chartConfig.scaleY.markers).forEach(function (k) {
+            k.alpha ^= 1
           })
         }
         zingchart.exec('hexbinGraph', 'modify', {
-          data : {
+          data: {
             scaleY: chartConfig.scaleY
           }
         });

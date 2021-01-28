@@ -913,7 +913,7 @@ export default class Layer {
   }
 
   calculateLayerDomain(dataset, visualChannel) {
-    const {allData, filteredIndexForDomain} = dataset;
+    const {allData, filteredIndexForDomain, allIndexes} = dataset;
     const defaultDomain = [0, 1];
     const {scale} = visualChannel;
     const scaleType = this.config[scale];
@@ -945,16 +945,16 @@ export default class Layer {
         return getOrdinalDomain(allData, valueAccessor);
 
       case SCALE_TYPES.quantile:
-        return getQuantileDomain(filteredIndexForDomain, indexValueAccessor, sortFunction);
+        return getQuantileDomain(/*filteredIndexForDomain*/allIndexes, indexValueAccessor, sortFunction);
 
       case SCALE_TYPES.log:
-        return getLogDomain(filteredIndexForDomain, indexValueAccessor);
+        return getLogDomain(/*filteredIndexForDomain*/allIndexes, indexValueAccessor);
 
       case SCALE_TYPES.quantize:
       case SCALE_TYPES.linear:
       case SCALE_TYPES.sqrt:
       default:
-        return getLinearDomain(filteredIndexForDomain, indexValueAccessor);
+        return getLinearDomain(/*filteredIndexForDomain*/allIndexes, indexValueAccessor);
     }
   }
 
