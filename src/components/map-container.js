@@ -269,6 +269,7 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
         uiStateActions,
         mousePos: {mousePosition, coordinate, pinned},
         uiState: {isGraphShow},
+        markerScale
       } = this.props;
 
       if (!mousePosition) {
@@ -350,6 +351,7 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
               {...this._getHoverXY(viewport, marker.lngLat)}
               info={marker.info}
               color={marker.color}
+              markerScale={markerScale}
               key={idx}
             />
           ))}

@@ -66,14 +66,20 @@ export function loadMinionsError(error) {
 /**
  * Set selected minion's id and index
  * @memberof minionStateActions
- * @type {typeof import('./minion-state-actions').setSelectedMinion}
+ * @type {typeof import('./minion-state-actions').selectMinion}
  * @return action
  */
-export function setSelectedMinion({ name, idx }) {
+export function selectMinion(minions) {
   return {
-    type: ActionTypes.SET_SELECTED_MINION,
-    name,
-    idx
+    type: ActionTypes.SELECT_MINION,
+    minions
+  };
+}
+
+export function unselectMinion(name) {
+  return {
+    type: ActionTypes.UNSELECT_MINION,
+    name
   };
 }
 
@@ -193,7 +199,33 @@ export function loadMinionCommandSuccess(commands) {
     type: ActionTypes.LOAD_MINION_COMMAND_SUCCESS,
     commands
   }
-}
+};
+
+export function selectAll(selectedAll) {
+  return {
+    type: ActionTypes.SELECT_ALL,
+    selectedAll
+  }
+};
+
+export function expand() {
+  return {
+    type: ActionTypes.EXPAND
+  }
+};
+
+export function collapse() {
+  return {
+    type: ActionTypes.COLLAPSE
+  }
+};
+
+export function setMarkerScale(markerScale) {
+  return {
+    type: ActionTypes.SET_MARKER_SCALE,
+    markerScale
+  }
+};
 
 /**
  * This declaration is needed to group actions in docs

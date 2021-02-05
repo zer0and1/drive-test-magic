@@ -51,6 +51,7 @@ function CommandGroupFactory(MinionGroup) {
       operationMode: null,
       lastAck: null,
       command: null,
+      selectedMinions: [],
       isCommandExecuting: null,
       commands: null,
       isLoaded: false
@@ -58,9 +59,7 @@ function CommandGroupFactory(MinionGroup) {
     static mqttClient = mqtt.connect(MQTT_BROKER_URL);
     static propTypes = {
       sleepInterval: PropTypes.number,
-      sessionId: PropTypes.string,
       operationMode: PropTypes.string,
-      lastAck: PropTypes.string,
       command: PropTypes.string,
       isCommandExecuting: PropTypes.bool,
 
@@ -94,7 +93,7 @@ function CommandGroupFactory(MinionGroup) {
       }
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
+    shouldComponentUpdate(nextProps) {
       const keys = Object.keys(CommandGroup.observers)
       const changed = keys.reduce((acc, key) => acc || CommandGroup.observers[key] != nextProps[key], false);
       CommandGroup.observers = keys.reduce((acc, key) => ({ ...acc, [key]: nextProps[key] }), {});
@@ -110,11 +109,12 @@ function CommandGroupFactory(MinionGroup) {
         command,
         commands,
         sessionId,
-        isCommandExecuting,
+        selectedMinions,
+        selectedAll
       } = this.props;
 
       return (
-        <MinionGroup groupIcon={Gear} label="Command" toggled={true}>
+        <MinionGroup groupIcon={Gear} label={`Command - ${selectedMinions.length} selected`} toggled={true}>
           <table style={{ tableLayout: 'fixed', width: '100%' }}>
             <tbody>
               <tr>
@@ -212,15 +212,17 @@ function CommandGroupFactory(MinionGroup) {
                     itemHeight={20}
                     autoDropDownHeight={true}
                     enableBrowserBoundsDetection={true}
-                    onChange={({ args: { item: { value: cmd } } }) => this.props.setCommand(cmd)}
+                    onChange={({ args: { item } }) => item && this.props.setCommand(item.value)}
                   />
                   <StyledButton onClick={this.props.sendCommand}>SEND</StyledButton>
                 </td>
               </tr>
-              <tr>
-                <td>Last ACK:</td>
-                <td colSpan="2">{lastAck}</td>
-              </tr>
+              {selectedMinions.map(({ name }, idx) => (
+                <tr key={idx}>
+                  <td>{name}/ack:</td>
+                  <td colSpan="2">{lastAck?.[name]}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </MinionGroup>

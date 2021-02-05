@@ -348,7 +348,8 @@ function KeplerGlFactory(
         visStateActions,
         mapStateActions,
         animationConfig,
-        deckGlProps
+        deckGlProps,
+        markerScale: minionState.markerScale
       };
 
       const graphInfo = visState.clicked;

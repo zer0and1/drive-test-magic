@@ -34,7 +34,7 @@ const FileNameTag = styled.div`
 
   .text {
     color: white;
-    font-size: ${props => props.fontSize};
+    fontSize: ${props => props.fontSize};
   }
 `;
 

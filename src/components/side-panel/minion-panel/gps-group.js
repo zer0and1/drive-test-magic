@@ -9,8 +9,8 @@ GPSGroupFactory.deps = [MinionGroupFactory];
 function GPSGroupFactory(MinionGroup) {
   const round = (v, n) => Math.round(v * Math.pow(10, n)) / Math.pow(10, n);
 
-  const GPSGroup = ({ data }) => (
-    <MinionGroup groupIcon={CursorClick} label="GPS">
+  const GPSGroup = ({ data, disabled }) => (
+    <MinionGroup groupIcon={CursorClick} label="GPS" disabled={disabled} >
       <table style={{tableLayout: 'fixed', width: '100%'}}>
         <tbody>
           <tr>

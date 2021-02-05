@@ -20,19 +20,24 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { Place } from 'components/common/icons';
+import { Place, PlaceMedium, PlaceSmall } from 'components/common/icons';
 import { injectIntl } from 'react-intl';
 import styled from 'styled-components';
 import moment from 'moment';
 
-const MARKER_WIDTH = 160;
-const MARKER_HEIGHT = 80;
 
-const StyledMarker = styled(Place)`
-  left: ${props => props.x - MARKER_WIDTH * props.scale / 2}px;
-  top: ${props => props.y - MARKER_HEIGHT * props.scale}px;
-  position: absolute;
-`;
+const Marker = ({ IconComponent, x, y, scale, width, height, mode, name }) => (
+  <IconComponent
+    style={{
+      left: x - width * scale / 2,
+      top: y - height * scale,
+      position: 'absolute'
+    }}
+    mode={mode}
+    name={name}
+  />
+);
+
 
 const StyledMarkerWrapper = styled.div`
   pointer-events: none;
@@ -47,15 +52,29 @@ export default function MapMarkerFactory() {
       y: PropTypes.number.isRequired,
       color: PropTypes.string,
       info: PropTypes.object,
+      markerScale: PropTypes.string
     };
 
     static defaultProps = {
       color: 'yellow',
-      info: {}
+      info: {},
+      markerScale: 'large'
     }
 
     render() {
-      const { mapW, x, y, info: { operation_mode, name, lastupdate, gps_fix_lastupdate } } = this.props;
+      const {
+        mapW,
+        x,
+        y,
+        markerScale,
+        info: {
+          operation_mode,
+          name,
+          lastupdate,
+          gps_fix_lastupdate
+        }
+      } = this.props;
+
       const scale = mapW / 1920;
       let mode = operation_mode;
 
@@ -67,16 +86,23 @@ export default function MapMarkerFactory() {
 
       if (fixDiff > 120) {
         if (updateDiff < 120) {
-          mode = 'no fix';          
+          mode = 'no fix';
         }
         else {
           mode = 'offline';
         }
       }
-      
+      const props = { x, y, name, mode, scale };
+      let placeComp = markerScale == 'large' ? Place : (markerScale == 'medium' ? PlaceMedium : PlaceSmall);
+
       return (
         <StyledMarkerWrapper>
-          <StyledMarker x={x} y={y} scale={scale} mode={mode} name={name}/>
+          <Marker
+            {...props}
+            IconComponent={placeComp}
+            width={180}
+            height={80}
+          />
         </StyledMarkerWrapper>
       );
     }

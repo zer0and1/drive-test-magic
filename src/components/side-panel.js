@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {PureComponent} from 'react';
-import {FormattedMessage} from 'localization';
+import React, { PureComponent } from 'react';
+import { FormattedMessage } from 'localization';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import get from 'lodash.get';
@@ -27,6 +27,7 @@ import get from 'lodash.get';
 import SidebarFactory from './side-panel/side-bar';
 import PanelHeaderFactory from './side-panel/panel-header';
 import MinionManagerFactory from './side-panel/minion-manager';
+import MinionControlBarFactory from './side-panel/minion-panel/control-bar';
 import LayerManagerFactory from './side-panel/layer-manager';
 import FilterManagerFactory from './side-panel/filter-manager';
 import InteractionManagerFactory from './side-panel/interaction-manager';
@@ -75,6 +76,7 @@ SidePanelFactory.deps = [
   PanelToggleFactory,
   PanelTitleFactory,
   MinionManagerFactory,
+  MinionControlBarFactory,
   LayerManagerFactory,
   FilterManagerFactory,
   InteractionManagerFactory,
@@ -92,6 +94,7 @@ export default function SidePanelFactory(
   PanelToggle,
   PanelTitle,
   MinionManager,
+  MinionControlBar,
   LayerManager,
   FilterManager,
   InteractionManager,
@@ -213,9 +216,16 @@ export default function SidePanelFactory(
         availableProviders
       } = this.props;
 
-      const {activeSidePanel} = uiState;
+      const { activeSidePanel } = uiState;
       const isOpen = Boolean(activeSidePanel);
       const panels = [...this.props.panels, ...customPanels];
+
+      const minionControlBarActions = {
+        selectAll: minionStateActions.selectAll,
+        expand: minionStateActions.expand,
+        collapse: minionStateActions.collapse,
+        setMarkerScale: minionStateActions.setMarkerScale
+      };
 
       const minionManagerActions = {
         updateVisData: visStateActions.updateVisData,
@@ -225,7 +235,8 @@ export default function SidePanelFactory(
         removeMarker: visStateActions.removeMarker,
 
         loadMinions: minionStateActions.loadMinions,
-        setSelectedMinion: minionStateActions.setSelectedMinion,
+        selectMinion: minionStateActions.selectMinion,
+        unselectMinion: minionStateActions.unselectMinion,
         setOperationMode: minionStateActions.setOperationMode,
         setSleepInterval: minionStateActions.setSleepInterval,
         setSessionId: minionStateActions.setSessionId,
@@ -289,7 +300,7 @@ export default function SidePanelFactory(
         updateProfileLabel: mapProfileActions.updateProfileLabel,
         showAddMapStyleModal: this._showAddMapStyleModal
       };
-      
+
       return (
         <div>
           <Sidebar
@@ -325,9 +336,18 @@ export default function SidePanelFactory(
             <SidePanelContent className="side-panel__content" style={{ overflowY: activeSidePanel == 'minion' ? 'hidden' : 'scroll' }}>
               <div className="side-panel__content__inner">
                 <PanelTitle className="side-panel__content__title">
-                  <FormattedMessage
-                    id={(panels.find(({id}) => id === activeSidePanel) || {}).label}
-                  />
+                  <div style={{ float: 'left' }}>
+                    <FormattedMessage
+                      id={(panels.find(({ id }) => id === activeSidePanel) || {}).label}
+                    />
+                  </div>
+                  {activeSidePanel == 'minion' ? (
+                    <MinionControlBar
+                      {...minionControlBarActions}
+                      selectedAll={minionState.selectedAll}
+                      markerScale={minionState.markerScale}
+                    />
+                  ) : null}
                 </PanelTitle>
                 {activeSidePanel === 'minion' && (
                   <MinionManager

@@ -28,32 +28,24 @@ import * as minionStateUpdaters from './minion-state-updaters';
  */
 const actionHandler = {
   [ActionTypes.LOAD_MINIONS]: minionStateUpdaters.loadMinionsUpdater,
-
   [ActionTypes.LOAD_MINIONS_SUCCESS]: minionStateUpdaters.loadMinionsSuccessUpdater,
-
   [ActionTypes.LOAD_MINIONS_ERROR]: minionStateUpdaters.loadMinionsErrorUpdater,
-
   [ActionTypes.SET_SLEEP_INTERVAL]: minionStateUpdaters.setSleepIntervalUpdater,
-
-  [ActionTypes.SET_SELECTED_MINION]: minionStateUpdaters.setSelectedMinionUpdater,
-
+  [ActionTypes.SELECT_MINION]: minionStateUpdaters.selectMinionUpdater,
+  [ActionTypes.UNSELECT_MINION]: minionStateUpdaters.unselectMinionUpdater,
   [ActionTypes.SET_OPERATION_MODE]: minionStateUpdaters.setOperationModeUpdater,
-
   [ActionTypes.SET_SESSION_ID]: minionStateUpdaters.setSessionIdUpdater,
-
   [ActionTypes.SEND_SESSION_COMMAND]: minionStateUpdaters.sendSessionCommandUpdater,
-
   [ActionTypes.SET_COMMAND]: minionStateUpdaters.setCommandUpdater,
-
   [ActionTypes.SEND_COMMAND]: minionStateUpdaters.sendCommandUpdater,
-
   [ActionTypes.SET_MQTT_CLIENT]: minionStateUpdaters.setMqttClientUpdater,
-
   [ActionTypes.SET_MQTT_MESSAGE]: minionStateUpdaters.setMqttMessageUpdater,
-
   [ActionTypes.LOAD_MINION_COMMAND]: minionStateUpdaters.loadMinionCommandUpdater,
-
   [ActionTypes.LOAD_MINION_COMMAND_SUCCESS]: minionStateUpdaters.loadMinionCommandSuccessUpdater,
+  [ActionTypes.SELECT_ALL]: minionStateUpdaters.selectAllUpdater,
+  [ActionTypes.EXPAND]: minionStateUpdaters.expandUpdater,
+  [ActionTypes.COLLAPSE]: minionStateUpdaters.collapseUpdater,
+  [ActionTypes.SET_MARKER_SCALE]: minionStateUpdaters.setMarkerScaleUpdater,
 };
 
 // construct vis-state reducer

@@ -85,8 +85,8 @@ function SignalSampleGroupFactory(MinionGroup) {
     }
   };
 
-  const SignalSampleGroup = ({ data }) => (
-    <MinionGroup groupIcon={Minion} label={`Signal Sample${makeTimeLabel(data.date)}`}>
+  const SignalSampleGroup = ({ data, disabled }) => (
+    <MinionGroup groupIcon={Minion} label={`Signal Sample${disabled ? '' : makeTimeLabel(data.date)}`} disabled={disabled}>
       <table style={{ tableLayout: 'fixed', width: '100%' }}>
         <tbody>
           <tr>

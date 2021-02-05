@@ -19,11 +19,13 @@
 // THE SOFTWARE.
 
 import { disableStackCapturing, withTask } from 'react-palm/tasks';
-import { GRAPHQL_QUERY_TASK } from 'tasks/tasks';
+import { GRAPHQL_QUERY_TASK, ACTION_TASK } from 'tasks/tasks';
 import { GQL_GET_MINIONS, GQL_GET_MINION_COMMANDS } from 'graphqls';
 import { loadMinionsSuccess, loadMinionsError, loadMinionCommandSuccess } from 'actions/minion-state-actions';
+import { updateMap, fitBounds } from 'actions/map-state-actions';
 import { SIGNAL_QUALITY } from 'constants/default-settings';
 import moment from 'moment';
+import _ from 'lodash';
 
 // react-palm
 // disable capture exception for react-palm call to withTask
@@ -79,18 +81,20 @@ const minionStateUpdaters = null;
  */
 export const INITIAL_MINION_STATE = {
   details: {},
-  selectedMinionName: null,
-  selectedMinionIdx: -1,
+  selectedMinions: [],
   operationMode: null,
   sleepInterval: null,
   sessionId: null,
-  lastAck: null,
+  lastAck: {},
   command: null,
   commands: [],
   isCommandExecuting: false,
   mqttClient: null,
   mqttMessage: null,
-  mqttTopic: null
+  mqttTopic: null,
+  selectedAll: false,
+  markerScale: 'large',
+  minions: []
 };
 
 /**
@@ -99,13 +103,13 @@ export const INITIAL_MINION_STATE = {
  *
  */
 export function loadMinionsUpdater(state, { onLoaded }) {
-  const query = GQL_GET_MINIONS(state.selectedMinionName);
+  const query = GQL_GET_MINIONS(state.selectedMinions[0]?.name);
   const loadMinionTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     result => {
-      const minions = result.data.signal_db_minions;
+      const minions = _.sortBy(result.data.signal_db_minions, ['name']);
       const sample = result.data.signal_db_signal_samples?.[0];
 
-      onLoaded(minions?.[state.selectedMinionIdx], minions);
+      onLoaded(minions);
 
       return loadMinionsSuccess(minions, sample);
     },
@@ -153,17 +157,21 @@ export function calcLevel(val, factor, type) {
  *
  */
 export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
+  const { selectedMinions } = state;
   let newState = {
     ...state,
     isLoadingMinions: false,
+    isSelectingAll: false,
+    isDeselectingAll: false,
+    minions,
     details: {}
   };
 
-  if (state.selectedMinionIdx < 0 || !signalSample) {
+  if (selectedMinions.length != 1 || !signalSample) {
     return newState;
   }
 
-  const minionDetails = minions?.[state.selectedMinionIdx];
+  const minionDetails = selectedMinions[0];
   const connectionType = signalSample.connection_type;
   const { rssi, rsrq, rsrp_rscp, sinr_ecio } = signalSample;
   const details = {
@@ -200,20 +208,36 @@ export function loadMinionsErrorUpdater(state, { error }) {
 
 /**
  * Set selected minion's name and index
- * @type {typeof import('./minion-state-updaters').setSelectedMinionUpdater}
+ * @type {typeof import('./minion-state-updaters').selectMinionUpdater}
  *
  */
-export function setSelectedMinionUpdater(state, { name, idx }) {
+export function selectMinionUpdater(state, { minions }) {
   const { mqttClient } = state;
 
   if (mqttClient) {
-    mqttClient.subscribe(`${name}/ack`);
+    minions.forEach(m => mqttClient.subscribe(`${m.name}/ack`));
   }
 
   return {
     ...state,
-    selectedMinionName: name,
-    selectedMinionIdx: idx
+    selectedMinions: minions,
+    isSelectingAll: false,
+    isDeselectingAll: false
+  };
+}
+
+/**
+ * Set selected minion's name and index
+ * @type {typeof import('./minion-state-updaters').selectMinionUpdater}
+ *
+ */
+export function unselectMinionUpdater(state, { name }) {
+  const selectedMinions = state.selectedMinions.filter(m => m.name != name);
+
+  return {
+    ...state,
+    selectedMinions,
+    selectedAll: selectedMinions.length != 1
   };
 }
 
@@ -223,25 +247,24 @@ export function setSelectedMinionUpdater(state, { name, idx }) {
  *
  */
 export function setSleepIntervalUpdater(state, { interval }) {
-  const { mqttClient, selectedMinionName } = state;
+  const { mqttClient, selectedMinions, selectedAll } = state;
 
-  if (!mqttClient || !selectedMinionName) {
+  if (!mqttClient || selectedMinions.length == 0) {
     return state;
   }
 
-  const topic = `${selectedMinionName}/interval`;
-  mqttClient.subscribe(topic, err => {
-    if (!err) {
-      mqttClient.publish(topic, interval.toString());
-    }
-    else {
-      console.log(err)
-    }
+  selectedMinions.forEach(({ name }) => {
+    const topic = `${name}/interval`;
+    mqttClient.subscribe(topic, err => {
+      err || mqttClient.publish(topic, interval.toString());
+    });
   });
+
 
   return {
     ...state,
-    isCommandExecuting: true
+    isCommandExecuting: true,
+    sleepInterval: selectedAll ? null : interval
   };
 }
 
@@ -251,22 +274,23 @@ export function setSleepIntervalUpdater(state, { interval }) {
  *
  */
 export function setOperationModeUpdater(state, { mode }) {
-  const { mqttClient, selectedMinionName } = state;
+  const { mqttClient, selectedMinions, selectedAll } = state;
 
-  if (!mqttClient || !selectedMinionName) {
+  if (!mqttClient || selectedMinions.length == 0) {
     return state;
   }
 
-  const topic = `${selectedMinionName}/operation_mode`;
-  mqttClient.subscribe(topic, err => {
-    if (!err) {
-      mqttClient.publish(topic, mode);
-    }
+  selectedMinions.forEach(({ name }) => {
+    const topic = `${name}/operation_mode`;
+    mqttClient.subscribe(topic, err => {
+      err || mqttClient.publish(topic, mode.toString());
+    });
   });
 
   return {
     ...state,
-    isCommandExecuting: true
+    isCommandExecuting: true,
+    operationMode: selectedAll ? null : mode
   };
 }
 
@@ -276,26 +300,24 @@ export function setOperationModeUpdater(state, { mode }) {
  *
  */
 export function sendSessionCommandUpdater(state, { isIncrement }) {
-  const { mqttClient, selectedMinionName, sessionId } = state;
+  const { mqttClient, selectedMinions, sessionId, selectedAll } = state;
 
-  if (!mqttClient || !selectedMinionName) {
+  if (!mqttClient || selectedMinions.length == 0) {
     return state;
   }
 
-  const topic = `${selectedMinionName}/session_id`;
-  mqttClient.subscribe(topic, err => {
-    if (!err) {
-      mqttClient.publish(topic, isIncrement ? 'increment' : sessionId.toString());
-    }
-    else {
-      console.log(err);
-    }
+  const payload = isIncrement ? 'increment' : sessionId.toString();
+  selectedMinions.forEach(({ name }) => {
+    const topic = `${name}/session_id`;
+    mqttClient.subscribe(topic, err => {
+      err || mqttClient.publish(topic, payload);
+    });
   });
 
   return {
     ...state,
     isCommandExecuting: true,
-    sessionId: isIncrement ? parseInt(state.sessionId) + 1 : state.sessionId 
+    sessionId: selectedAll ? null : (isIncrement ? parseInt(state.sessionId) + 1 : state.sessionId)
   };
 }
 
@@ -329,18 +351,17 @@ export function setCommandUpdater(state, { command }) {
  *
  */
 export function sendCommandUpdater(state) {
-  const { mqttClient, selectedMinionName } = state;
+  const { mqttClient, selectedMinions, command } = state;
 
-  if (!mqttClient || !selectedMinionName) {
+  if (!mqttClient || !command || selectedMinions.length == 0) {
     return state;
   }
 
-  const topic = `${selectedMinionName}/command`;
-  console.log(`send command: ${topic}`)
-  mqttClient.subscribe(topic, err => {
-    if (!err) {
-      mqttClient.publish(topic, state.command);
-    }
+  selectedMinions.forEach(({ name }) => {
+    const topic = `${name}/command`;
+    mqttClient.subscribe(topic, err => {
+      err || mqttClient.publish(topic, command.toString());
+    });
   });
 
   return {
@@ -355,8 +376,6 @@ export function sendCommandUpdater(state) {
  *
  */
 export function setMqttClientUpdater(state, { mqttClient }) {
-  console.log('mqtt client has been connected to the broker successfully');
-
   return {
     ...state,
     mqttClient
@@ -369,22 +388,29 @@ export function setMqttClientUpdater(state, { mqttClient }) {
  *
  */
 export function setMqttMessageUpdater(state, { mqttTopic: topic, mqttMessage: payload }) {
-  const { selectedMinionName } = state;
+  const { lastAck } = state;
   topic = topic.toString();
   payload = payload.toString();
+  const minion = topic.split('/')?.[0];
+  const cmd = topic.split('/')?.[1];
 
   const reflections = {
-    [`${selectedMinionName}/ack`]: { lastAck: payload + moment().format(' @ HH:mm:ss') },
-    [`${selectedMinionName}/command`]: { command: payload },
-    [`${selectedMinionName}/operation_mode`]: { operationMode: payload },
-    [`${selectedMinionName}/interval`]: { sleepInterval: parseFloat(payload) },
-    [`${selectedMinionName}/session_id`]: { sessionId: parseInt(payload) },
+    ack: {
+      lastAck: {
+        ...lastAck,
+        [minion]: payload + moment().format(' @ HH:mm:ss')
+      }
+    },
+    command: { command: payload },
+    operation_mode: { operationMode: payload },
+    interval: { sleepInterval: parseFloat(payload) },
+    session_id: { sessionId: parseInt(payload) },
   };
 
   return {
     ...state,
     isCommandExecuting: false,
-    ...(reflections?.[topic])
+    ...(reflections?.[cmd])
   };
 }
 
@@ -402,5 +428,81 @@ export function loadMinionCommandSuccessUpdater(state, { commands }) {
   return {
     ...state,
     commands: commands.map(c => c.command)
+  }
+}
+
+export function selectAllUpdater(state) {
+  const { minions, selectedMinions } = state;
+  return {
+    ...state,
+    selectedMinions: state.minions,
+    operationMode: null,
+    sleepInterval: null,
+    sessionId: null,
+    lastAck: {},
+    command: null,
+    isSelectingAll: minions.length != selectedMinions.length,
+    isDeselectingAll: minions.length == selectedMinions.length,
+  }
+}
+
+export function expandUpdater(state) {
+  const { minions } = state;
+
+  if (minions.length == 0) {
+    return state;
+  }
+  else if (minions.length == 1) {
+    const { longitude, latitude } = minions[0];
+    const task = ACTION_TASK().map(_ => updateMap({ longitude, latitude }));
+
+    return withTask(state, task);
+  }
+
+  const { minLat, minLnt, maxLat, maxLnt } = minions.reduce((acc, { latitude: lat, longitude: lnt }) => {
+    if (acc.minLat > lat) {
+      acc.minLat = lat;
+    }
+    if (acc.minLnt > lnt) {
+      acc.minLnt = lnt;
+    }
+    if (acc.maxLat < lat) {
+      acc.maxLat = lat;
+    }
+    if (acc.maxLnt < lnt) {
+      acc.maxLnt = lnt;
+    }
+
+    return acc;
+  }, { minLat: 90, minLnt: 180, maxLat: -90, maxLnt: -180 });
+
+  const task = ACTION_TASK().map(_ => fitBounds([
+    minLnt,
+    minLat,
+    maxLnt,
+    maxLat,
+    true
+  ]));
+
+  return withTask(state, task);
+}
+
+export function collapseUpdater(state) {
+  const { selectedMinions } = state;
+
+  if (selectedMinions.length == 0) {
+    return state;
+  }
+
+  const { longitude, latitude } = selectedMinions[0];
+  const task = ACTION_TASK().map(_ => updateMap({ longitude, latitude }));
+
+  return withTask(state, task);
+}
+
+export function setMarkerScaleUpdater(state, { markerScale }) {
+  return {
+    ...state,
+    markerScale
   }
 }

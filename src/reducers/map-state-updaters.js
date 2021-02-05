@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import geoViewport from '@mapbox/geo-viewport';
+import WebMercatorViewport from 'viewport-mercator-project';
 
 /** @typedef {import('./map-state-updaters').MapState} MapState */
 
@@ -110,16 +111,21 @@ export const updateMapUpdater = (state, action) => ({
  */
 export const fitBoundsUpdater = (state, action) => {
   const bounds = action.payload;
-  const {zoom} = geoViewport.viewport(bounds, [state.width, state.height]);
+  // const {zoom} = geoViewport.viewport(bounds, [state.width, state.height]);
   // center being calculated by geo-vieweport.viewport has a complex logic that
   // projects and then unprojects the coordinates to determine the center
   // Calculating a simple average instead as that is the expected behavior in most of cases
-  const center = [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2];
+  const [x1, y1, x2, y2, paddingEnabled] = bounds;
+  const viewport = new WebMercatorViewport(state);
+  const paddingHeight = state.height * 0.1;
+  const paddingWidth = state.width * 0.1;
+  const padding = paddingEnabled ? { left: 500, top: paddingHeight, bottom: paddingHeight, right: paddingWidth } : { left: 0, top: 0, right: 0, bottom: 0 };
+  const { zoom, latitude, longitude } = viewport.fitBounds([[x1, y1], [x2, y2]], { padding });
 
   return {
     ...state,
-    latitude: center[1],
-    longitude: center[0],
+    latitude,
+    longitude,
     zoom
   };
 };
@@ -160,12 +166,12 @@ export const resetMapConfigUpdater = state => ({
  */
 export const receiveMapConfigUpdater = (
   state,
-  {payload: {config = {}, options = {}, bounds = null}}
+  { payload: { config = {}, options = {}, bounds = null } }
 ) => {
-  const {mapState} = config || {};
+  const { mapState } = config || {};
 
   // merged received mapstate with previous state
-  let mergedState = {...state, ...mapState};
+  let mergedState = { ...state, ...mapState };
 
   // if center map
   // center map will override mapState config
@@ -208,11 +214,11 @@ export function getMapDimForSplitMap(isSplit, state) {
   const width =
     state.isSplit && !isSplit
       ? // 3. state split: true - isSplit: false
-        // double width
-        state.width * 2
+      // double width
+      state.width * 2
       : // 4. state split: false - isSplit: true
-        // split width
-        state.width / 2;
+      // split width
+      state.width / 2;
 
   return {
     width

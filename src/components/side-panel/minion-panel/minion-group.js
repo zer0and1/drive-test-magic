@@ -75,12 +75,15 @@ function MinionGroupFactory(PanelHeaderAction) {
     };
 
     toggle() {
-      this.setState({ toggled: !this.state.toggled });
+      this.props.disabled || this.setState({ toggled: !this.state.toggled });
     }
 
     render() {
+      let {toggled} = this.state;
+      toggled = this.props.disabled ? false : toggled;
+
       return <div className="minion-panel__group" id={this.props.id}>
-        <StyledMinionGroupHeader style={{ marginBottom: this.state.toggled ? '0px' : '5px' }}>
+        <StyledMinionGroupHeader style={{ marginBottom: toggled ? '0px' : '5px' }}>
           <StyledPanelHeader onClick={this.toggle.bind(this)}>
             <PanelHeaderContent>
               <div className="minion-panel__header__icon icon">
@@ -92,12 +95,12 @@ function MinionGroupFactory(PanelHeaderAction) {
             </PanelHeaderContent>
             <PanelHeaderAction
               id="minion-info-group"
-              IconComponent={this.state.toggled ? ArrowUp : ArrowDown}
+              IconComponent={toggled ? ArrowUp : ArrowDown}
               onClick={this.toggle.bind(this)}
             />
           </StyledPanelHeader>
         </StyledMinionGroupHeader>
-        {this.state.toggled ? (
+        {toggled ? (
           <StyledMinionGroupWrapper>
             <StyledMinionGroupContent>
               {this.props.children}

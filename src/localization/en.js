@@ -225,6 +225,12 @@ export default {
     applyProfile: 'Apply profile',
     reloadSession: 'Reload Sessions',
     testQuery: 'Test Query',
+    selectAll: 'Select All',
+    zoomToAll: 'Zoom to All',
+    centerToSelected: 'Center to Selected',
+    largeMarker: 'Large',
+    mediumMarker: 'Medium',
+    smallMarker: 'Small'
   },
   toolbar: {
     exportImage: 'Export Image',
