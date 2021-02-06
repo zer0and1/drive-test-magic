@@ -40,7 +40,7 @@ import {
 
 import { loadCloudMap } from 'actions';
 import { CLOUD_PROVIDERS } from './app-cloud-providers';
-import { KEPLER_GL_NAME, HASURA_SERVER_API_ENDPOINT, HASURA_COLLABORATOR_TOKEN } from 'constants/default-settings';
+import { KEPLER_GL_NAME, HASURA_SERVER_API_ENDPOINT } from 'constants/default-settings';
 
 import 'gasparesganga-jquery-loading-overlay';
 
@@ -96,10 +96,7 @@ class App extends Component {
   componentDidMount() {
     const apolloClient = new ApolloClient({
       link: createHttpLink({
-        uri: HASURA_SERVER_API_ENDPOINT,
-        // headers: {
-        //   'hasura-collaborator-token': HASURA_COLLABORATOR_TOKEN,
-        // }
+        uri: HASURA_SERVER_API_ENDPOINT
       }),
       cache: new InMemoryCache()
     });

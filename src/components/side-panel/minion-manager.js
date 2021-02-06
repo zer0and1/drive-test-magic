@@ -91,8 +91,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     sortCol = null;
     sortDir = null;
     isResizingPanel = false;
-    isSelectingAllRows = false;
-    isUnselectingAllRows = false;
+    isSelectingAll = false;
+    isUnselectingAll = false;
 
     strRenderer(row, columnproperties, value) {
       return `<div style='text-align: center; margin-top: 5px;'>${value}</div>`
@@ -141,15 +141,15 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
     shouldComponentUpdate(nextProps) {
       const { minions } = nextProps;
-      this.isSelectingAllRows = nextProps.isSelectingAll;
-      this.isUnselectingAllRows = nextProps.isDeselectingAll;
+      this.isSelectingAll = nextProps.isSelectingAll;
+      this.isUnselectingAll = nextProps.isUnselectingAll;
 
       if (nextProps.isSelectingAll) {
         this.refs.minionGrid.selectallrows();
         this.props.selectMinion(minions);
       }
 
-      if (nextProps.isDeselectingAll) {
+      if (nextProps.isUnselectingAll) {
         minions.forEach((m, idx) => this.refs.minionGrid.unselectrow(idx));
         this.props.selectMinion([]);
       }
@@ -192,10 +192,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     minionRowselect() {
-      if (this.isSelectingAllRows) {
+      if (this.isSelectingAll) {
         return;
       }
-
+      
       const idxs = this.refs.minionGrid.getselectedrowindexes();
       const rows = idxs.map(idx => this.refs.minionGrid.getrowdata(idx));
       const minions = rows.map(m => this.props.minions.find(om => om.name == m.name));
@@ -208,13 +208,13 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     minionRowunselect() {
-      if (this.isUnselectingAllRows) {
+      if (this.isUnselectingAll) {
         return;
       }
 
       const idxs = this.refs.minionGrid.getselectedrowindexes();
-      const rows = this.refs.minionGrid.getrows();
-      const minions = idxs.map(idx => rows[idx]);
+      const rows = idxs.map(idx => this.refs.minionGrid.getrowdata(idx));
+      const minions = rows.map(m => this.props.minions.find(om => om.name == m.name));
       this.props.selectMinion(minions);
 
       if (minions.length == 1) {

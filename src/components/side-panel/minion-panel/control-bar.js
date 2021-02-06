@@ -58,7 +58,7 @@ function ControlBarFactory() {
         onClick={() => selectAll(!selectedAll)}
         tooltip={'tooltip.selectAll'}
         IconComponent={Select}
-        marginRight={20}
+        marginRight={50}
       />
       <ControlButton
         onClick={expand}
@@ -69,7 +69,7 @@ function ControlBarFactory() {
         onClick={collapse}
         tooltip={'tooltip.centerToSelected'}
         IconComponent={Collapse}
-        marginRight={20}
+        marginRight={50}
       />
       <ControlButton
         onClick={() => setMarkerScale('small')}
@@ -89,7 +89,6 @@ function ControlBarFactory() {
         onClick={() => setMarkerScale('large')}
         tooltip={'tooltip.largeMarker'}
         IconComponent={Large}
-        marginRight={35}
         active={markerScale == 'large'}
       />
     </StyledControlBarWrapper>

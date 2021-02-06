@@ -162,7 +162,7 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
     ...state,
     isLoadingMinions: false,
     isSelectingAll: false,
-    isDeselectingAll: false,
+    isUnselectingAll: false,
     minions,
     details: {}
   };
@@ -173,7 +173,7 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
 
   const minionDetails = selectedMinions[0];
   const connectionType = signalSample.connection_type;
-  const { rssi, rsrq, rsrp_rscp, sinr_ecio } = signalSample;
+  const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi } = signalSample;
   const details = {
     ...minionDetails,
     ...signalSample,
@@ -181,7 +181,7 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
     ...calcLevel(rsrq, 'rsrq', connectionType),
     ...calcLevel(rsrp_rscp, 'rsrp_rscp', connectionType),
     ...calcLevel(sinr_ecio, 'sinr_ecio', connectionType),
-    cqi: 0,
+    ...calcLevel(cqi, 'cqi', connectionType),
   };
 
   return {
@@ -222,7 +222,7 @@ export function selectMinionUpdater(state, { minions }) {
     ...state,
     selectedMinions: minions,
     isSelectingAll: false,
-    isDeselectingAll: false
+    isUnselectingAll: false
   };
 }
 
@@ -442,7 +442,7 @@ export function selectAllUpdater(state) {
     lastAck: {},
     command: null,
     isSelectingAll: minions.length != selectedMinions.length,
-    isDeselectingAll: minions.length == selectedMinions.length,
+    isUnselectingAll: minions.length == selectedMinions.length,
   }
 }
 
