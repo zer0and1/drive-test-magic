@@ -19,7 +19,7 @@ const StyledProgBar = styled.span`
   display: block;
   height: 100%;
   overflow: hidden;
-  width: ${props => props.prog}%;
+  width: ${props => props.prog > 100 ? 100 : props.prog}%;
   background-color: ${props => COLOR_LEVEL_MAP[props.level]}
 `;
 

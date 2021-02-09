@@ -24,7 +24,7 @@ import PropTypes from 'prop-types';
 import {createSelector} from 'reselect';
 import {Tooltip} from 'components/common/styled-components';
 import KeplerGlLogo from 'components/common/logo';
-import {Save, DataTable, Save2, Picture, Db, Map as MapIcon, Share} from 'components/common/icons';
+import {Save, DataTable, Save2, Picture, Db, Map as MapIcon, Share, Login} from 'components/common/icons';
 import ClickOutsideCloseDropdown from 'components/side-panel/panel-dropdown';
 import Toolbar from 'components/common/toolbar';
 import ToolbarItem from 'components/common/toolbar-item';
@@ -239,12 +239,19 @@ function PanelHeaderFactory(SaveExportDropdown, CloudStorageDropdown) {
       onSaveToStorage: PropTypes.func,
       onSaveAsToStorage: PropTypes.func,
       onSaveMap: PropTypes.func,
-      onShareMap: PropTypes.func
+      onShareMap: PropTypes.func,
+      onLogin: PropTypes.func
     };
 
     static defaultProps = {
       logoComponent: KeplerGlLogo,
       actionItems: [
+        {
+          id: 'token',
+          iconComponent: Login,
+          tooltip: 'tooltip.login',
+          onClick: () => {},
+        },
         {
           id: 'storage',
           iconComponent: Db,
@@ -296,6 +303,8 @@ function PanelHeaderFactory(SaveExportDropdown, CloudStorageDropdown) {
                     onClick={() => {
                       if (item.dropdownComponent) {
                         showExportDropdown(item.id);
+                      } else if (item.id == 'token') {
+                        this.props.onLogin();
                       } else {
                         item.onClick && item.onClick(this.props);
                       }

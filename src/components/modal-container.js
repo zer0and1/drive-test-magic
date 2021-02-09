@@ -42,6 +42,7 @@ import ExportMapModalFactory from './modals/export-map-modal/export-map-modal';
 import AddMapStyleModalFactory from './modals/add-map-style-modal';
 import SaveMapModalFactory from './modals/save-map-modal';
 import ShareMapModalFactory from './modals/share-map-modal';
+import InputTokenModalFactory from './modals/input-token-modal';
 
 // Breakpoints
 import { media } from 'styles/media-breakpoints';
@@ -58,7 +59,8 @@ import {
   ADD_MAP_STYLE_ID,
   SAVE_MAP_ID,
   SHARE_MAP_ID,
-  OVERWRITE_MAP_ID
+  OVERWRITE_MAP_ID,
+  INPUT_USER_TOKEN_ID
 } from 'constants/default-settings';
 import { EXPORT_MAP_FORMATS } from 'constants/default-settings';
 import KeyEvent from 'constants/keyevent';
@@ -88,6 +90,10 @@ const LoadDataModalStyle = css`
   top: 60px;
 `;
 
+const InputTokenModalStyle = css`
+  width: 30%;
+`;
+
 const DefaultStyle = css`
   max-width: 960px;
 `;
@@ -104,7 +110,8 @@ ModalContainerFactory.deps = [
   AddMapStyleModalFactory,
   ModalDialogFactory,
   SaveMapModalFactory,
-  ShareMapModalFactory
+  ShareMapModalFactory,
+  InputTokenModalFactory
 ];
 
 export default function ModalContainerFactory(
@@ -119,7 +126,8 @@ export default function ModalContainerFactory(
   AddMapStyleModal,
   ModalDialog,
   SaveMapModal,
-  ShareMapModal
+  ShareMapModal,
+  InputTokenModal
 ) {
   /** @typedef {import('./modal-container').ModalContainerProps} ModalContainerProps */
   /** @augments React.Component<ModalContainerProps> */
@@ -559,6 +567,17 @@ export default function ModalContainerFactory(
               title: 'modal.title.shareURL',
               cssStyle: '',
               onCancel: this._onCloseSaveMap
+            };
+            break;
+          case INPUT_USER_TOKEN_ID:
+            template = (
+              <InputTokenModal />
+            );
+            modalProps = {
+              title: 'modal.title.inputToken',
+              cssStyle: InputTokenModalStyle,
+              footer: true,
+              onConfirm: this._closeModal
             };
             break;
           default:

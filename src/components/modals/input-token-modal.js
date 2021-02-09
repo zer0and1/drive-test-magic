@@ -18,29 +18,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {PanelHeaderFactory, Icons} from 'components';
-import {BUG_REPORT_LINK, USER_GUIDE_DOC} from 'constants';
+import React, {Component} from 'react';
+import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
-export function CustomPanelHeaderFactory(...deps) {
-  const PanelHeader = PanelHeaderFactory(...deps);
-  const defaultActionItems = PanelHeader.defaultProps.actionItems;
-  PanelHeader.defaultProps = {
-    ...PanelHeader.defaultProps,
-    actionItems: [
-      defaultActionItems.find(item => item.id === 'token'),
-      defaultActionItems.find(item => item.id === 'storage'),
-      {
-        ...defaultActionItems.find(item => item.id === 'save'),
-        label: null,
-        tooltip: 'Share'
-      }
-    ]
-  };
-  return PanelHeader;
-}
+import {injectIntl} from 'react-intl';
+import {FormattedMessage} from 'localization';
 
-CustomPanelHeaderFactory.deps = PanelHeaderFactory.deps;
+const StyledInput = styled.input`
+  width: 100%;
+`;
 
-export function replacePanelHeader() {
-  return [PanelHeaderFactory, CustomPanelHeaderFactory];
-}
+const StyledLabel = styled.div`
+  font-size: 15px;
+  font-family: ${props => props.theme.fontFamily};
+  margin-bottom: 5px;
+`;
+
+const propTypes = {
+  
+};
+
+const InputTokenModalFactory = () => {
+  class InputTokenModal extends Component {
+    componentDidMount() {
+    }
+
+
+    render() {
+
+      return (
+        <div className="input-token-modal">
+          <StyledLabel>Please enter user token</StyledLabel>
+          <StyledInput type="text" />
+        </div>
+      );
+    }
+  }
+  InputTokenModal.propTypes = propTypes;
+  return injectIntl(InputTokenModal);
+};
+
+export default InputTokenModalFactory;

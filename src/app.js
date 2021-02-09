@@ -40,7 +40,7 @@ import {
 
 import { loadCloudMap } from 'actions';
 import { CLOUD_PROVIDERS } from './app-cloud-providers';
-import { KEPLER_GL_NAME, HASURA_SERVER_API_ENDPOINT } from 'constants/default-settings';
+import { KEPLER_GL_NAME, HASURA_SERVER_API_ENDPOINT, HASURA_SERVER_JWT } from 'constants/default-settings';
 
 import 'gasparesganga-jquery-loading-overlay';
 
@@ -96,7 +96,10 @@ class App extends Component {
   componentDidMount() {
     const apolloClient = new ApolloClient({
       link: createHttpLink({
-        uri: HASURA_SERVER_API_ENDPOINT
+        uri: HASURA_SERVER_API_ENDPOINT,
+        headers: {
+          'Authorization': HASURA_SERVER_JWT
+        }
       }),
       cache: new InMemoryCache()
     });

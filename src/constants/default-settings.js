@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import keyMirror from 'keymirror';
-import {EditorModes} from 'react-map-gl-draw';
+import { EditorModes } from 'react-map-gl-draw';
 
 import {
   scaleLinear,
@@ -42,17 +42,16 @@ import {
   Clipboard,
   Cancel
 } from 'components/common/icons';
-import {getHTMLMapModeTileUrl} from 'utils/utils';
-import {TOOLTIP_FORMAT_TYPES} from './tooltip';
-import {LAYER_TYPES} from 'layers/types';
+import { getHTMLMapModeTileUrl } from 'utils/utils';
+import { TOOLTIP_FORMAT_TYPES } from './tooltip';
+import { LAYER_TYPES } from 'layers/types';
 
 export const ACTION_PREFIX = '@@kepler.gl/';
 export const CLOUDFRONT = 'https://d1a3f4spazzrp4.cloudfront.net/kepler.gl';
 export const ICON_PREFIX = `${CLOUDFRONT}/geodude`;
 export const DEFAULT_MAPBOX_API_URL = 'https://api.mapbox.com';
 export const MQTT_BROKER_URL = 'ws://159.89.0.130:9001';
-export const HASURA_SERVER_API_ENDPOINT = 'https://kepler-drive.hasura.app/v1/graphql';
-// export const HASURA_SERVER_API_ENDPOINT = 'http://159.89.0.130:8080/v1/graphql';
+export const HASURA_SERVER_API_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
 
 // Modal Ids
 /**
@@ -132,6 +131,14 @@ export const OVERWRITE_MAP_ID = 'overwriteMap';
  * @public
  */
 export const SHARE_MAP_ID = 'shareMap';
+/**
+ * Modal id: input user token to login
+ * @constant
+ * @type {string}
+ * @public
+ */
+export const INPUT_USER_TOKEN_ID = 'inputUserToken';
+
 
 export const KEPLER_GL_NAME = 'drive.test.magic';
 
@@ -152,7 +159,7 @@ export const DIMENSIONS = {
       interaction: 300,
       map: 300
     },
-    margin: {top: 20, left: 20, bottom: 30, right: 20},
+    margin: { top: 20, left: 20, bottom: 30, right: 20 },
     headerHeight: 96
   },
   mapControl: {
@@ -214,32 +221,32 @@ export const PANELS = SIDEBAR_PANELS;
 export const DEFAULT_LAYER_GROUPS = [
   {
     slug: 'label',
-    filter: ({id}) => id.match(/(?=(label|place-|poi-))/),
+    filter: ({ id }) => id.match(/(?=(label|place-|poi-))/),
     defaultVisibility: true
   },
   {
     slug: 'road',
-    filter: ({id}) => id.match(/(?=(road|railway|tunnel|street|bridge))(?!.*label)/),
+    filter: ({ id }) => id.match(/(?=(road|railway|tunnel|street|bridge))(?!.*label)/),
     defaultVisibility: true
   },
   {
     slug: 'border',
-    filter: ({id}) => id.match(/border|boundaries/),
+    filter: ({ id }) => id.match(/border|boundaries/),
     defaultVisibility: false
   },
   {
     slug: 'building',
-    filter: ({id}) => id.match(/building/),
+    filter: ({ id }) => id.match(/building/),
     defaultVisibility: true
   },
   {
     slug: 'water',
-    filter: ({id}) => id.match(/(?=(water|stream|ferry))/),
+    filter: ({ id }) => id.match(/(?=(water|stream|ferry))/),
     defaultVisibility: true
   },
   {
     slug: 'land',
-    filter: ({id}) => id.match(/(?=(parks|landcover|industrial|sand|hillshade))/),
+    filter: ({ id }) => id.match(/(?=(parks|landcover|industrial|sand|hillshade))/),
     defaultVisibility: true
   },
   {
@@ -383,14 +390,14 @@ export const TABLE_OPTION_LIST = [
     icon: Cancel,
     condition: props => props.isSorted
   },
-  {value: TABLE_OPTION.PIN, display: 'Pin Column', icon: Pin, condition: props => !props.isPinned},
+  { value: TABLE_OPTION.PIN, display: 'Pin Column', icon: Pin, condition: props => !props.isPinned },
   {
     value: TABLE_OPTION.UNPIN,
     display: 'Unpin Column',
     icon: Cancel,
     condition: props => props.isPinned
   },
-  {value: TABLE_OPTION.COPY, display: 'Copy Column', icon: Clipboard}
+  { value: TABLE_OPTION.COPY, display: 'Copy Column', icon: Clipboard }
 ];
 
 const ORANGE = '248, 194, 28';
@@ -686,13 +693,13 @@ export const EXPORT_IMG_RATIO_OPTIONS = [
   {
     id: EXPORT_IMG_RATIOS.SCREEN,
     label: 'modal.exportImage.ratioOriginalScreen',
-    getSize: (screenW, screenH) => ({width: screenW, height: screenH})
+    getSize: (screenW, screenH) => ({ width: screenW, height: screenH })
   },
   {
     id: EXPORT_IMG_RATIOS.CUSTOM,
     hidden: true,
     label: 'modal.exportImage.ratioCustom',
-    getSize: (mapW, mapH) => ({width: mapW, height: mapH})
+    getSize: (mapW, mapH) => ({ width: mapW, height: mapH })
   },
   {
     id: EXPORT_IMG_RATIOS.FOUR_BY_THREE,
@@ -951,5 +958,5 @@ export const SIGNAL_QUALITY = {
   rsrq: [-3, -5, -9, -12, -20],
   rsrp_rscp: [-44, -84, -102, -111, -130],
   ecio: [0, -2, -5, -10, -20],
-  cqi: [12, 9, 6, 3, 0]
+  cqi: [16, 12, 8, 4, 0]
 };

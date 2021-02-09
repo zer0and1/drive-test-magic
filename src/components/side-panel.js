@@ -45,7 +45,8 @@ import {
   SIDEBAR_PANELS,
   OVERWRITE_MAP_ID,
   SAVE_MAP_ID,
-  EXPORT_IMAGE_ID
+  EXPORT_IMAGE_ID,
+  INPUT_USER_TOKEN_ID
 } from 'constants/default-settings';
 
 const SidePanelContent = styled.div`
@@ -160,6 +161,10 @@ export default function SidePanelFactory(
     _showAddMapStyleModal = () => {
       this.props.uiStateActions.toggleModal(ADD_MAP_STYLE_ID);
     };
+
+    _showInputTokenModal = () => {
+      this.props.uiStateActions.toggleModal(INPUT_USER_TOKEN_ID);
+    }
 
     _removeDataset = key => {
       // this will show the modal dialog to confirm deletion
@@ -327,6 +332,7 @@ export default function SidePanelFactory(
                   : null
               }
               onShareMap={availableProviders.hasShare ? this._onClickShareMap : null}
+              onLogin={this._showInputTokenModal}
             />
             <PanelToggle
               panels={panels}

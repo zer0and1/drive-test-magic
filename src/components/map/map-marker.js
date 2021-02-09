@@ -26,12 +26,12 @@ import styled from 'styled-components';
 import moment from 'moment';
 
 
-const Marker = ({ IconComponent, x, y, scale, width, height, mode, name }) => (
+const Marker = ({ IconComponent, x, y, scale, offset, height, mode, name }) => (
   <IconComponent
     style={{
-      left: x - width * scale / 2,
+      left: x - scale * offset,
       top: y - height * scale,
-      position: 'absolute'
+      position: 'absolute',
     }}
     mode={mode}
     name={name}
@@ -40,7 +40,6 @@ const Marker = ({ IconComponent, x, y, scale, width, height, mode, name }) => (
 
 
 const StyledMarkerWrapper = styled.div`
-  pointer-events: none;
 `;
 
 MapMarkerFactory.deps = [];
@@ -93,15 +92,33 @@ export default function MapMarkerFactory() {
         }
       }
       const props = { x, y, name, mode, scale };
-      let placeComp = markerScale == 'large' ? Place : (markerScale == 'medium' ? PlaceMedium : PlaceSmall);
+      let offset = 0, height = 0, placeComp = Place;
+
+      switch (markerScale) {
+        case 'large':
+          placeComp = Place;
+          offset = 90;
+          height = 80;
+          break;
+        case 'medium':
+          placeComp = PlaceMedium;
+          offset = 22;
+          height = 61;
+          break;
+        case 'small':
+          placeComp = PlaceSmall;
+          offset = 90;
+          height = 80;
+          break;
+      }
 
       return (
         <StyledMarkerWrapper>
           <Marker
             {...props}
             IconComponent={placeComp}
-            width={180}
-            height={80}
+            offset={offset}
+            height={height}
           />
         </StyledMarkerWrapper>
       );

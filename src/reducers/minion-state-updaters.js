@@ -440,6 +440,7 @@ export function selectAllUpdater(state) {
     sleepInterval: null,
     sessionId: null,
     lastAck: {},
+    details: {},
     command: null,
     isSelectingAll: minions.length != selectedMinions.length,
     isUnselectingAll: minions.length == selectedMinions.length,
@@ -488,13 +489,14 @@ export function expandUpdater(state) {
 }
 
 export function collapseUpdater(state) {
-  const { selectedMinions } = state;
+  const { selectedMinions, minions } = state;
 
   if (selectedMinions.length == 0) {
     return state;
   }
-
-  const { longitude, latitude } = selectedMinions[0];
+  
+  const { name } = selectedMinions[0];
+  const { longitude, latitude } = minions.find(m => m.name == name);
   const task = ACTION_TASK().map(_ => updateMap({ longitude, latitude }));
 
   return withTask(state, task);
