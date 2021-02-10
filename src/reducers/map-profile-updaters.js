@@ -173,7 +173,7 @@ export const removeProfileUpdater = (state, { id }) => {
     variables: { id },
     mutation
   }).bimap(
-    res => removeProfileSuccess(res.data.update_signal_db_profiles_by_pk),
+    res => removeProfileSuccess(res.data.delete_signal_db_profiles_by_pk),
     err => removeProfileError(err)
   );
   const newState = { ...state, profiles: state.profiles.map(profile => profile.id == id ? { ...profile, isRemoving: true } : profile) };

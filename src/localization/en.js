@@ -255,7 +255,8 @@ export default {
       exportMap: 'Export Map',
       addCustomMapboxStyle: 'Add Custom Mapbox Style',
       saveMap: 'Save Map',
-      shareURL: 'Share URL'
+      shareURL: 'Share URL',
+      inputToken: 'User Token'
     },
     button: {
       delete: 'Delete',
@@ -264,6 +265,7 @@ export default {
       addStyle: 'Add Style',
       save: 'Save',
       add: 'Add',
+      send: 'Send',
       update: 'Update',
       defaultCancel: 'Cancel',
       defaultConfirm: 'Confirm'

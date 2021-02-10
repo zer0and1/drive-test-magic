@@ -30,6 +30,7 @@ export * from './map-style-actions';
 export * from './identity-actions';
 export * from './provider-actions';
 export * from './map-profile-actions';
+export * from './auth-state-actions';
 
 // Dispatch
 export {

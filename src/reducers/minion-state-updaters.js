@@ -19,13 +19,15 @@
 // THE SOFTWARE.
 
 import { disableStackCapturing, withTask } from 'react-palm/tasks';
-import { GRAPHQL_QUERY_TASK, ACTION_TASK } from 'tasks/tasks';
+import { GRAPHQL_QUERY_TASK, ACTION_TASK, DELAY_TASK } from 'tasks/tasks';
 import { GQL_GET_MINIONS, GQL_GET_MINION_COMMANDS } from 'graphqls';
-import { loadMinionsSuccess, loadMinionsError, loadMinionCommandSuccess } from 'actions/minion-state-actions';
+import { loadMinions, loadMinionsSuccess, loadMinionsError, loadMinionCommandSuccess } from 'actions/minion-state-actions';
+import { addMarker, removeMarker } from 'actions/vis-state-actions';
 import { updateMap, fitBounds } from 'actions/map-state-actions';
 import { SIGNAL_QUALITY } from 'constants/default-settings';
 import moment from 'moment';
 import _ from 'lodash';
+import $ from 'jquery';
 
 // react-palm
 // disable capture exception for react-palm call to withTask
@@ -102,19 +104,21 @@ export const INITIAL_MINION_STATE = {
  * @type {typeof import('./minion-state-updaters').loadMinionsUpdater}
  *
  */
-export function loadMinionsUpdater(state, { onLoaded }) {
+export function loadMinionsUpdater(state, { firstLoading }) {
+  if (firstLoading) {
+    $('#minion-grid').LoadingOverlay('show');
+  }
+
   const query = GQL_GET_MINIONS(state.selectedMinions[0]?.name);
   const loadMinionTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     result => {
       const minions = _.sortBy(result.data.signal_db_minions, ['name']);
       const sample = result.data.signal_db_signal_samples?.[0];
-
-      onLoaded(minions);
-
       return loadMinionsSuccess(minions, sample);
     },
     error => loadMinionsError(error)
   );
+
   const newState = {
     ...state,
     isLoadingMinions: true
@@ -167,29 +171,49 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
     details: {}
   };
 
-  if (selectedMinions.length != 1 || !signalSample) {
-    return newState;
+  $('#minion-grid').LoadingOverlay('hide', true);
+  $('#minion-group').LoadingOverlay('hide', true);
+
+  if (selectedMinions.length == 1 && signalSample) {
+    const minionDetails = selectedMinions[0];
+    const connectionType = signalSample.connection_type;
+    const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi } = signalSample;
+    const details = {
+      ...minionDetails,
+      ...signalSample,
+      ...calcLevel(rssi, 'rssi', connectionType),
+      ...calcLevel(rsrq, 'rsrq', connectionType),
+      ...calcLevel(rsrp_rscp, 'rsrp_rscp', connectionType),
+      ...calcLevel(sinr_ecio, 'sinr_ecio', connectionType),
+      ...calcLevel(cqi, 'cqi', connectionType),
+    };
+
+    newState = {
+      ...newState,
+      details,
+      operationMode: minionDetails.operation_mode,
+      sessionId: minionDetails.session_id,
+      sleepInterval: minionDetails.sleep_interval
+    };
   }
-
-  const minionDetails = selectedMinions[0];
-  const connectionType = signalSample.connection_type;
-  const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi } = signalSample;
-  const details = {
-    ...minionDetails,
-    ...signalSample,
-    ...calcLevel(rssi, 'rssi', connectionType),
-    ...calcLevel(rsrq, 'rsrq', connectionType),
-    ...calcLevel(rsrp_rscp, 'rsrp_rscp', connectionType),
-    ...calcLevel(sinr_ecio, 'sinr_ecio', connectionType),
-    ...calcLevel(cqi, 'cqi', connectionType),
-  };
-
-  return {
-    ...newState,
-    details,
-    operationMode: state.operationMode || minionDetails.operation_mode,
-    sessionId: state.sessionId || minionDetails.session_id,
-    sleepInterval: state.sleepInterval || minionDetails.sleep_interval
+  
+  if (minions) {
+    const markers = minions.map(m => ({
+      lngLat: [m.longitude, m.latitude],
+      info: m,
+      id: m.name
+    }));
+  
+    const tasks = [
+      DELAY_TASK(5000).map(loadMinions),
+      ACTION_TASK().map(_ => removeMarker()),
+      ACTION_TASK().map(_ => addMarker(markers))
+    ];
+  
+    return withTask(newState, tasks);
+  }
+  else {
+    return INITIAL_MINION_STATE;
   }
 }
 
@@ -317,7 +341,7 @@ export function sendSessionCommandUpdater(state, { isIncrement }) {
   return {
     ...state,
     isCommandExecuting: true,
-    sessionId: selectedAll ? null : (isIncrement ? parseInt(state.sessionId) + 1 : state.sessionId)
+    sessionId: selectedAll ? null : (isIncrement ? parseInt(sessionId) + 1 : sessionId)
   };
 }
 
@@ -494,7 +518,7 @@ export function collapseUpdater(state) {
   if (selectedMinions.length == 0) {
     return state;
   }
-  
+
   const { name } = selectedMinions[0];
   const { longitude, latitude } = minions.find(m => m.name == name);
   const task = ACTION_TASK().map(_ => updateMap({ longitude, latitude }));

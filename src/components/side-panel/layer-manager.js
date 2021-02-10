@@ -171,7 +171,8 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
     };
 
     componentDidMount() {
-      if (Object.keys(this.props.datasets).length == 0) {
+      const { userRole } = this.props;
+      if (userRole && userRole != 'not-allowed' && Object.keys(this.props.datasets).length == 0) {
         $('.side-panel__content').LoadingOverlay('show');
         this.props.loadDataset();
       }

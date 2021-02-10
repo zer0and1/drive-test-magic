@@ -27,6 +27,7 @@ import {mapStyleReducerFactory} from './map-style';
 import {uiStateReducerFactory} from './ui-state';
 import {providerStateReducerFactory} from './provider-state';
 import {mapProfileReducerFactory} from './map-profile';
+import {authStateReducerFactory} from './auth-state';
 
 import composers from './composers';
 
@@ -38,7 +39,8 @@ const combined = (initialState = {}) =>
     mapStyle: mapStyleReducerFactory(initialState.mapStyle),
     uiState: uiStateReducerFactory(initialState.uiState),
     providerState: providerStateReducerFactory(initialState.providerState),
-    mapProfile: mapProfileReducerFactory(initialState.mapProfile)
+    mapProfile: mapProfileReducerFactory(initialState.mapProfile),
+    authState: authStateReducerFactory(initialState.authState)
   });
 
 export const coreReducerFactory = (initialState = {}) => (state, action) => {
@@ -103,5 +105,14 @@ export const uiStateLens = reduxState => ({uiState: reduxState.uiState});
  * @public
  */
 export const providerStateLens = reduxState => ({providerState: reduxState.providerState});
+
+/**
+ * Connect subreducer `authState`, used with `injectComponents`. Learn more at
+ * [Replace UI Component](../advanced-usages/replace-ui-component.md#pass-custom-component-props)
+ *
+ * @param {*} reduxState
+ * @public
+ */
+export const authStateLens = reduxState => ({authState: reduxState.authState});
 
 export const mapProfileLens = reduxState => ({mapState: reduxState.mapProfile});

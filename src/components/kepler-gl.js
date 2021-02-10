@@ -35,6 +35,7 @@ import * as MapStyleActions from 'actions/map-style-actions';
 import * as MapProfileActions from 'actions/map-profile-actions';
 import * as UIStateActions from 'actions/ui-state-actions';
 import * as ProviderActions from 'actions/provider-actions';
+import * as AuthStateActions from 'actions/auth-state-actions';
 
 import {
   DIMENSIONS,
@@ -134,6 +135,7 @@ function KeplerGlFactory(
       this._validateMapboxToken();
       this._loadMapStyle(this.props.mapStyles);
       this._handleResize(this.props);
+      this.props.authStateActions.getAuthInfo();
       if (typeof this.props.onKeplerGlInitialized === 'function') {
         this.props.onKeplerGlInitialized();
       }
@@ -252,6 +254,7 @@ function KeplerGlFactory(
         minionState,
         providerState,
         mapProfile,
+        authState,
 
         // actions,
         minionStateActions,
@@ -261,6 +264,7 @@ function KeplerGlFactory(
         mapProfileActions,
         uiStateActions,
         providerActions,
+        authStateActions,
 
         // readOnly override
         readOnly
@@ -314,11 +318,13 @@ function KeplerGlFactory(
         uiStateActions,
         minionStateActions,
         providerActions,
+        authStateActions,
         width: this.props.sidePanelWidth,
         height: this.props.height - DIMENSIONS.sidePanel.margin.top - DIMENSIONS.sidePanel.margin.bottom,
         availableProviders,
         mapSaved: providerState.mapSaved,
-        mapProfile
+        mapProfile,
+        authState
       };
 
       const mapFields = {
@@ -430,12 +436,14 @@ function KeplerGlFactory(
                   visState={visState}
                   mapState={mapState}
                   uiState={uiState}
+                  authState={authState}
                   mapboxApiAccessToken={mapboxApiAccessToken}
                   mapboxApiUrl={mapboxApiUrl}
                   visStateActions={visStateActions}
                   uiStateActions={uiStateActions}
                   mapStyleActions={mapStyleActions}
                   providerActions={providerActions}
+                  authStateActions={authStateActions}
                   rootNode={this.root.current}
                   containerW={containerW}
                   containerH={mapState.height}
@@ -468,6 +476,7 @@ function mapStateToProps(state = {}, props) {
     uiState: state.uiState,
     providerState: state.providerState,
     mapProfile: state.mapProfile,
+    authState: state.authState,
     sidePanelWidth: DIMENSIONS.sidePanel.width[state.uiState.activeSidePanel]
   };
 }
@@ -478,14 +487,15 @@ const getUserActions = (dispatch, props) => props.actions || defaultUserActions;
 
 function makeGetActionCreators() {
   return createSelector([getDispatch, getUserActions], (dispatch, userActions) => {
-    const [minionStateActions, visStateActions, mapStateActions, mapStyleActions, mapProfileActions, uiStateActions, providerActions] = [
+    const [minionStateActions, visStateActions, mapStateActions, mapStyleActions, mapProfileActions, uiStateActions, providerActions, authStateActions] = [
       MinionStateActions,
       VisStateActions,
       MapStateActions,
       MapStyleActions,
       MapProfileActions,
       UIStateActions,
-      ProviderActions
+      ProviderActions,
+      AuthStateActions
     ].map(actions => bindActionCreators(mergeActions(actions, userActions), dispatch));
 
     return {
@@ -496,6 +506,7 @@ function makeGetActionCreators() {
       mapProfileActions,
       uiStateActions,
       providerActions,
+      authStateActions,
       dispatch
     };
   });

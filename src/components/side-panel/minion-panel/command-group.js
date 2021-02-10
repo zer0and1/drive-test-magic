@@ -71,13 +71,10 @@ function CommandGroupFactory(MinionGroup) {
       sendCommand: PropTypes.func.isRequired,
       setMqttClient: PropTypes.func.isRequired,
       setMqttMessage: PropTypes.func.isRequired,
-      loadMinionCommand: PropTypes.func.isRequired,
     };
 
     componentDidMount() {
       if (CommandGroup.observers.isLoaded == false) {
-        this.props.loadMinionCommand();
-
         const client = CommandGroup.mqttClient;
         client.on('connect', () => {
           this.props.setMqttClient(CommandGroup.mqttClient);

@@ -28,10 +28,10 @@ import ActionTypes from 'constants/action-types';
  * @type {typeof import('./minion-state-actions').loadMinions}
  * @return action
  */
-export function loadMinions(onLoaded) {
+export function loadMinions(firstLoading) {
   return {
     type: ActionTypes.LOAD_MINIONS,
-    onLoaded
+    firstLoading
   };
 }
 

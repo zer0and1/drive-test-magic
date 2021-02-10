@@ -49,8 +49,6 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       updateVisData: PropTypes.func.isRequired,
       onMouseMove: PropTypes.func.isRequired,
       updateMap: PropTypes.func.isRequired,
-      addMarker: PropTypes.func.isRequired,
-      removeMarker: PropTypes.func.isRequired,
 
       loadMinions: PropTypes.func.isRequired,
       selectMinion: PropTypes.func.isRequired,
@@ -68,22 +66,11 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       command: PropTypes.string,
       isCommandExecuting: PropTypes.bool,
       details: PropTypes.object,
+      minions: PropTypes.array
     };
 
     static defaultProps = {
       details: {},
-    };
-
-    minionSource = {
-      localdata: [],
-      datatype: 'array',
-      datafields: [
-        { name: 'id', type: 'int' },
-        { name: 'name', type: 'string' },
-        { name: 'lastupdate', type: 'date' },
-        { name: 'gps_fix_lastupdate', type: 'date' },
-        { name: 'operation_mode', type: 'string' }
-      ]
     };
 
     timeoutId = 0;
@@ -127,16 +114,18 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     componentDidMount() {
-      $('#minion-grid').LoadingOverlay('show');
-      this.props.loadMinions(this.onMinionsLoaded.bind(this));
       this._mounted = true;
+
+      if (this.props.userRole && this.props.userRole != 'not-allowed') {
+        this.props.loadMinions(true);
+      }
     }
 
     componentWillUnmount() {
       this.props.removeMarker();
       this.props.selectMinion([]);
       this._mounted = false;
-      clearTimeout(this.timeoutId);
+      clearTimeout(global.DELAY_TASK_TIMEOUT_ID);
     }
 
     shouldComponentUpdate(nextProps) {
@@ -161,31 +150,6 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       return true;
     }
 
-    onMinionsLoaded(minions) {
-      if (this._mounted == false) {
-        return;
-      }
-
-      $('#minion-grid').LoadingOverlay('hide', true);
-      $('#minion-group').LoadingOverlay('hide', true);
-
-      this.minionSource.localdata = minions;
-      this.refs.minionGrid.updatebounddata();
-      this.timeoutId = setTimeout(this.props.loadMinions.bind(this), 5000, this.onMinionsLoaded.bind(this));
-      this.trackMinion(minions);
-    }
-
-    trackMinion(minions) {
-      this.props.removeMarker();
-      this.props.addMarker(
-        minions.map(m => ({
-          lngLat: [m.longitude, m.latitude],
-          info: m,
-          id: m.name
-        }))
-      );
-    }
-
     onPanelResize({ args }) {
       this.panelRatio = args.panels[0].size / this.props.height;
       this.isResizingPanel = false;
@@ -195,7 +159,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       if (this.isSelectingAll) {
         return;
       }
-      
+
       const idxs = this.refs.minionGrid.getselectedrowindexes();
       const rows = idxs.map(idx => this.refs.minionGrid.getrowdata(idx));
       const minions = rows.map(m => this.props.minions.find(om => om.name == m.name));
@@ -203,7 +167,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
       if (minions.length == 1) {
         $('#minion-group').LoadingOverlay('show');
-        this.props.loadMinions(this.onMinionsLoaded.bind(this));
+        this.props.loadMinions();
       }
     }
 
@@ -219,12 +183,12 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
       if (minions.length == 1) {
         $('#minion-group').LoadingOverlay('show');
-        this.props.loadMinions(this.onMinionsLoaded.bind(this));
+        this.props.loadMinions();
       }
     }
 
     render() {
-      const { width, height, selectedMinions } = this.props;
+      const { width, height, selectedMinions, minions } = this.props;
       const commandGroupFields = {
         sleepInterval: this.props.sleepInterval,
         operationMode: this.props.operationMode,
@@ -235,6 +199,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         commands: this.props.commands,
         selectedAll: this.props.selectedAll,
         isCommandExecuting: this.props.isCommandExecuting,
+        userRole: this.props.userRole
       };
 
       const commandGroupActions = {
@@ -267,7 +232,17 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 width={'100%'}
                 height={'100%'}
                 theme={'metrodark'}
-                source={new jqx.dataAdapter(this.minionSource)}
+                source={new jqx.dataAdapter({
+                  localdata: minions,
+                  datatype: 'array',
+                  datafields: [
+                    { name: 'id', type: 'int' },
+                    { name: 'name', type: 'string' },
+                    { name: 'lastupdate', type: 'date' },
+                    { name: 'gps_fix_lastupdate', type: 'date' },
+                    { name: 'operation_mode', type: 'string' }
+                  ]
+                })}
                 columns={[
                   { text: 'Name', datafield: 'name', cellsalign: 'center', align: 'center', width: '20%', cellsrenderer: this.strRenderer.bind(this) },
                   { text: 'Last Update', datafield: 'lastupdate', cellsalign: 'center', cellsrenderer: this.datetimeRenderer.bind(this), align: 'center', width: '34%' },

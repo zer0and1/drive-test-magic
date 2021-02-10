@@ -34,6 +34,7 @@
     "@turf/boolean-within": "^6.0.1",
     "@turf/helpers": "^6.1.4",
     "apollo-link-http": "^1.5.17",
+    "axios": "^0.21.1",
     "classnames": "^2.2.1",
     "colorbrewer": "^1.0.0",
     "copy-to-clipboard": "^3.3.1",

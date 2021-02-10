@@ -18,13 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Task, {taskCreator} from 'react-palm/tasks';
-import {json as requestJson} from 'd3-request';
-import {readFileInBatches, processFileData} from '../processors/file-handler';
+import Task, { taskCreator } from 'react-palm/tasks';
+import { json as requestJson } from 'd3-request';
+import { readFileInBatches, processFileData } from '../processors/file-handler';
+import axios from 'axios';
 
 export const LOAD_FILE_TASK = Task.fromPromise(
-  ({file, fileCache, loaders, loadOptions}) =>
-    readFileInBatches({file, fileCache, loaders, loadOptions}),
+  ({ file, fileCache, loaders, loadOptions }) =>
+    readFileInBatches({ file, fileCache, loaders, loadOptions }),
   'LOAD_FILE_TASK'
 );
 
@@ -35,7 +36,7 @@ export const PROCESS_FILE_DATA = Task.fromPromise(
 );
 
 export const LOAD_MAP_STYLE_TASK = taskCreator(
-  ({url, id}, success, error) =>
+  ({ url, id }, success, error) =>
     requestJson(url, (err, result) => {
       if (err) {
         error(err);
@@ -43,7 +44,7 @@ export const LOAD_MAP_STYLE_TASK = taskCreator(
         if (!result) {
           error(new Error('Map style response is empty'));
         }
-        success({id, style: result});
+        success({ id, style: result });
       }
     }),
 
@@ -54,13 +55,13 @@ export const LOAD_MAP_STYLE_TASK = taskCreator(
  * task to upload file to cloud provider
  */
 export const EXPORT_FILE_TO_CLOUD_TASK = Task.fromPromise(
-  ({provider, payload}) => provider.uploadMap(payload),
+  ({ provider, payload }) => provider.uploadMap(payload),
 
   'EXPORT_FILE_TO_CLOUD_TASK'
 );
 
 export const LOAD_CLOUD_MAP_TASK = Task.fromPromise(
-  ({provider, payload}) => provider.downloadMap(payload),
+  ({ provider, payload }) => provider.downloadMap(payload),
 
   'LOAD_CLOUD_MAP_TASK'
 );
@@ -75,6 +76,12 @@ export const GRAPHQL_MUTATION_TASK = Task.fromPromise(
   (context) => apolloClient.mutate(context),
 
   'GRAPHQL_MUTATION_TASK'
+);
+
+export const AXIOS_REQUEST_TASK = Task.fromPromise(
+  (context) => axios.request(context),
+
+  'AXIOS_REQUEST_TASK'
 );
 
 export const GET_SAVED_MAPS_TASK = Task.fromPromise(
@@ -92,7 +99,10 @@ export const ACTION_TASK = Task.fromCallback(
 );
 
 export const DELAY_TASK = Task.fromCallback(
-  (delay, cb) => window.setTimeout(() => cb(), delay),
+  (delay, cb) => {
+    window.clearTimeout(global.DELAY_TASK_TIMEOUT_ID);
+    global.DELAY_TASK_TIMEOUT_ID = window.setTimeout(() => cb(), delay);
+  },
 
   'DELAY_TASK'
 );

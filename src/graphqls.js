@@ -67,17 +67,10 @@ query MyQuery {
 
 export const GQL_GET_PROFILES = () => gql`
 query {
-  signal_db_profiles (
-    where: {
-      removed: {
-        _eq: false
-      }
-    }
-  ) {
+  signal_db_profiles {
     id
     label
     config
-    removed
   }
 }
 `;
@@ -112,11 +105,8 @@ mutation($id: uuid!, $config: jsonb) {
 
 export const GQL_REMOVE_PROFILE = () => gql`
 mutation($id: uuid!) {
-  update_signal_db_profiles_by_pk (
-    pk_columns: {id: $id},
-    _set: {
-      removed: true
-    }
+  delete_signal_db_profiles_by_pk (
+    id: $id
   ) {
     id
   }

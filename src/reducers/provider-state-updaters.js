@@ -909,7 +909,11 @@ export const loadDatasetSuccessUpdater = (state, { payload: datasets }) => {
     }
   });
 
-  const newState = { ...state, isLoadingDataset: false };
+  const newState = { 
+    ...state, 
+    isLoadingDataset: false,
+    loadingCompleted: datasets.length == 0
+  };
 
   return withTask(newState, tasks);
 };

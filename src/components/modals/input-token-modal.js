@@ -18,12 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-import {injectIntl} from 'react-intl';
-import {FormattedMessage} from 'localization';
+import { injectIntl } from 'react-intl';
+import { FormattedMessage } from 'localization';
+import { media } from 'styles/media-breakpoints';
+import { Button } from 'components/common/styled-components';
+import LoadingDialog from './loading-dialog';
 
 const StyledInput = styled.input`
   width: 100%;
@@ -35,22 +38,74 @@ const StyledLabel = styled.div`
   margin-bottom: 5px;
 `;
 
+const StyledModalFooter = styled.div`
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-top: 24px;
+  ${media.portable`
+    padding-top: 24px;
+  `};
+
+  ${media.palm`
+    padding-top: 16px;
+  `};
+  z-index: ${props => props.theme.modalFooterZ};
+`;
+
+const FooterActionWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+`;
+
 const propTypes = {
-  
+  onInputToken: PropTypes.func.isRequired,
+  isSendingToken: PropTypes.bool.isRequired
 };
 
 const InputTokenModalFactory = () => {
   class InputTokenModal extends Component {
-    componentDidMount() {
+    state = {
+      userToken: ''
     }
 
+    componentDidUpdate(prevProps) {
+      if (prevProps.isSendingToken == true && this.props.isSendingToken == false) {
+        this.props.onClose();
+      }
+    }
+
+    _inputToken() {
+      this.props.onInputToken(this.state.userToken);
+    }
 
     render() {
+      const { isSendingToken } = this.props;
 
       return (
         <div className="input-token-modal">
-          <StyledLabel>Please enter user token</StyledLabel>
-          <StyledInput type="text" />
+          {isSendingToken ? (
+            <LoadingDialog size="64" height="150px" />
+          ) : (
+            <>
+              <StyledLabel>Please enter user token</StyledLabel>
+              <StyledInput type="text" onChange={e => this.setState({ userToken: e.target.value })} value={this.state.userToken} />
+
+              <StyledModalFooter>
+                <FooterActionWrapper>
+                  <Button className="modal--footer--cancel-button" link onClick={this.props.onClose}>
+                    <FormattedMessage id={'modal.button.defaultCancel'} />
+                  </Button>
+                  <Button className="modal--footer--confirm-button" onClick={() => this._inputToken()}>
+                    <FormattedMessage id={'modal.button.send'} />
+                  </Button>
+                </FooterActionWrapper>
+              </StyledModalFooter>
+            </>
+          )}
         </div>
       );
     }

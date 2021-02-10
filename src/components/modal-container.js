@@ -146,6 +146,7 @@ export default function ModalContainerFactory(
       visStateActions: PropTypes.object.isRequired,
       uiStateActions: PropTypes.object.isRequired,
       mapStyleActions: PropTypes.object.isRequired,
+      authStateActions: PropTypes.object.isRequired,
       onSaveToStorage: PropTypes.func,
       cloudProviders: PropTypes.arrayOf(PropTypes.object)
     };
@@ -272,9 +273,11 @@ export default function ModalContainerFactory(
         mapState,
         uiState,
         visState,
+        authState,
         rootNode,
         visStateActions,
         uiStateActions,
+        authStateActions,
         providerState
       } = this.props;
       const { currentModal, datasetKeyToRemove, datasetKeyToUpdate } = uiState;
@@ -571,13 +574,12 @@ export default function ModalContainerFactory(
             break;
           case INPUT_USER_TOKEN_ID:
             template = (
-              <InputTokenModal />
+              <InputTokenModal onInputToken={authStateActions.getAuthInfo} onClose={this._closeModal} isSendingToken={authState.isSendingToken} />
             );
             modalProps = {
               title: 'modal.title.inputToken',
               cssStyle: InputTokenModalStyle,
-              footer: true,
-              onConfirm: this._closeModal
+              footer: false
             };
             break;
           default:

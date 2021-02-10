@@ -137,10 +137,6 @@ export default function SidePanelFactory(
       availableProviders: {}
     };
 
-    componentDidMount() {
-      this.props.mapProfileActions.loadProfile();
-    }
-
     /* component private functions */
     _onOpenOrClose = () => {
       this.props.uiStateActions.toggleSidePanel(
@@ -209,6 +205,7 @@ export default function SidePanelFactory(
         layerClasses,
         uiState,
         minionState,
+        authState,
         layerOrder,
         interactionConfig,
         minionStateActions,
@@ -359,6 +356,7 @@ export default function SidePanelFactory(
                   <MinionManager
                     {...minionManagerActions}
                     {...minionState}
+                    {...authState}
                     width={this.props.width}
                     height={this.props.height - 54/*header*/ - 30 /*toggler*/ - 16 /*top-padding*/ - 48/*title*/}
                   />
@@ -366,6 +364,7 @@ export default function SidePanelFactory(
                 {activeSidePanel === 'layer' && (
                   <LayerManager
                     {...layerManagerActions}
+                    {...authState}
                     datasets={datasets}
                     layers={layers}
                     layerClasses={layerClasses}
