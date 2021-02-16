@@ -62,7 +62,7 @@ const StyledTextArea = styled(TextArea)`
   height: 40px;
 `;
 
-export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
+export const ProfileLabelEditor = ({ profileId, label, onEdit, readOnly }) => {
   const [value, setValue] = useState(label);
   const [isEditing, setEditing] = useState(false);
   const [isClicked, setClicked] = useState(false);
@@ -82,8 +82,10 @@ export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
           style={{ maxWidth: '185px', minWidth: '185px' }}
           onClick={e => {
             e.stopPropagation();
-            setEditing(true);
-            setClicked(true);
+            if (readOnly == false) {
+              setEditing(true);
+              setClicked(true);
+            }
           }}
         >
           {value}
@@ -99,7 +101,7 @@ export const ProfileLabelEditor = ({ profileId, label, onEdit }) => {
           onClick={e => {
             e.stopPropagation();
           }}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => readOnly || setValue(e.target.value)}
           onBlur={() => {
             onEdit(value);
             setEditing(false);
@@ -129,10 +131,10 @@ export function ProfileTitleSectionFactory() {
       text-transform: capitalize;
     }
   `;
-  const ProfileTitleSection = ({ profileId, label, onUpdateProfileLabel }) => (
+  const ProfileTitleSection = ({ profileId, label, onUpdateProfileLabel, hadProfilePrivilege }) => (
     <StyledProfileTitleSection className="profile__title">
       <div>
-        <ProfileLabelEditor profileId={profileId} label={label} onEdit={onUpdateProfileLabel} />
+        <ProfileLabelEditor profileId={profileId} label={label} onEdit={onUpdateProfileLabel} readOnly={hadProfilePrivilege} />
       </div>
     </StyledProfileTitleSection>
   );
@@ -176,6 +178,7 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
                 <ProfileTitleSection
                   profileId={profile.id}
                   label={profile.label}
+                  hadProfilePrivilege={hadProfilePrivilege}
                   onUpdateProfileLabel={label => updateProfileLabel(profile.id, label)}
                 />
               </HeaderLabelSection>
