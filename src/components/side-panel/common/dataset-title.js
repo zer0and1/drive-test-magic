@@ -218,7 +218,7 @@ export default function DatasetTitleFactory(DatasetTag) {
       return (
         <StyledDatasetTitle
           className="source-data-title"
-          clickable={Boolean(showDatasetTable || onTitleClick)}
+          clickable={showDatasetTable || onTitleClick}
         >
           <DatasetTag dataset={dataset} onClick={this._onClickTitle} />
           {showDatasetTable ? (
@@ -226,15 +226,12 @@ export default function DatasetTitleFactory(DatasetTag) {
               <ArrowRight height="12px" />
             </CenterFlexbox>
           ) : null}
-          { false ? (
-            <ShowDataTable id={dataset.id} showDatasetTable={showDatasetTable} />
-          ) : null}
           {showDeleteDataset && hadDBPrivilege ? (
             <RemoveDataset datasetKey={dataset.id} removeDataset={removeDataset} />
           ) : null}
-          {hadDBPrivilege && <SetupDataset datasetKey={dataset.id} setupDataset={setupDataset} />}
-          <ReloadDataset datasetKey={dataset.id} reloading={dataset.reloading} startReloadingDataset={startReloadingDataset} />
-          <EnableDataset datasetKey={dataset.id} enableDataset={enableDataset} enabled={dataset.enabled} />
+          {setupDataset && hadDBPrivilege && <SetupDataset datasetKey={dataset.id} setupDataset={setupDataset} />}
+          {startReloadingDataset && <ReloadDataset datasetKey={dataset.id} reloading={dataset.reloading} startReloadingDataset={startReloadingDataset} />}
+          {enableDataset && <EnableDataset datasetKey={dataset.id} enableDataset={enableDataset} enabled={dataset.enabled} />}
         </StyledDatasetTitle>
       );
     }
