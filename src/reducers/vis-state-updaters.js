@@ -686,14 +686,6 @@ export function setFilterUpdater(state, action) {
 }
 
 export function updateFilters(state, datasetIds, filterIdx) {
-  // const filters = state.filters.map(f => (
-  //   Object.keys(DEFAULT_FILTER_STRUCTURE).reduce(
-  //     (acc, field) => ({
-  //       ...acc, 
-  //       [field]: f[field]
-  //     }), {})
-  //   )
-  // ).filter(d => d.type);
   const filters = state.filters.filter(d => d.type);
   const datasets = datasetIds.reduce((acc, id) => ({
     ...acc,

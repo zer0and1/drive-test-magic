@@ -33,6 +33,7 @@ SourceDataCatalogFactory.deps = [DatasetTitleFactory, DatasetInfoFactory];
 
 function SourceDataCatalogFactory(DatasetTitle, DatasetInfo) {
   const SourceDataCatalog = ({
+    userRole,
     datasets,
     showDatasetTable,
     removeDataset,
@@ -46,6 +47,7 @@ function SourceDataCatalogFactory(DatasetTitle, DatasetInfo) {
       {Object.values(datasets).sort((a, b) => a.label > b.label ? 1 : -1).map((dataset, index) => (
         <SidePanelSection key={dataset.id}>
           <DatasetTitle
+            userRole={userRole}
             showDatasetTable={showDatasetTable}
             showDeleteDataset={showDeleteDataset}
             removeDataset={removeDataset}

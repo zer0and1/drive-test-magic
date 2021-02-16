@@ -29,6 +29,9 @@ import { ApolloClient, InMemoryCache } from '@apollo/client';
 import { createHttpLink } from "apollo-link-http";
 import { HASURA_SERVER_API_ENDPOINT } from 'constants/default-settings';
 
+import { INPUT_USER_TOKEN_ID } from 'constants/default-settings';
+import { toggleModal } from 'actions/ui-state-actions';
+
 // react-palm
 // disable capture exception for react-palm call to withTask
 disableStackCapturing();
@@ -97,7 +100,8 @@ export const getAuthInfoUpdater = (state, { userToken }) => {
       return getAuthInfoSuccessUpdater(state, { info: JSON.parse(authInfo) });
     }
     else {
-      return state;
+      const task = ACTION_TASK().map(_ => toggleModal(INPUT_USER_TOKEN_ID));
+      return withTask(state, task);
     }
   }
   else {

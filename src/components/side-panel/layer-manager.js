@@ -214,7 +214,8 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
     };
 
     render() {
-      const { layers, datasets, layerOrder, openModal, intl } = this.props;
+      const { layers, datasets, layerOrder, openModal, intl, userRole } = this.props;
+      const hadDBPrivilege = userRole == 'admin' || userRole == 'user';
       const defaultDataset = Object.keys(datasets)[0];
       const layerTypeOptions = this.layerTypeOptionsSelector(this.props);
 
@@ -237,6 +238,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       return (
         <div className="layer-manager">
           <SourceDataCatalog
+            userRole={userRole}
             datasets={datasets}
             showDatasetTable={this.props.showDatasetTable}
             removeDataset={this.props.removeDataset}
@@ -245,7 +247,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
             enableDataset={this.props.enableDataset}
             showDeleteDataset
           />
-          <AddDataButton onClick={this.props.showAddDataModal} isInactive={!defaultDataset} />
+          {hadDBPrivilege && <AddDataButton onClick={this.props.showAddDataModal} isInactive={!defaultDataset} />}
           <SidePanelDivider />
           <SidePanelSection>
             <SortableContainer

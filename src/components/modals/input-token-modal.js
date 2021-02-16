@@ -28,14 +28,9 @@ import { media } from 'styles/media-breakpoints';
 import { Button } from 'components/common/styled-components';
 import LoadingDialog from './loading-dialog';
 
-const StyledInput = styled.input`
+const StyledTextArea = styled.textarea`
   width: 100%;
-`;
-
-const StyledLabel = styled.div`
-  font-size: 15px;
-  font-family: ${props => props.theme.fontFamily};
-  margin-bottom: 5px;
+  height: 50px;
 `;
 
 const StyledModalFooter = styled.div`
@@ -91,8 +86,7 @@ const InputTokenModalFactory = () => {
             <LoadingDialog size="64" height="150px" />
           ) : (
             <>
-              <StyledLabel>Please enter user token</StyledLabel>
-              <StyledInput type="text" onChange={e => this.setState({ userToken: e.target.value })} value={this.state.userToken} />
+              <StyledTextArea onChange={e => this.setState({ userToken: e.target.value })} value={this.state.userToken} />
 
               <StyledModalFooter>
                 <FooterActionWrapper>

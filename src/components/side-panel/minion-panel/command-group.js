@@ -62,6 +62,7 @@ function CommandGroupFactory(MinionGroup) {
       operationMode: PropTypes.string,
       command: PropTypes.string,
       isCommandExecuting: PropTypes.bool,
+      userRole: PropTypes.string,
 
       setSleepInterval: PropTypes.func.isRequired,
       setOperationMode: PropTypes.func.isRequired,
@@ -107,8 +108,9 @@ function CommandGroupFactory(MinionGroup) {
         commands,
         sessionId,
         selectedMinions,
-        selectedAll
+        userRole
       } = this.props;
+      const hadPrivilege = userRole == 'admin' || userRole == 'user';
 
       return (
         <MinionGroup groupIcon={Gear} label={`Command - ${selectedMinions.length} selected`} toggled={true}>
@@ -118,19 +120,19 @@ function CommandGroupFactory(MinionGroup) {
                 <td>Operation Mode:</td>
                 <td colSpan="2">
                   <StyledMode
-                    onClick={() => this.props.setOperationMode('idle')}
+                    onClick={() => hadPrivilege && this.props.setOperationMode('idle')}
                     active={operationMode == 'idle'}
                   >
                     Idle
                   </StyledMode>
                   <StyledMode
-                    onClick={() => this.props.setOperationMode('store')}
+                    onClick={() => hadPrivilege && this.props.setOperationMode('store')}
                     active={operationMode == 'store'}
                   >
                     Store
                   </StyledMode>
                   <StyledMode
-                    onClick={() => this.props.setOperationMode('report')}
+                    onClick={() => hadPrivilege && this.props.setOperationMode('report')}
                     active={operationMode == 'report'}
                     last={true}
                   >
@@ -142,25 +144,25 @@ function CommandGroupFactory(MinionGroup) {
                 <td>Sleep Interval:</td>
                 <td colSpan="2">
                   <StyledInterval
-                    onClick={() => this.props.setSleepInterval(0.5)}
+                    onClick={() => hadPrivilege && this.props.setSleepInterval(0.5)}
                     active={sleepInterval == 0.5}
                   >
                     0.5s
                   </StyledInterval>
                   <StyledInterval
-                    onClick={() => this.props.setSleepInterval(2)}
+                    onClick={() => hadPrivilege && this.props.setSleepInterval(2)}
                     active={sleepInterval == 2}
                   >
                     2s
                   </StyledInterval>
                   <StyledInterval
-                    onClick={() => this.props.setSleepInterval(10)}
+                    onClick={() => hadPrivilege && this.props.setSleepInterval(10)}
                     active={sleepInterval == 10}
                   >
                     10s
                   </StyledInterval>
                   <StyledInterval
-                    onClick={() => this.props.setSleepInterval(60)}
+                    onClick={() => hadPrivilege && this.props.setSleepInterval(60)}
                     active={sleepInterval == 60}
                     last={true}
                   >
@@ -192,7 +194,7 @@ function CommandGroupFactory(MinionGroup) {
                       }
                     }}
                   />
-                  <StyledButton onClick={() => this.props.sendSessionCommand(true)}>+1</StyledButton>
+                  <StyledButton onClick={() => hadPrivilege && this.props.sendSessionCommand(true)}>+1</StyledButton>
                 </td>
               </tr>
               <tr>

@@ -86,7 +86,7 @@ const StyledToolbar = styled(Toolbar)`
   position: absolute;
 `;
 
-export const PanelAction = ({item, onClick}) => (
+export const PanelAction = ({item, onClick, tooltip}) => (
   <StyledPanelAction data-tip data-for={`${item.id}-action`} onClick={onClick}>
     {item.label ? <p>{item.label}</p> : null}
     <a target={item.blank ? '_blank' : ''} href={item.href}>
@@ -95,6 +95,10 @@ export const PanelAction = ({item, onClick}) => (
     {item.tooltip ? (
       <Tooltip id={`${item.id}-action`} place="bottom" delayShow={500} effect="solid">
         <FormattedMessage id={item.tooltip} />
+      </Tooltip>
+    ) : tooltip ? (
+      <Tooltip id={`${item.id}-action`} place="bottom" delayShow={500} effect="solid">
+        logged as: {tooltip.toUpperCase()}
       </Tooltip>
     ) : null}
   </StyledPanelAction>
@@ -249,7 +253,6 @@ function PanelHeaderFactory(SaveExportDropdown, CloudStorageDropdown) {
         {
           id: 'token',
           iconComponent: Login,
-          tooltip: 'tooltip.login',
           onClick: () => {},
         },
         {
@@ -273,6 +276,7 @@ function PanelHeaderFactory(SaveExportDropdown, CloudStorageDropdown) {
       const {
         appName,
         appWebsite,
+        userRole,
         version,
         actionItems,
         visibleDropdown,
@@ -300,6 +304,7 @@ function PanelHeaderFactory(SaveExportDropdown, CloudStorageDropdown) {
                 >
                   <PanelAction
                     item={item}
+                    tooltip={item.id == 'token' ? userRole : null}
                     onClick={() => {
                       if (item.dropdownComponent) {
                         showExportDropdown(item.id);

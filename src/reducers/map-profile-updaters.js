@@ -5,7 +5,7 @@ import {
   GQL_GET_PROFILES,
   GQL_INSERT_PROFILE,
   GQL_UPDATE_PROFILE,
-  GQL_REMOVE_PROFILE,
+  GQL_DELETE_PROFILE,
   GQL_UPDATE_PROFILE_LABEL
 } from 'graphqls';
 
@@ -168,7 +168,7 @@ export const applyProfileUpdater = (state, { id, map, options = {} }) => {
 
 
 export const removeProfileUpdater = (state, { id }) => {
-  const mutation = GQL_REMOVE_PROFILE();
+  const mutation = GQL_DELETE_PROFILE();
   const removeProfileTask = GRAPHQL_MUTATION_TASK({
     variables: { id },
     mutation

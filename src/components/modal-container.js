@@ -32,6 +32,7 @@ import { isValidMapInfo } from 'utils/map-info-utils';
 
 // modals
 import DeleteDatasetModalFactory from './modals/delete-data-modal';
+import DeleteFilteredDataModalFactory from './modals/delete-filtered-data-modal';
 import OverWriteMapModalFactory from './modals/overwrite-map-modal';
 import DataTableModalFactory from './modals/data-table-modal';
 import LoadDataModalFactory from './modals/load-data-modal';
@@ -52,6 +53,7 @@ import {
   ADD_DATA_ID,
   DATA_TABLE_ID,
   DELETE_DATA_ID,
+  DELETE_FILTERED_DATA_ID,
   UPDATE_DATA_ID,
   EXPORT_DATA_ID,
   EXPORT_IMAGE_ID,
@@ -100,6 +102,7 @@ const DefaultStyle = css`
 
 ModalContainerFactory.deps = [
   DeleteDatasetModalFactory,
+  DeleteFilteredDataModalFactory,
   OverWriteMapModalFactory,
   DataTableModalFactory,
   LoadDataModalFactory,
@@ -116,6 +119,7 @@ ModalContainerFactory.deps = [
 
 export default function ModalContainerFactory(
   DeleteDatasetModal,
+  DeleteFilteredDataModal,
   OverWriteMapModal,
   DataTableModal,
   LoadDataModal,
@@ -180,6 +184,10 @@ export default function ModalContainerFactory(
       this.props.visStateActions.removeDataset(key);
       this.props.providerActions.unregisterDataset(key);
       this._closeModal();
+    };
+
+    _deleteFilteredData = key => {
+      this.props.minionStateActions.deleteFilteredData(this.props.datasets[key]);
     };
 
     _onAddCustomMapStyle = () => {
@@ -277,10 +285,11 @@ export default function ModalContainerFactory(
         rootNode,
         visStateActions,
         uiStateActions,
+        minionStateActions,
         authStateActions,
         providerState
       } = this.props;
-      const { currentModal, datasetKeyToRemove, datasetKeyToUpdate } = uiState;
+      const { currentModal, datasetKeyToRemove, datasetKeyToDetete, datasetKeyToUpdate } = uiState;
       const { datasets, layers, editingDataset } = visState;
 
       let template = null;
@@ -340,6 +349,26 @@ export default function ModalContainerFactory(
               };
             }
             break; // in case we add a new case after this one
+          case DELETE_FILTERED_DATA_ID:
+            // validate options
+            if (datasetKeyToDetete && datasets && datasets[datasetKeyToDetete]) {
+              template = (
+                <DeleteFilteredDataModal 
+                  dataset={datasets[datasetKeyToDetete]} 
+                  layers={layers} 
+                  onDelete={() => minionStateActions.deleteFilteredData(datasets[datasetKeyToDetete])}
+                  removeFilter={visStateActions.removeFilter}
+                  filters={visState.filters}
+                  onCancel={this._closeModal}
+                />
+              );
+              modalProps = {
+                title: 'modal.title.deleteFilteredData',
+                cssStyle: smallModalCss,
+                footer: false
+              };
+            }
+            break;
           case ADD_DATA_ID:
             template = (
               <LoadDataModal

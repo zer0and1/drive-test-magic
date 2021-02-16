@@ -22,6 +22,13 @@
 import ActionTypes from 'constants/action-types';
 
 
+export function setLoopingEnabled(enabled) {
+  return {
+    type: ActionTypes.SET_LOOPING_ENABLED,
+    enabled
+  }
+};
+
 /**
  * Start to load minions data
  * @memberof minionStateActions
@@ -227,6 +234,26 @@ export function setMarkerScale(markerScale) {
   }
 };
 
+export function deleteFilteredData(dataset) {
+  return {
+    type: ActionTypes.DELETE_FILTERED_DATA,
+    dataset
+  }
+};
+
+export function deleteFilteredDataSuccess(dataset) {
+  return {
+    type: ActionTypes.DELETE_FILTERED_DATA_SUCCESS,
+    dataset
+  }
+};
+
+export function deleteFilteredDataError(error) {
+  return {
+    type: ActionTypes.DELETE_FILTERED_DATA_ERROR,
+    error
+  }
+};
 /**
  * This declaration is needed to group actions in docs
  */

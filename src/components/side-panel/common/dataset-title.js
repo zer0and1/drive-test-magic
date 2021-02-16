@@ -210,8 +210,10 @@ export default function DatasetTitleFactory(DatasetTag) {
         startReloadingDataset,
         setupDataset,
         enableDataset,
-        dataset
+        dataset,
+        userRole
       } = this.props;
+      const hadDBPrivilege = userRole == 'admin' || userRole == 'user';
 
       return (
         <StyledDatasetTitle
@@ -227,10 +229,10 @@ export default function DatasetTitleFactory(DatasetTag) {
           { false ? (
             <ShowDataTable id={dataset.id} showDatasetTable={showDatasetTable} />
           ) : null}
-          {showDeleteDataset ? (
+          {showDeleteDataset && hadDBPrivilege ? (
             <RemoveDataset datasetKey={dataset.id} removeDataset={removeDataset} />
           ) : null}
-          <SetupDataset datasetKey={dataset.id} setupDataset={setupDataset} />
+          {hadDBPrivilege && <SetupDataset datasetKey={dataset.id} setupDataset={setupDataset} />}
           <ReloadDataset datasetKey={dataset.id} reloading={dataset.reloading} startReloadingDataset={startReloadingDataset} />
           <EnableDataset datasetKey={dataset.id} enableDataset={enableDataset} enabled={dataset.enabled} />
         </StyledDatasetTitle>

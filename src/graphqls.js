@@ -103,7 +103,7 @@ mutation($id: uuid!, $config: jsonb) {
 }
 `;
 
-export const GQL_REMOVE_PROFILE = () => gql`
+export const GQL_DELETE_PROFILE = () => gql`
 mutation($id: uuid!) {
   delete_signal_db_profiles_by_pk (
     id: $id
@@ -194,6 +194,16 @@ mutation($id: String!) {
     id: $id
   ) {
     id
+  }
+}
+`;
+
+export const GQL_DELETE_SIGNAL_SAMPLES = (datesToDelete) => gql`
+mutation {
+  delete_signal_db_signal_samples (
+    where: { date: { _in: [${datesToDelete.toString()}] } }
+  ) {
+    affected_rows
   }
 }
 `;

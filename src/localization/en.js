@@ -177,7 +177,8 @@ export default {
     howTo: 'How to'
   },
   filterManager: {
-    addFilter: 'Add Filter'
+    addFilter: 'Add Filter',
+    deleteFilteredData: 'Delete Data'
   },
   datasetTitle: {
     showDataTable: 'Show data table',
@@ -248,6 +249,7 @@ export default {
   modal: {
     title: {
       deleteDataset: 'Delete Dataset',
+      deleteFilteredData: 'Delete Filtered Data',
       addDataToMap: 'Add Data To Map',
       updateDataset: 'Setup Dataset',
       exportImage: 'Export Image',
@@ -256,7 +258,7 @@ export default {
       addCustomMapboxStyle: 'Add Custom Mapbox Style',
       saveMap: 'Save Map',
       shareURL: 'Share URL',
-      inputToken: 'User Token'
+      inputToken: 'Send User Token'
     },
     button: {
       delete: 'Delete',
@@ -305,6 +307,9 @@ export default {
     },
     deleteData: {
       warning: 'you are going to delete this dataset. It will affect {length} layers'
+    },
+    deleteFilteredData: {
+      warning: 'You are going to delete filtered data. It will affect {length} records'
     },
     addStyle: {
       publishTitle: '1. Publish your style at mapbox or provide access token',

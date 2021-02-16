@@ -267,66 +267,64 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
         interactionConfig,
         layers,
         uiStateActions,
-        mousePos: {mousePosition, coordinate, pinned},
-        uiState: {isGraphShow},
+        mousePos: { mousePosition, coordinate, pinned },
+        uiState: { isGraphShow },
         markerScale
       } = this.props;
 
-      if (!mousePosition) {
-        return null;
-      }
-      // if clicked something, ignore hover behavior
-      let layerHoverProp = null;
-      let layerPinnedProp = null;
-      const position = { x: mousePosition[0], y: mousePosition[1] };
-      let pinnedPosition = {};
-      
-      layerHoverProp = getLayerHoverProp({
-        interactionConfig,
-        hoverInfo,
-        layers,
-        layersToRender,
-        datasets,
-        isGraphShow,
-        uiStateActions
-      });
-
-      const compareMode = interactionConfig.tooltip.config
-        ? interactionConfig.tooltip.config.compareMode
-        : false;
-
-      const hasTooltip = pinned || clicked;
-      const hasComparisonTooltip = compareMode || (!clicked && !pinned);
-      const viewport = new WebMercatorViewport(mapState);
-
-      if (hasTooltip) {
-        // project lnglat to screen so that tooltip follows the object on zoom
-        const lngLat = clicked ? clicked.lngLat : pinned.coordinate;
-        pinnedPosition = this._getHoverXY(viewport, lngLat);
-        layerPinnedProp = getLayerHoverProp({
-          interactionConfig,
-          hoverInfo: clicked,
-          layers,
-          layersToRender,
-          datasets,
-          isGraphShow,
-          uiStateActions
-        });
-        if (layerHoverProp && layerPinnedProp) {
-          layerHoverProp.primaryData = layerPinnedProp.data;
-          layerHoverProp.compareType = interactionConfig.tooltip.config.compareType;
-        }
-      }
-
+      let popover = null;
       const commonProp = {
         onClose: this._onCloseMapPopover,
         mapW: mapState.width,
         mapH: mapState.height,
         zoom: mapState.zoom
       };
+      const viewport = new WebMercatorViewport(mapState);
 
-      return (
-        <div>
+      if (mousePosition) {
+        // if clicked something, ignore hover behavior
+        let layerHoverProp = null;
+        let layerPinnedProp = null;
+        const position = { x: mousePosition[0], y: mousePosition[1] };
+        let pinnedPosition = {};
+
+        layerHoverProp = getLayerHoverProp({
+          interactionConfig,
+          hoverInfo,
+          layers,
+          layersToRender,
+          datasets,
+          isGraphShow,
+          uiStateActions
+        });
+
+        const compareMode = interactionConfig.tooltip.config
+          ? interactionConfig.tooltip.config.compareMode
+          : false;
+
+        const hasTooltip = pinned || clicked;
+        const hasComparisonTooltip = compareMode || (!clicked && !pinned);
+
+        if (hasTooltip) {
+          // project lnglat to screen so that tooltip follows the object on zoom
+          const lngLat = clicked ? clicked.lngLat : pinned.coordinate;
+          pinnedPosition = this._getHoverXY(viewport, lngLat);
+          layerPinnedProp = getLayerHoverProp({
+            interactionConfig,
+            hoverInfo: clicked,
+            layers,
+            layersToRender,
+            datasets,
+            isGraphShow,
+            uiStateActions
+          });
+          if (layerHoverProp && layerPinnedProp) {
+            layerHoverProp.primaryData = layerPinnedProp.data;
+            layerHoverProp.compareType = interactionConfig.tooltip.config.compareType;
+          }
+        }
+
+        popover = (<>
           {hasTooltip && (
             <MapPopover
               {...pinnedPosition}
@@ -345,6 +343,13 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
               coordinate={interactionConfig.coordinate.enabled && coordinate}
             />
           )}
+        </>);
+      }
+
+
+      return (
+        <div>
+          {popover}
           {marked.map((marker, idx) => (
             <MapMarker
               {...commonProp}

@@ -70,6 +70,13 @@ export const DATA_TABLE_ID = 'dataTable';
  */
 export const DELETE_DATA_ID = 'deleteData';
 /**
+ * Modal id: delete filtered data confirm dialog
+ * @constant
+ * @type {string}
+ * @public
+ */
+export const DELETE_FILTERED_DATA_ID = 'deleteFilteredData';
+/**
  * Modal id: update dataset dialog
  * @constant
  * @type {string}

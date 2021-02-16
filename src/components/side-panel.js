@@ -167,6 +167,10 @@ export default function SidePanelFactory(
       this.props.uiStateActions.openDeleteModal(key);
     };
 
+    _deleteFilteredData = (datasetId) => {
+      this.props.uiStateActions.openDeleteDataModal(datasetId);
+    };
+
     _setupDataset = key => {
       this.props.uiStateActions.openDatasetModal(key);
     };
@@ -236,6 +240,7 @@ export default function SidePanelFactory(
         addMarker: visStateActions.addMarker,
         removeMarker: visStateActions.removeMarker,
 
+        setLoopingEnabled: minionStateActions.setLoopingEnabled,
         loadMinions: minionStateActions.loadMinions,
         selectMinion: minionStateActions.selectMinion,
         unselectMinion: minionStateActions.unselectMinion,
@@ -274,9 +279,11 @@ export default function SidePanelFactory(
       const filterManagerActions = {
         addFilter: visStateActions.addFilter,
         removeFilter: visStateActions.removeFilter,
+        deleteFilteredData: visStateActions.deleteFilteredData,
         moveUpFilter: visStateActions.moveUpFilter,
         moveDownFilter: visStateActions.moveDownFilter,
         setFilter: visStateActions.setFilter,
+        deleteFilteredData: this._deleteFilteredData,
         showDatasetTable: this._showDatasetTable,
         showAddDataModal: this._showAddDataModal,
         toggleAnimation: visStateActions.toggleFilterAnimation,
@@ -315,6 +322,7 @@ export default function SidePanelFactory(
               appName={appName}
               version={version}
               appWebsite={appWebsite}
+              userRole={authState.userRole}
               visibleDropdown={uiState.visibleDropdown}
               showExportDropdown={uiStateActions.showExportDropdown}
               hideExportDropdown={uiStateActions.hideExportDropdown}
@@ -379,6 +387,7 @@ export default function SidePanelFactory(
                     datasets={datasets}
                     layers={layers}
                     filters={filters}
+                    userRole={authState.userRole}
                   />
                 )}
                 {activeSidePanel === 'interaction' && (
@@ -389,7 +398,7 @@ export default function SidePanelFactory(
                   />
                 )}
                 {activeSidePanel === 'map' && (
-                  <MapManager {...mapManagerActions} mapStyle={this.props.mapStyle} mapProfile={this.props.mapProfile} />
+                  <MapManager {...mapManagerActions} mapStyle={this.props.mapStyle} mapProfile={this.props.mapProfile} {...authState} />
                 )}
                 {(customPanels || []).find(p => p.id === activeSidePanel) ? (
                   <CustomPanels

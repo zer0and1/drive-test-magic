@@ -441,6 +441,7 @@ function KeplerGlFactory(
                   mapboxApiUrl={mapboxApiUrl}
                   visStateActions={visStateActions}
                   uiStateActions={uiStateActions}
+                  minionStateActions={minionStateActions}
                   mapStyleActions={mapStyleActions}
                   providerActions={providerActions}
                   authStateActions={authStateActions}

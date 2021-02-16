@@ -149,6 +149,7 @@ const defaultActionIcons = {
 
 function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
   const MapProfileSelector = ({
+    userRole,
     mapProfile,
     addProfile,
     updateProfile,
@@ -161,6 +162,7 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
     const { profiles, isLoading, isAdding, isUpdating, selectedId } = mapProfile;
     const { isRemoving } = profiles.reduce((acc, profile) => ({ isRemoving: acc.isRemoving || profile.isRemoving }), { isRemoving: false });
     const btnDisabled = isLoading || isAdding || isUpdating || isRemoving;
+    const hadProfilePrivilege = userRole == 'admin' || userRole == 'user';
 
     return (
       <div>
@@ -178,14 +180,16 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
                 />
               </HeaderLabelSection>
               <HeaderActionSection className="profile-panel__header__actions">
-                <PanelHeaderAction
-                  className={profile.isRemoving ? "profile__removing-profile" : "profile__remove-profile"}
-                  id={profile.id}
-                  tooltip={'tooltip.removeProfile'}
-                  onClick={() => removeProfile(profile.id)}
-                  tooltipType="error"
-                  IconComponent={profile.isRemoving ? actionIcons.spinner : actionIcons.remove}
-                />
+                {hadProfilePrivilege ? (
+                  <PanelHeaderAction
+                    className={profile.isRemoving ? "profile__removing-profile" : "profile__remove-profile"}
+                    id={profile.id}
+                    tooltip={'tooltip.removeProfile'}
+                    onClick={() => removeProfile(profile.id)}
+                    tooltipType="error"
+                    IconComponent={profile.isRemoving ? actionIcons.spinner : actionIcons.remove}
+                  />
+                ) : null}
                 <PanelHeaderAction
                   className="profile__apply-profile"
                   id={profile.id}
@@ -197,29 +201,31 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
             </StyledProfilePanelHeader>
           </PanelWrapper>
         ))}
-        <SidePanelSection>
-          <Button
-            className="save-map-profile-button"
-            style={{ width: '30%', marginRight: '5%' }}
-            onClick={() => addProfile(map)}
-            disabled={btnDisabled}
-            primary
-          >
-            {isAdding ? <Spinner type="ls" /> : <Add height="12px" />}
-            <FormattedMessage id={'mapManager.saveMapProfile'} />
-          </Button>
-          <Button
-            disabled={selectedId == null || btnDisabled}
-            className="update-map-profile-button"
-            style={{ width: '35%' }}
-            onClick={() => updateProfile(map)}
-            secondary
-          >
-            {isUpdating ? <Spinner type="ls" /> : <Save2 height="12px" />}
-            <FormattedMessage id={'mapManager.updateMapProfile'} />
-          </Button>
+        {hadProfilePrivilege ? (
+          <SidePanelSection>
+            <Button
+              className="save-map-profile-button"
+              style={{ width: '30%', marginRight: '5%' }}
+              onClick={() => addProfile(map)}
+              disabled={btnDisabled}
+              primary
+            >
+              {isAdding ? <Spinner type="ls" /> : <Add height="12px" />}
+              <FormattedMessage id={'mapManager.saveMapProfile'} />
+            </Button>
+            <Button
+              disabled={selectedId == null || btnDisabled}
+              className="update-map-profile-button"
+              style={{ width: '35%' }}
+              onClick={() => updateProfile(map)}
+              secondary
+            >
+              {isUpdating ? <Spinner type="ls" /> : <Save2 height="12px" />}
+              <FormattedMessage id={'mapManager.updateMapProfile'} />
+            </Button>
 
-        </SidePanelSection>
+          </SidePanelSection>
+        ) : null}
       </div>
     )
   };

@@ -8,9 +8,18 @@ export function insertArguments(queryString, argsString) {
   const fieldNode = documentNode.selectionSet.selections?.[0];
   const args = fieldNode.arguments;
   let breakLoc = null;
+  let argWhereExists = false;
 
   if (args.length) {
-    breakLoc = args[args.length - 1].loc.end;
+    const argWhere = args.find(arg => arg.name.value == 'where');
+
+    if (argWhere) {
+      argWhereExists = true;
+      breakLoc = argWhere.loc.end - 1;
+    }
+    else {
+      breakLoc = args[args.length - 1].loc.end;
+    }
   }
   else {
     breakLoc = fieldNode.loc.startToken.end;
@@ -18,9 +27,9 @@ export function insertArguments(queryString, argsString) {
 
   const header = queryString.slice(0, breakLoc);
   const footer = queryString.slice(breakLoc);
-
+  
   if (args.length) {
-    return `${header},${argsString}${footer}`;
+    return argWhereExists ? `${header},${argsString}${footer}` : `${header}, where: { ${argsString}${footer} }`;
   }
   else {
     return `${header}(${argsString})${footer}`;
@@ -55,7 +64,7 @@ export function restrictSession(query, sessions) {
     return query;
   }
 
-  return insertArguments(query, `where: { session_id: { _in: [${sessions.toString()}] } }`);
+  return insertArguments(query, `session_id: { _in: [${sessions.toString()}] }`);
 };
 
 export function filterWithList(src, field, list) {

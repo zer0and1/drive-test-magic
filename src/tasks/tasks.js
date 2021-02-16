@@ -99,10 +99,7 @@ export const ACTION_TASK = Task.fromCallback(
 );
 
 export const DELAY_TASK = Task.fromCallback(
-  (delay, cb) => {
-    window.clearTimeout(global.DELAY_TASK_TIMEOUT_ID);
-    global.DELAY_TASK_TIMEOUT_ID = window.setTimeout(() => cb(), delay);
-  },
+  (delay, cb) => window.setTimeout(() => cb(), delay),
 
   'DELAY_TASK'
 );

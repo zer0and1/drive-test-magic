@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {useCallback, useMemo} from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import {FormattedMessage} from 'localization';
-import {Button, SidePanelDivider, SidePanelSection} from 'components/common/styled-components';
-import {Add} from 'components/common/icons';
+import { FormattedMessage } from 'localization';
+import { Button, SidePanelDivider, SidePanelSection } from 'components/common/styled-components';
+import { Add, Delete } from 'components/common/icons';
 import SourceDataCatalogFactory from './common/source-data-catalog';
 import FilterPanelFactory from './filter-panel/filter-panel';
 
@@ -33,10 +33,12 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
     filters = [],
     datasets,
     layers,
+    userRole,
     showDatasetTable,
     addFilter,
     setFilter,
     removeFilter,
+    deleteFilteredData,
     moveUpFilter,
     moveDownFilter,
     enlargeFilter,
@@ -46,6 +48,9 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
     const isAnyFilterAnimating = filters.some(f => f.isAnimating);
     const hadEmptyFilter = filters.some(f => !f.name);
     const hadDataset = Object.keys(datasets).length;
+    const signalDataset = Object.values(datasets).find(({ query }) => query.indexOf('signal_db_signal_samples_view'));
+    const hadFilteredData = signalDataset && signalDataset.filteredIndex.length < signalDataset.allIndexes.length;
+
     const onClickAddFilter = useCallback(() => {
       const defaultDataset = (Object.keys(datasets).length && Object.values(datasets).sort((a, b) => a.label > b.label ? 1 : -1)[0].id) || null;
       addFilter(defaultDataset);
@@ -61,7 +66,7 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
               key={`${filter.id}-${idx}`}
               idx={idx}
               filters={filters}
-              filter={{...filter, first: idx == 0, last: idx == filters.length - 1}}
+              filter={{ ...filter, first: idx == 0, last: idx == filters.length - 1 }}
               datasets={datasets}
               layers={layers}
               isAnyFilterAnimating={isAnyFilterAnimating}
@@ -84,6 +89,19 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
           <Add height="12px" />
           <FormattedMessage id={'filterManager.addFilter'} />
         </Button>
+        {userRole == 'admin' && (
+          <Button
+            className="delete-filtered-data"
+            disabled={hadEmptyFilter}
+            width="125px"
+            negative
+            style={{ marginLeft: '10px' }}
+            onClick={() => deleteFilteredData(signalDataset.id)}
+          >
+            <Delete height="12px" />
+            <FormattedMessage id={'filterManager.deleteFilteredData'} />
+          </Button>
+        )}
       </div>
     );
   };

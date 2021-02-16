@@ -33,6 +33,8 @@ const actionHandler = {
   [ActionTypes.SHOW_EXPORT_DROPDOWN]: uiStateUpdaters.showExportDropdownUpdater,
   [ActionTypes.HIDE_EXPORT_DROPDOWN]: uiStateUpdaters.hideExportDropdownUpdater,
   [ActionTypes.OPEN_DELETE_MODAL]: uiStateUpdaters.openDeleteModalUpdater,
+  [ActionTypes.OPEN_DELETE_DATA_MODAL]: uiStateUpdaters.openDeleteDataModalUpdater,
+  [ActionTypes.CLOSE_DELETE_DATA_MODAL]: uiStateUpdaters.closeDeleteDataModalUpdater,
   [ActionTypes.OPEN_DATASET_MODAL]: uiStateUpdaters.openDatasetModalUpdater,
   [ActionTypes.TOGGLE_MAP_CONTROL]: uiStateUpdaters.toggleMapControlUpdater,
   [ActionTypes.ADD_NOTIFICATION]: uiStateUpdaters.addNotificationUpdater,

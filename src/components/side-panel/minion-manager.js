@@ -50,6 +50,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       onMouseMove: PropTypes.func.isRequired,
       updateMap: PropTypes.func.isRequired,
 
+      setLoopingEnabled: PropTypes.func.isRequired,
       loadMinions: PropTypes.func.isRequired,
       selectMinion: PropTypes.func.isRequired,
       unselectMinion: PropTypes.func.isRequired,
@@ -115,6 +116,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
     componentDidMount() {
       this._mounted = true;
+      this.props.setLoopingEnabled(true);
 
       if (this.props.userRole && this.props.userRole != 'not-allowed') {
         this.props.loadMinions(true);
@@ -125,7 +127,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       this.props.removeMarker();
       this.props.selectMinion([]);
       this._mounted = false;
-      clearTimeout(global.DELAY_TASK_TIMEOUT_ID);
+      this.props.setLoopingEnabled(false);
     }
 
     shouldComponentUpdate(nextProps) {
@@ -213,7 +215,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         setMqttMessage: this.props.setMqttMessage,
         loadMinionCommand: this.props.loadMinionCommand,
       };
-
+      
       return (
         <div className="minion-manager">
           <JqxSplitter

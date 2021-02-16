@@ -27,6 +27,7 @@ import * as minionStateUpdaters from './minion-state-updaters';
  * It is used to generate documentation
  */
 const actionHandler = {
+  [ActionTypes.SET_LOOPING_ENABLED]: minionStateUpdaters.setLoopingEnabledUpdater,
   [ActionTypes.LOAD_MINIONS]: minionStateUpdaters.loadMinionsUpdater,
   [ActionTypes.LOAD_MINIONS_SUCCESS]: minionStateUpdaters.loadMinionsSuccessUpdater,
   [ActionTypes.LOAD_MINIONS_ERROR]: minionStateUpdaters.loadMinionsErrorUpdater,
@@ -46,6 +47,9 @@ const actionHandler = {
   [ActionTypes.EXPAND]: minionStateUpdaters.expandUpdater,
   [ActionTypes.COLLAPSE]: minionStateUpdaters.collapseUpdater,
   [ActionTypes.SET_MARKER_SCALE]: minionStateUpdaters.setMarkerScaleUpdater,
+  [ActionTypes.DELETE_FILTERED_DATA]: minionStateUpdaters.deleteFilteredDataUpdater,
+  [ActionTypes.DELETE_FILTERED_DATA_SUCCESS]: minionStateUpdaters.deleteFilteredDataSuccessUpdater,
+  [ActionTypes.DELETE_FILTERED_DATA_ERROR]: minionStateUpdaters.deleteFilteredDataErrorUpdater,
 };
 
 // construct vis-state reducer

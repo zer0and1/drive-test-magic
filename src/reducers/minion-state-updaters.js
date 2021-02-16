@@ -19,12 +19,35 @@
 // THE SOFTWARE.
 
 import { disableStackCapturing, withTask } from 'react-palm/tasks';
-import { GRAPHQL_QUERY_TASK, ACTION_TASK, DELAY_TASK } from 'tasks/tasks';
-import { GQL_GET_MINIONS, GQL_GET_MINION_COMMANDS } from 'graphqls';
-import { loadMinions, loadMinionsSuccess, loadMinionsError, loadMinionCommandSuccess } from 'actions/minion-state-actions';
+import { 
+  GRAPHQL_QUERY_TASK, 
+  GRAPHQL_MUTATION_TASK, 
+  ACTION_TASK, 
+  DELAY_TASK 
+} from 'tasks/tasks';
+
+import { 
+  GQL_GET_MINIONS, 
+  GQL_GET_MINION_COMMANDS, 
+  GQL_DELETE_SIGNAL_SAMPLES
+} from 'graphqls';
+
+import {
+  loadMinions,
+  loadMinionsSuccess,
+  loadMinionsError,
+  loadMinionCommandSuccess,
+  deleteFilteredDataSuccess,
+  deleteFilteredDataError
+} from 'actions/minion-state-actions';
+
+import { reloadDataset } from 'actions/provider-actions';
+import { closeDeleteDataModal } from 'actions/ui-state-actions';
 import { addMarker, removeMarker } from 'actions/vis-state-actions';
 import { updateMap, fitBounds } from 'actions/map-state-actions';
+
 import { SIGNAL_QUALITY } from 'constants/default-settings';
+
 import moment from 'moment';
 import _ from 'lodash';
 import $ from 'jquery';
@@ -96,7 +119,15 @@ export const INITIAL_MINION_STATE = {
   mqttTopic: null,
   selectedAll: false,
   markerScale: 'large',
+  loopingEnabled: false,
   minions: []
+};
+
+export function setLoopingEnabledUpdater(state, { enabled }) {
+  return {
+    ...state,
+    loopingEnabled: enabled
+  }
 };
 
 /**
@@ -121,6 +152,7 @@ export function loadMinionsUpdater(state, { firstLoading }) {
 
   const newState = {
     ...state,
+    // loopingEnabled: !!firstLoading,
     isLoadingMinions: true
   };
 
@@ -161,7 +193,7 @@ export function calcLevel(val, factor, type) {
  *
  */
 export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
-  const { selectedMinions } = state;
+  const { selectedMinions, loopingEnabled } = state;
   let newState = {
     ...state,
     isLoadingMinions: false,
@@ -174,8 +206,13 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
   $('#minion-grid').LoadingOverlay('hide', true);
   $('#minion-group').LoadingOverlay('hide', true);
 
+  if (loopingEnabled == false) {
+    return newState;
+  }
+
   if (selectedMinions.length == 1 && signalSample) {
-    const minionDetails = selectedMinions[0];
+    const { name } = selectedMinions[0];
+    const minionDetails = minions.find(m => m.name == name);
     const connectionType = signalSample.connection_type;
     const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi } = signalSample;
     const details = {
@@ -196,20 +233,20 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
       sleepInterval: minionDetails.sleep_interval
     };
   }
-  
-  if (minions) {
+
+  if (minions.length) {
     const markers = minions.map(m => ({
       lngLat: [m.longitude, m.latitude],
       info: m,
       id: m.name
     }));
-  
+
     const tasks = [
-      DELAY_TASK(5000).map(loadMinions),
+      DELAY_TASK(3000).map(loadMinions),
       ACTION_TASK().map(_ => removeMarker()),
       ACTION_TASK().map(_ => addMarker(markers))
     ];
-  
+
     return withTask(newState, tasks);
   }
   else {
@@ -524,11 +561,46 @@ export function collapseUpdater(state) {
   const task = ACTION_TASK().map(_ => updateMap({ longitude, latitude }));
 
   return withTask(state, task);
-}
+};
 
 export function setMarkerScaleUpdater(state, { markerScale }) {
   return {
     ...state,
     markerScale
   }
-}
+};
+
+export function deleteFilteredDataUpdater(state, { dataset }) {
+  const { fields, filteredIndex, allData } = dataset;
+  const dateFieldIdx = fields.findIndex(f => f.name == 'date');
+
+  if (dateFieldIdx < 0) {
+    return state;
+  }
+
+  const datesToDelete = filteredIndex.map(i => `"${allData[i][dateFieldIdx]}"`);
+  const mutation = GQL_DELETE_SIGNAL_SAMPLES(datesToDelete);
+  const task = GRAPHQL_MUTATION_TASK({ mutation }).bimap(
+    () => deleteFilteredDataSuccess(dataset),
+    err => deleteFilteredDataError(err)
+  );
+
+  return withTask(state, task);
+};
+
+export function deleteFilteredDataSuccessUpdater(state, { dataset }) {
+  const tasks = [
+    ACTION_TASK().map(_ => reloadDataset(dataset)),
+    ACTION_TASK().map(_ => closeDeleteDataModal())
+  ];
+
+  return withTask(state, tasks);
+};
+
+export function deleteFilteredDataErrorUpdater(state, { error }) {
+  const tasks = [
+    ACTION_TASK().map(_ => closeDeleteDataModal(error))
+  ];
+
+  return withTask(state, tasks);
+};

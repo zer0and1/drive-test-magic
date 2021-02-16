@@ -75,13 +75,32 @@ export const toggleMapControl = createAction(ActionTypes.TOGGLE_MAP_CONTROL, (pa
 }));
 
 /**
- * Open model to delete dataset
+ * Open modal to delete dataset
  * @memberof uiStateActions
  * @param datasetId - `id` of the dataset to be deleted
  * @type {typeof import('./ui-state-actions').openDeleteModal}
  * @public
  */
 export const openDeleteModal = createAction(ActionTypes.OPEN_DELETE_MODAL, datasetId => datasetId);
+
+/**
+ * Open modal to delete filtered data
+ * @memberof uiStateActions
+ * @param datasetId - `id` of the dataset to be deleted
+ * @type {typeof import('./ui-state-actions').openDeleteModal}
+ * @public
+ */
+export const openDeleteDataModal = createAction(ActionTypes.OPEN_DELETE_DATA_MODAL, datasetId => datasetId);
+
+/**
+ * Close modal to delete filtered data
+ * @memberof uiStateActions
+ * @param datasetId - `id` of the dataset to be deleted
+ * @type {typeof import('./ui-state-actions').openDeleteModal}
+ * @public
+ */
+export const closeDeleteDataModal = createAction(ActionTypes.CLOSE_DELETE_DATA_MODAL, error => error);
+
 
 /**
  * Open modal to update dataset info
