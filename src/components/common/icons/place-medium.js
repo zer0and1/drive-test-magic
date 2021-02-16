@@ -32,6 +32,9 @@ const MODE_COLOR_MAP = {
 };
 
 const StyledBase = styled(Base)`
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
   .str0 {stroke:black;stroke-width:3;stroke-miterlimit:22.9256}
   .fil1 {fill:none}
   .fil2 {fill:white}

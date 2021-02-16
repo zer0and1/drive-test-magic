@@ -35,6 +35,7 @@ const Marker = ({ IconComponent, x, y, scale, offset, height, mode, name }) => (
     }}
     mode={mode}
     name={name}
+    onClick={() => console.log('marker clicked')}
   />
 );
 
@@ -74,7 +75,7 @@ export default function MapMarkerFactory() {
         }
       } = this.props;
 
-      const scale = mapW / 1920;
+      const scale = 1;
       let mode = operation_mode;
 
       const lastFix = moment(gps_fix_lastupdate).format('YYYY-MM-DD HH:mm:ss');
@@ -107,7 +108,7 @@ export default function MapMarkerFactory() {
           break;
         case 'small':
           placeComp = PlaceSmall;
-          offset = 9.5;
+          offset = 10;
           height = 18;
           break;
       }
