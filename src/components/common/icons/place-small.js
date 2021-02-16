@@ -60,13 +60,13 @@ export default class PlaceMedium extends Component {
 
     return (
       <>
-        <StyledBase {...{ ...this.props, width: `${sw}px`, height: `${sh}px`, viewBox: `0 0 ${sw} ${sh}` }} data-tip data-for="minion-marker-small">
+        <StyledBase {...{ ...this.props, width: `${sw}px`, height: `${sh}px`, viewBox: `0 0 ${sw} ${sh}` }} data-tip data-for={`minion-marker-small-${name}`}>
           <g transform={`scale(${scale})`}>
             <path d="m10.51775,16.91746c0.37096,-0.63917 0.7434,-1.28057 1.11306,-1.91732c2.72774,-4.70108 5.52099,-9.40589 8.25691,-14.10828c0.14611,-0.25146 0.43256,-0.61628 0.91799,-0.7555c-0.7421,0 -2.03123,0 -2.77315,0c-5.75216,0 -11.50358,0.00037 -17.25518,0c0.37077,0.63954 0.74154,1.27853 1.11287,1.9177c2.87589,4.95459 5.75142,9.90881 8.6275,14.86341l0,0l0,-0.00001z" className="fil0" />
             <path d="m0.80706,0.38579c2.75695,4.93766 6.95549,12.17029 9.53804,16.6201c3.0717,-5.29149 6.30363,-11.41826 9.52673,-16.59592l-19.06477,-0.02419l0,0.00001z" className="fil1 str0" />
           </g>
         </StyledBase >
-        <Tooltip id="minion-marker-small" effect="solid" delayShow={500}>
+        <Tooltip id={`minion-marker-small-${name}`} effect="solid" delayShow={500}>
           {name}/{mode}
         </Tooltip>
       </>
