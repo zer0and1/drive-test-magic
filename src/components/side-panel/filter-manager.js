@@ -22,7 +22,7 @@ import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'localization';
 import { Button, SidePanelDivider, SidePanelSection } from 'components/common/styled-components';
-import { Add, Delete } from 'components/common/icons';
+import { Add, Trash } from 'components/common/icons';
 import SourceDataCatalogFactory from './common/source-data-catalog';
 import FilterPanelFactory from './filter-panel/filter-panel';
 
@@ -93,13 +93,12 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
           <Button
             className="delete-filtered-data"
             disabled={hadEmptyFilter}
-            width="125px"
+            width="40px"
             negative
-            style={{ marginLeft: '10px' }}
+            style={{ padding: '5px 3px 5px 11px', float: 'right', textAlign: 'center' }}
             onClick={() => deleteFilteredData(signalDataset.id)}
           >
-            <Delete height="12px" />
-            <FormattedMessage id={'filterManager.deleteFilteredData'} />
+            <Trash height="20px" />
           </Button>
         )}
       </div>
