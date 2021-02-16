@@ -25,7 +25,6 @@ import { injectIntl } from 'react-intl';
 import styled from 'styled-components';
 import moment from 'moment';
 
-
 const Marker = ({ IconComponent, x, y, scale, offset, height, mode, name }) => (
   <IconComponent
     style={{
@@ -35,7 +34,11 @@ const Marker = ({ IconComponent, x, y, scale, offset, height, mode, name }) => (
     }}
     mode={mode}
     name={name}
-    onClick={() => console.log('marker clicked')}
+    onClick={() => {
+      const targetRow = minionGridRef.getdisplayrows().find(r => r.name == name).boundindex;
+      minionGridRef.clearselection();
+      minionGridRef.selectrow(targetRow);
+    }}
   />
 );
 

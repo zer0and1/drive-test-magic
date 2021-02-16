@@ -131,17 +131,21 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     shouldComponentUpdate(nextProps) {
-      const { minions } = nextProps;
+      const { minions, targetMinions } = nextProps;
       this.isSelectingAll = nextProps.isSelectingAll;
       this.isUnselectingAll = nextProps.isUnselectingAll;
+      global.minionGridRef = this.refs.minionGrid;
 
       if (nextProps.isSelectingAll) {
         this.refs.minionGrid.selectallrows();
+        // this.props.selectMinion(minions.filter(m => targetMinions.findIndex(tm => tm.name == m.name) >= 0));
         this.props.selectMinion(minions);
       }
 
       if (nextProps.isUnselectingAll) {
-        minions.forEach((m, idx) => this.refs.minionGrid.unselectrow(idx));
+        // targetMinions.forEach((_, idx) => this.refs.minionGrid.unselectrow(idx));
+        // this.props.selectMinion(minions.filter(m => targetMinions.findIndex(tm => tm.name == m.name) < 0));
+        this.refs.minionGrid.clearselection();
         this.props.selectMinion([]);
       }
 
@@ -179,7 +183,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       }
 
       const idxs = this.refs.minionGrid.getselectedrowindexes();
-      const rows = idxs.map(idx => this.refs.minionGrid.getrowdata(idx));
+      const rowsData = this.refs.minionGrid.getdisplayrows();
+      const rows = idxs.map(idx => rowsData[idx]);
       const minions = rows.map(m => this.props.minions.find(om => om.name == m.name));
       this.props.selectMinion(minions);
 
@@ -230,6 +235,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
           >
             <div className={"splitter-panel"} id="minion-grid">
               <JqxGrid
+                id="grid-minion"
                 ref={'minionGrid'}
                 width={'100%'}
                 height={'100%'}
@@ -261,7 +267,6 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 enablehover={false}
                 selectionmode={'multiplerowsadvanced'}
                 onRowselect={this.minionRowselect}
-                onRowunselect={this.minionRowunselect}
                 onSort={({ args: { sortinformation: { sortcolumn, sortdirection } } }) => {
                   this.sortCol = sortcolumn;
                   this.sortDir = sortcolumn ? (sortdirection.ascending ? 'asc' : 'desc') : null;

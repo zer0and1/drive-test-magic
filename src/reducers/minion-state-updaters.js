@@ -19,16 +19,16 @@
 // THE SOFTWARE.
 
 import { disableStackCapturing, withTask } from 'react-palm/tasks';
-import { 
-  GRAPHQL_QUERY_TASK, 
-  GRAPHQL_MUTATION_TASK, 
-  ACTION_TASK, 
-  DELAY_TASK 
+import {
+  GRAPHQL_QUERY_TASK,
+  GRAPHQL_MUTATION_TASK,
+  ACTION_TASK,
+  DELAY_TASK
 } from 'tasks/tasks';
 
-import { 
-  GQL_GET_MINIONS, 
-  GQL_GET_MINION_COMMANDS, 
+import {
+  GQL_GET_MINIONS,
+  GQL_GET_MINION_COMMANDS,
   GQL_DELETE_SIGNAL_SAMPLES
 } from 'graphqls';
 
@@ -120,7 +120,8 @@ export const INITIAL_MINION_STATE = {
   selectedAll: false,
   markerScale: 'large',
   loopingEnabled: false,
-  minions: []
+  minions: [],
+  loadingMinionName: null
 };
 
 export function setLoopingEnabledUpdater(state, { enabled }) {
@@ -139,7 +140,7 @@ export function loadMinionsUpdater(state, { firstLoading }) {
   if (firstLoading) {
     $('#minion-grid').LoadingOverlay('show');
   }
-
+  console.log(state.selectedMinions[0]?.name)
   const query = GQL_GET_MINIONS(state.selectedMinions[0]?.name);
   const loadMinionTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     result => {
@@ -193,25 +194,29 @@ export function calcLevel(val, factor, type) {
  *
  */
 export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
-  const { selectedMinions, loopingEnabled } = state;
+  const { selectedMinions, loopingEnabled, loadingMinionName } = state;
   let newState = {
     ...state,
     isLoadingMinions: false,
     isSelectingAll: false,
     isUnselectingAll: false,
     minions,
-    details: {}
+    details: signalSample ? state.details : {}
   };
 
-  $('#minion-grid').LoadingOverlay('hide', true);
-  $('#minion-group').LoadingOverlay('hide', true);
-
   if (loopingEnabled == false) {
+    $('#minion-grid').LoadingOverlay('hide', true);
+    $('#minion-group').LoadingOverlay('hide', true);
     return newState;
   }
 
   if (selectedMinions.length == 1 && signalSample) {
     const { name } = selectedMinions[0];
+
+    if (name != signalSample.minion_id) {
+      return newState;
+    }
+
     const minionDetails = minions.find(m => m.name == name);
     const connectionType = signalSample.connection_type;
     const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi } = signalSample;
@@ -233,6 +238,9 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
       sleepInterval: minionDetails.sleep_interval
     };
   }
+
+  $('#minion-grid').LoadingOverlay('hide', true);
+  $('#minion-group').LoadingOverlay('hide', true);
 
   if (minions.length) {
     const markers = minions.map(m => ({
@@ -281,9 +289,9 @@ export function selectMinionUpdater(state, { minions }) {
 
   return {
     ...state,
-    selectedMinions: minions,
     isSelectingAll: false,
-    isUnselectingAll: false
+    isUnselectingAll: false,
+    selectedMinions: minions
   };
 }
 
@@ -496,13 +504,14 @@ export function selectAllUpdater(state) {
   const { minions, selectedMinions } = state;
   return {
     ...state,
-    selectedMinions: state.minions,
+    selectedMinions: minions,
     operationMode: null,
     sleepInterval: null,
     sessionId: null,
     lastAck: {},
     details: {},
     command: null,
+    targetMinions: minions,
     isSelectingAll: minions.length != selectedMinions.length,
     isUnselectingAll: minions.length == selectedMinions.length,
   }
