@@ -23,6 +23,7 @@ import styled from 'styled-components';
 import { format } from 'd3-format';
 import { FormattedMessage } from 'localization';
 import moment from 'moment';
+import { timeDifference } from 'utils/utils';
 
 const numFormat = format(',');
 
@@ -49,16 +50,8 @@ export default function DatasetInfoFactory() {
 
     updateTimeAgo() {
       const { dataset: { timestamp } } = this.props;
-      let secs = moment().diff(timestamp, 'seconds');
-      const mins = Math.floor(secs / 60);
-      secs = secs % 60;
-
-      if (mins == 0 && secs == 0) {
-        this.setState({ timeAgoLabel: '=> just now' });
-      }
-      else {
-        this.setState({ timeAgoLabel: `=> ${mins ? mins + 'm ' : ''} ${secs ? secs + 's' : ''} ago` });
-      }
+      const diffSecs = moment().diff(timestamp, 'seconds');
+      this.setState({ timeAgoLabel: `=> ${timeDifference(diffSecs)}` });
     }
 
     render() {

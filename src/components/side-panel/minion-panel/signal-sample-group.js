@@ -1,6 +1,7 @@
 import React from 'react';
 import MinionGroupFactory from './minion-group';
 import { Minion } from 'components/common/icons';
+import { timeDifference } from 'utils/utils';
 import styled from 'styled-components';
 import moment from 'moment-timezone';
 
@@ -40,33 +41,6 @@ const ProgressBar = ({ value, prog, level }) => (
 SignalSampleGroupFactory.deps = [MinionGroupFactory];
 
 function SignalSampleGroupFactory(MinionGroup) {
-
-  const timeDifference = (elapsed) => {
-    var msPerMinute = 60;
-    var msPerHour = msPerMinute * 60;
-    var msPerDay = msPerHour * 24;
-    var msPerMonth = msPerDay * 30;
-    var msPerYear = msPerDay * 365;
-
-    if (elapsed < msPerMinute) {
-      return Math.round(elapsed) + ' seconds ago';
-    }
-    else if (elapsed < msPerHour) {
-      return Math.round(elapsed / msPerMinute) + ' minutes ago';
-    }
-    else if (elapsed < msPerDay) {
-      return Math.round(elapsed / msPerHour) + ' hours ago';
-    }
-    else if (elapsed < msPerMonth) {
-      return 'approx ' + Math.round(elapsed / msPerDay) + ' days ago';
-    }
-    else if (elapsed < msPerYear) {
-      return 'approx ' + Math.round(elapsed / msPerMonth) + ' months ago';
-    }
-    else {
-      return 'approx ' + Math.round(elapsed / msPerYear) + ' years ago';
-    }
-  };
 
   const makeTimeLabel = (value) => {
     if (!value) {

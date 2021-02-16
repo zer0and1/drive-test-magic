@@ -197,3 +197,33 @@ export function arrayInsert(arr, index, val) {
 
   return [...arr.slice(0, index), val, ...arr.slice(index)];
 }
+
+export function timeDifference(elapsed) {
+  var msPerMinute = 60;
+  var msPerHour = msPerMinute * 60;
+  var msPerDay = msPerHour * 24;
+  var msPerMonth = msPerDay * 30;
+  var msPerYear = msPerDay * 365;
+
+  if (elapsed == 0) {
+    return 'just now';
+  }
+  else if (elapsed < msPerMinute) {
+    return Math.round(elapsed) + ' seconds ago';
+  }
+  else if (elapsed < msPerHour) {
+    return Math.round(elapsed / msPerMinute) + ' minutes ago';
+  }
+  else if (elapsed < msPerDay) {
+    return Math.round(elapsed / msPerHour) + ' hours ago';
+  }
+  else if (elapsed < msPerMonth) {
+    return 'approx ' + Math.round(elapsed / msPerDay) + ' days ago';
+  }
+  else if (elapsed < msPerYear) {
+    return 'approx ' + Math.round(elapsed / msPerMonth) + ' months ago';
+  }
+  else {
+    return 'approx ' + Math.round(elapsed / msPerYear) + ' years ago';
+  }
+}
