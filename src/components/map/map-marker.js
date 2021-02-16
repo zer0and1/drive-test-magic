@@ -98,7 +98,7 @@ export default function MapMarkerFactory() {
         case 'large':
           placeComp = Place;
           offset = 90;
-          height = 80;
+          height = 79;
           break;
         case 'medium':
           placeComp = PlaceMedium;

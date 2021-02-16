@@ -71,7 +71,7 @@ export const DeleteFilteredDataModal = ({ dataset, onCancel, onDelete, filters, 
           <StyledMsg className="delete-dataset-msg">
             <FormattedMessage
               id={'modal.deleteFilteredData.warning'}
-              values={{ length: dataset.filteredIndex.length }}
+              values={{ length: dataset.filteredIndexForDomain.length }}
             />
           </StyledMsg>
           <StyledModalFooter>

@@ -571,14 +571,14 @@ export function setMarkerScaleUpdater(state, { markerScale }) {
 };
 
 export function deleteFilteredDataUpdater(state, { dataset }) {
-  const { fields, filteredIndex, allData } = dataset;
+  const { fields, filteredIndexForDomain, allData } = dataset;
   const dateFieldIdx = fields.findIndex(f => f.name == 'date');
 
   if (dateFieldIdx < 0) {
     return state;
   }
 
-  const datesToDelete = filteredIndex.map(i => `"${allData[i][dateFieldIdx]}"`);
+  const datesToDelete = filteredIndexForDomain.map(i => `"${allData[i][dateFieldIdx]}"`);
   const mutation = GQL_DELETE_SIGNAL_SAMPLES(datesToDelete);
   const task = GRAPHQL_MUTATION_TASK({ mutation }).bimap(
     () => deleteFilteredDataSuccess(dataset),
