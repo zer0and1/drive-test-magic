@@ -107,7 +107,7 @@ export const ProfileLabelEditor = ({ profileId, label, onEdit, readOnly }) => {
             setEditing(false);
           }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.KeyCode === 13) {
+            if ((e.key === 'Enter' || e.KeyCode === 13) && readOnly == false) {
               onEdit(value);
               setEditing(false);
             }
@@ -134,7 +134,7 @@ export function ProfileTitleSectionFactory() {
   const ProfileTitleSection = ({ profileId, label, onUpdateProfileLabel, hadProfilePrivilege }) => (
     <StyledProfileTitleSection className="profile__title">
       <div>
-        <ProfileLabelEditor profileId={profileId} label={label} onEdit={onUpdateProfileLabel} readOnly={hadProfilePrivilege} />
+        <ProfileLabelEditor profileId={profileId} label={label} onEdit={onUpdateProfileLabel} readOnly={!hadProfilePrivilege} />
       </div>
     </StyledProfileTitleSection>
   );
