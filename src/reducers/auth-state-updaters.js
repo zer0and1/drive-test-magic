@@ -97,7 +97,7 @@ export const getAuthInfoUpdater = (state, { userToken }) => {
     const authInfo = localStorage.getItem('auth-info');
 
     if (authInfo) {
-      return getAuthInfoSuccessUpdater(state, { info: JSON.parse(authInfo) });
+      return getAuthInfoSuccessUpdater(state, { info: JSON.parse(authInfo), disabledReloading: true });
     }
     else {
       const task = ACTION_TASK().map(_ => toggleModal(INPUT_USER_TOKEN_ID));
@@ -123,7 +123,7 @@ export const getAuthInfoUpdater = (state, { userToken }) => {
   }
 };
 
-export const getAuthInfoSuccessUpdater = (state, { info }) => {
+export const getAuthInfoSuccessUpdater = (state, { info, disabledReloading }) => {
   const { jwt, user_info: { id, role, user_token } } = info;
   const authInfo = {
     jwt,
@@ -149,13 +149,19 @@ export const getAuthInfoSuccessUpdater = (state, { info }) => {
 
   localStorage.setItem('auth-info', JSON.stringify(info));
 
-  const tasks = [
-    ACTION_TASK().map(_ => loadMinions(true)),
-    role != 'not-allowed' && ACTION_TASK().map(_ => loadMinionCommand()),
-    role != 'not-allowed' && ACTION_TASK().map(_ => loadProfile())
-  ].filter(d => d);
-
-  return withTask(newState, tasks);
+  if (!disabledReloading) {
+    window.location.reload();
+    return newState;
+  }
+  else {
+    const tasks = [
+      ACTION_TASK().map(_ => loadMinions(true)),
+      role != 'not-allowed' && ACTION_TASK().map(_ => loadMinionCommand()),
+      role != 'not-allowed' && ACTION_TASK().map(_ => loadProfile())
+    ].filter(d => d);
+  
+    return withTask(newState, tasks);
+  }
 };
 
 export const getAuthInfoErrorUpdater = (state, { error }) => {
