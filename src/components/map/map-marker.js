@@ -97,7 +97,7 @@ export default function MapMarkerFactory() {
       switch (markerScale) {
         case 'large':
           placeComp = Place;
-          offset = 90;
+          offset = 23;
           height = 79;
           break;
         case 'medium':
@@ -107,8 +107,8 @@ export default function MapMarkerFactory() {
           break;
         case 'small':
           placeComp = PlaceSmall;
-          offset = 90;
-          height = 80;
+          offset = 9.5;
+          height = 18;
           break;
       }
 
