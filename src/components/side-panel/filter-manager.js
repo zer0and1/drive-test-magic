@@ -35,6 +35,10 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
     layers,
     userRole,
     showDatasetTable,
+    removeDataset,
+    startReloadingDataset,
+    setupDataset,
+    enableDataset,
     addFilter,
     setFilter,
     removeFilter,
@@ -49,7 +53,7 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
     const hadEmptyFilter = filters.some(f => !f.name);
     const hadDataset = Object.keys(datasets).length;
     const signalDataset = Object.values(datasets).find(({ query }) => query.indexOf('signal_db_signal_samples_view'));
-    const hadFilteredData = signalDataset && signalDataset.filteredIndex.length < signalDataset.allIndexes.length;
+    // const hadFilteredData = signalDataset && signalDataset.filteredIndex.length < signalDataset.allIndexes.length;
 
     const onClickAddFilter = useCallback(() => {
       const defaultDataset = (Object.keys(datasets).length && Object.values(datasets).sort((a, b) => a.label > b.label ? 1 : -1)[0].id) || null;
@@ -58,7 +62,16 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
 
     return (
       <div className="filter-manager">
-        <SourceDataCatalog datasets={datasets} showDatasetTable={showDatasetTable} />
+        <SourceDataCatalog
+          userRole={userRole}
+          datasets={datasets}
+          showDatasetTable={showDatasetTable}
+          removeDataset={removeDataset}
+          startReloadingDataset={startReloadingDataset}
+          setupDataset={setupDataset}
+          enableDataset={enableDataset}
+          showDeleteDataset
+        />
         <SidePanelDivider />
         <SidePanelSection>
           {filters.map((filter, idx) => (
