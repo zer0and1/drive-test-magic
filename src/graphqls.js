@@ -53,6 +53,9 @@ query MyQuery {
     session_id
     sinr_ecio
     ul_chan_bandwidth
+    mcs
+    ri
+    pmi
   }
 }
 `;

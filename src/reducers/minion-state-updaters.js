@@ -218,7 +218,7 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
 
     const minionDetails = minions.find(m => m.name == name);
     const connectionType = signalSample.connection_type;
-    const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi } = signalSample;
+    const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi, mcs } = signalSample;
     const details = {
       ...minionDetails,
       ...signalSample,
@@ -227,6 +227,7 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
       ...calcLevel(rsrp_rscp, 'rsrp_rscp', connectionType),
       ...calcLevel(sinr_ecio, 'sinr_ecio', connectionType),
       ...calcLevel(cqi, 'cqi', connectionType),
+      ...calcLevel(mcs, 'mcs', connectionType),
     };
 
     newState = {

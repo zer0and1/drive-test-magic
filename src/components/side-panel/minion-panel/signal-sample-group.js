@@ -129,13 +129,20 @@ function SignalSampleGroupFactory(MinionGroup) {
             <td>{data.connection_type == 'LTE' ? 'SINR' : 'ECIO'}:</td>
             <td>{data.sinr_ecio != undefined && <ProgressBar value={data.sinr_ecio} prog={data.sinr_ecio_prog} level={data.sinr_ecio_level} />}</td>
           </tr>
-          {data.connection_type == 'LTE' != undefined && (
+          {data.connection_type == 'LTE' && (
             <tr>
               <td>CQI:</td>
               <td>{data.cqi != undefined && <ProgressBar value={data.cqi} prog={data.cqi_prog} level={data.cqi_level} />}</td>
-              <td colSpan="2"></td>
+              <td>MCS:</td>
+              <td>{data.mcs != undefined && <ProgressBar value={data.mcs} prog={data.mcs_prog} level={data.mcs_level} />}</td>
             </tr>
           )}
+           <tr>
+            <td>RI:</td>
+            <td>{data.ri}</td>
+            <td>PMI:</td>
+            <td>{data.pmi}</td>
+          </tr>
           <tr>
             <td colSpan="4" style={{ height: '10px' }}></td>
           </tr>
