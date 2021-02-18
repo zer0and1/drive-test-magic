@@ -27,7 +27,7 @@ import {Pin, ArrowLeft, ArrowRight} from 'components/common/icons';
 import ErrorBoundary from 'components/common/error-boundary';
 import {injectIntl} from 'react-intl';
 import {FormattedMessage} from 'localization';
-import Switch from 'components/common/switch';
+import {Button} from 'components/common/styled-components';
 
 const MAX_WIDTH = 500;
 const MAX_HEIGHT = 600;
@@ -104,6 +104,13 @@ const StyledIcon = styled.div`
     cursor: pointer;
     color: ${props => props.theme.linkBtnColor};
   }
+`;
+
+const StyledToggleButton = styled(Button)`
+  padding: 2px 5px;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
 `;
 
 MapPopoverFactory.deps = [LayerHoverInfoFactory, CoordinateInfoFactory];
@@ -227,12 +234,13 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
                   )}
                 </div>
                 {layerHoverProp?.layer?.isAggregated && dsc != undefined && dsc != 'property.pointCount' ? (
-                  <div className="primary-label gutter" style={{ paddingTop: 2, marginRight: -15 }}>
-                    <Switch
-                      checked={layerHoverProp.isGraphShow}
-                      id={layerHoverProp.layer.id}
-                      onChange={layerHoverProp.toggleGraphShow}
-                    />
+                  <div className="primary-label gutter" style={{ marginRight: -10 }}>
+                    <StyledToggleButton
+                      secondary={layerHoverProp.isGraphShow}
+                      onClick={layerHoverProp.toggleGraphShow}
+                    >
+                      GRAPH
+                    </StyledToggleButton>
                   </div>
                 ) : null}
               </div>
