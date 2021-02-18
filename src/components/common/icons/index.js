@@ -90,6 +90,7 @@ export {default as Settings} from './settings';
 export {default as Search} from './search';
 export {default as Small} from './small';
 export {default as Split} from './split';
+export {default as Span} from './span';
 export {default as Table} from './table';
 export {default as Trash} from './trash';
 export {default as Upload} from './upload';

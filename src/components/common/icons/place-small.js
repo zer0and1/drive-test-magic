@@ -66,8 +66,8 @@ export default class PlaceMedium extends Component {
             <path d="m0.80706,0.38579c2.75695,4.93766 6.95549,12.17029 9.53804,16.6201c3.0717,-5.29149 6.30363,-11.41826 9.52673,-16.59592l-19.06477,-0.02419l0,0.00001z" className="fil1 str0" />
           </g>
         </StyledBase >
-        <Tooltip id={`minion-marker-small-${name}`} effect="solid" delayShow={500}>
-          {name}/{mode}
+        <Tooltip id={`minion-marker-small-${name}`} effect="solid">
+          <span style={{fontWeight: '600'}}>{name}/{mode}</span>
         </Tooltip>
       </>
     );

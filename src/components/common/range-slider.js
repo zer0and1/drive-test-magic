@@ -26,6 +26,7 @@ import styled from 'styled-components';
 import RangePlotFactory from './range-plot';
 import Slider from 'components/common/slider/slider';
 import {Input} from 'components/common/styled-components';
+import { Span } from 'components/common/icons';
 
 import {roundValToStep} from 'utils/data-utils';
 
@@ -278,6 +279,7 @@ export default function RangeSliderFactory(RangePlot) {
           {isRanged && showInput ? (
             <RangeInputWrapper className="range-slider__input-group">
               {this._renderInput('value0')}
+              <Span />
               {this._renderInput('value1')}
             </RangeInputWrapper>
           ) : null}
