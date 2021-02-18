@@ -35,7 +35,13 @@ const Marker = ({ IconComponent, x, y, scale, offset, height, mode, name }) => (
     mode={mode}
     name={name}
     onClick={() => {
-      const targetRow = minionGridRef.getdisplayrows().find(r => r.name == name).boundindex;
+      const targetRow = minionGridRef.getrows().find(r => r.name == name).boundindex;
+      const selectedRows = minionGridRef.getselectedrowindexes();
+
+      if (selectedRows.length == 1 && selectedRows.findIndex(r => r == targetRow) >= 0) {
+        return;
+      }
+
       minionGridRef.clearselection();
       minionGridRef.selectrow(targetRow);
     }}
