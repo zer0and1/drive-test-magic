@@ -258,7 +258,7 @@ export default {
       addCustomMapboxStyle: 'Add Custom Mapbox Style',
       saveMap: 'Save Map',
       shareURL: 'Share URL',
-      inputToken: 'Send User Token'
+      inputToken: 'Enter Authorization Token'
     },
     button: {
       delete: 'Delete',

@@ -140,7 +140,6 @@ export function loadMinionsUpdater(state, { firstLoading }) {
   if (firstLoading) {
     $('#minion-grid').LoadingOverlay('show');
   }
-  console.log(state.selectedMinions[0]?.name)
   const query = GQL_GET_MINIONS(state.selectedMinions[0]?.name);
   const loadMinionTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     result => {

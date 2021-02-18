@@ -83,10 +83,20 @@ const InputTokenModalFactory = () => {
       return (
         <div className="input-token-modal">
           {isSendingToken ? (
-            <LoadingDialog size="64" height="150px" />
+            <LoadingDialog size="64" height="112px" />
           ) : (
             <>
-              <StyledTextArea onChange={e => this.setState({ userToken: e.target.value })} value={this.state.userToken} />
+              <StyledTextArea
+                onChange={e => this.setState({ userToken: e.target.value })}
+                value={this.state.userToken}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.KeyCode === 13) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    this._inputToken();
+                  }
+                }}
+              />
 
               <StyledModalFooter>
                 <FooterActionWrapper>
