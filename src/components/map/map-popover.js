@@ -18,16 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {PureComponent, createRef} from 'react';
+import React, { PureComponent, createRef } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import LayerHoverInfoFactory from './layer-hover-info';
 import CoordinateInfoFactory from './coordinate-info';
-import {Pin, ArrowLeft, ArrowRight} from 'components/common/icons';
+import { Pin, ArrowLeft, ArrowRight } from 'components/common/icons';
 import ErrorBoundary from 'components/common/error-boundary';
-import {injectIntl} from 'react-intl';
-import {FormattedMessage} from 'localization';
-import {Button} from 'components/common/styled-components';
+import { injectIntl } from 'react-intl';
+import { FormattedMessage } from 'localization';
+import { Button } from 'components/common/styled-components';
 
 const MAX_WIDTH = 500;
 const MAX_HEIGHT = 600;
@@ -111,6 +111,13 @@ const StyledToggleButton = styled(Button)`
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
+  background-color: ${props => props.toggled ? props.theme.activeColor : props.theme.secondaryBtnBgd};
+  :hover,
+  :focus,
+  :active,
+  &.active {
+    background-color: ${props => props.theme.activeColorHover};
+  }
 `;
 
 MapPopoverFactory.deps = [LayerHoverInfoFactory, CoordinateInfoFactory];
@@ -159,15 +166,15 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
       const height = Math.min(Math.round(node.scrollHeight), MAX_HEIGHT);
 
       if (width !== this.state.width || height !== this.state.height) {
-        this.setState({width, height});
+        this.setState({ width, height });
       }
     }
 
     _getPosition(x, y, isLeft) {
       const topOffset = 20;
       const leftOffset = 20;
-      const {mapW, mapH} = this.props;
-      const {width, height} = this.state;
+      const { mapW, mapH } = this.props;
+      const { width, height } = this.state;
       const pos = {};
       if (x + leftOffset + width > mapW || isLeft) {
         pos.right = mapW - x + leftOffset;
@@ -185,16 +192,16 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
     }
 
     moveLeft = () => {
-      this.setState({isLeft: true});
+      this.setState({ isLeft: true });
     };
 
     moveRight = () => {
-      this.setState({isLeft: false});
+      this.setState({ isLeft: false });
     };
 
     render() {
-      const {x, y, frozen, coordinate, layerHoverProp, isBase, zoom} = this.props;
-      const {isLeft} = this.state;
+      const { x, y, frozen, coordinate, layerHoverProp, isBase, zoom } = this.props;
+      const { isLeft } = this.state;
 
       const style = Number.isFinite(x) && Number.isFinite(y) ? this._getPosition(x, y, isLeft) : {};
 
@@ -236,7 +243,7 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
                 {layerHoverProp?.layer?.isAggregated && dsc != undefined && dsc != 'property.pointCount' ? (
                   <div className="primary-label gutter" style={{ marginRight: -10 }}>
                     <StyledToggleButton
-                      secondary={layerHoverProp.isGraphShow}
+                      toggled={layerHoverProp.isGraphShow}
                       onClick={layerHoverProp.toggleGraphShow}
                     >
                       GRAPH

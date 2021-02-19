@@ -146,6 +146,10 @@ export const updateProfileErrorUpdater = (state, { error }) => {
 };
 
 export const applyProfileUpdater = (state, { id, map, options = {} }) => {
+  if (!id) {
+    id = state.selectedId;
+  }
+  
   const { config } = state.profiles.find(p => p.id == id);
   const { datasets } = KeplerGlSchema.save(map);
   const mapToLoad = KeplerGlSchema.load(datasets, config);

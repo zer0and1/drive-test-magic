@@ -353,10 +353,10 @@ export default function ModalContainerFactory(
             // validate options
             if (datasetKeyToDetete && datasets && datasets[datasetKeyToDetete]) {
               template = (
-                <DeleteFilteredDataModal 
-                  dataset={datasets[datasetKeyToDetete]} 
-                  layers={layers} 
-                  onDelete={() => minionStateActions.deleteFilteredData(datasets[datasetKeyToDetete])}
+                <DeleteFilteredDataModal
+                  dataset={datasets[datasetKeyToDetete]}
+                  layers={layers}
+                  onDelete={() => minionStateActions.deleteFilteredData(datasets[datasetKeyToDetete], { visState, mapState, mapStyle })}
                   removeFilter={visStateActions.removeFilter}
                   filters={visState.filters}
                   onCancel={this._closeModal}

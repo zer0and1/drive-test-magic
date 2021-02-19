@@ -186,7 +186,8 @@ export default function BottomWidgetFactory(
     const layerId = visState?.layer?.id;
     const datasetName = layers.find(item => item.id === layerId)?.config?.dataId;
     const allData = datasets[datasetName]?.allData
-
+    const fields = datasets[datasetName]?.fields;
+    
     return (
       <BottomWidgetContainer
         width={Math.min(maxWidth, enlargedFilterWidth)}
@@ -220,6 +221,7 @@ export default function BottomWidgetFactory(
             visState={visState}
             layers={layers}
             allData={allData}
+            fields={fields}
           />
           ) : null
         }

@@ -31,6 +31,7 @@ import {
   GRAPHQL_MUTATION_TASK
 } from 'tasks/tasks';
 import { removeNotification, toggleModal, addNotification } from 'actions/ui-state-actions';
+import { applyProfile } from 'actions/map-profile-actions';
 import { addDataToMap } from 'actions/actions';
 import {
   DEFAULT_NOTIFICATION_TYPES,
@@ -939,10 +940,10 @@ export const initDatasetUpdater = (state, { payload: oldDataset }) => {
   };
 };
 
-export const reloadDatasetUpdater = (state, { payload: dataset }) => {
+export const reloadDatasetUpdater = (state, { dataset, visState }) => {
   const { query: qstr, sessions } = dataset;
   const query = gql(restrictSession(qstr, sessions));
-  const task = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).map(
+  const loadTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).map(
     result => {
       const data = makeDataset(query, result.data[extractOperation(query)], sessions);
       return addDataToMap({
@@ -962,6 +963,8 @@ export const reloadDatasetUpdater = (state, { payload: dataset }) => {
       });
     }
   );
+  const profileTask = visState && ACTION_TASK().map(_ => applyProfile(null, visState, {}));
+  const tasks = [loadTask, profileTask].filter(d => d);
 
-  return withTask(state, task);
+  return withTask(state, tasks);
 };

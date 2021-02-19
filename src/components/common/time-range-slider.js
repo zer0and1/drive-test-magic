@@ -18,19 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import throttle from 'lodash.throttle';
 import styled from 'styled-components';
-import {createSelector} from 'reselect';
+import { createSelector } from 'reselect';
 
-import {Minus} from 'components/common/icons';
+import { Minus, Span } from 'components/common/icons';
 import RangeSliderFactory from 'components/common/range-slider';
 import TimeSliderMarkerFactory from 'components/common/time-slider-marker';
 import PlaybackControlsFactory from 'components/common/animation-control/playback-controls';
 
-import {DEFAULT_TIME_FORMAT} from 'constants/default-settings';
+import { DEFAULT_TIME_FORMAT } from 'constants/default-settings';
 
 const animationControlWidth = 176;
 
@@ -98,7 +98,7 @@ export default function TimeRangeSliderFactory(PlaybackControls, RangeSlider, Ti
 
             return accu;
           },
-          {displayDate: [], displayTime: []}
+          { displayDate: [], displayTime: [] }
         );
       }
     );
@@ -109,12 +109,12 @@ export default function TimeRangeSliderFactory(PlaybackControls, RangeSlider, Ti
     };
 
     render() {
-      const {domain, value, isEnlarged, hideTimeTitle, animationControlProps} = this.props;
+      const { domain, value, isEnlarged, hideTimeTitle, animationControlProps } = this.props;
 
       return (
         <div className="time-range-slider">
           {!hideTimeTitle ? (
-            <TimeTitle timeFormat={this.props.timeFormat} value={value} isEnlarged={isEnlarged} />
+            <TimeTitle timeFormat={this.props.timeFormat} value={value} isEnlarged={isEnlarged} onChange={this._sliderUpdate} range={domain} />
           ) : null}
           <StyledSliderContainer className="time-range-slider__container" isEnlarged={isEnlarged}>
             <div
@@ -190,19 +190,23 @@ const TimeValueWrapper = styled.div`
   }
 `;
 
-const TimeTitle = ({value, isEnlarged, timeFormat = DEFAULT_TIME_FORMAT}) => (
+const TimeTitle = ({ value, isEnlarged, onChange, range, timeFormat = DEFAULT_TIME_FORMAT }) => (
   <TimeValueWrapper isEnlarged={isEnlarged} className="time-range-slider__time-title">
     <TimeValue key={0} value={moment(value[0]).format(timeFormat)} split={!isEnlarged} />
     {isEnlarged ? (
       <div className="horizontal-bar">
         <Minus height="12px" />
       </div>
-    ) : null}
+    ) : (
+      <div style={{ color: 'grey', paddingTop: '2px' }} onClick={() => onChange(range)}>
+        <Span height="16px" />
+      </div>
+    )}
     <TimeValue key={1} value={moment(value[1]).format(timeFormat)} split={!isEnlarged} />
   </TimeValueWrapper>
 );
 
-const TimeValue = ({value, split}) => (
+const TimeValue = ({ value, split }) => (
   // render two lines if not enlarged
   <div className="time-value">
     {split ? (

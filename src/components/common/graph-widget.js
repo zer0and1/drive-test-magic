@@ -67,14 +67,22 @@ function GraphWidgetFactory(HexbinGraph) {
         showGraphState,
         visState,
         layers,
-        allData
+        allData,
+        fields
       } = this.props;
 
+      const enodebField = fields && fields.find(f => f.name == "enodeb_id");
+      
+      if (!enodebField) {
+        return null;
+      }
+      
       const layerId = visState?.layer?.id;
       const layer = layers.find(item => item.id === layerId);
       const fieldName = layer?.config?.colorField?.name;
       const fieldIndex = layer?.config?.colorField?.tableFieldIndex;
       const aggregation = layer?.config?.visConfig?.colorAggregation;
+      
 
       const ymin = min(allData.map(function (el) { return el[fieldIndex - 1] }));
       const ymax = max(allData.map(function (el) { return el[fieldIndex - 1] }));
@@ -122,6 +130,7 @@ function GraphWidgetFactory(HexbinGraph) {
           <HexbinGraph
             lineChart={lineChart}
             index={fieldIndex}
+            enodebFieldIndex={enodebField.tableFieldIndex - 1}
             aggregation={aggregation}
             ymin={ymin}
             ymax={ymax}

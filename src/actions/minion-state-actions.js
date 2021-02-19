@@ -234,17 +234,19 @@ export function setMarkerScale(markerScale) {
   }
 };
 
-export function deleteFilteredData(dataset) {
+export function deleteFilteredData(dataset, visState) {
   return {
     type: ActionTypes.DELETE_FILTERED_DATA,
-    dataset
+    dataset,
+    visState
   }
 };
 
-export function deleteFilteredDataSuccess(dataset) {
+export function deleteFilteredDataSuccess(dataset, visState) {
   return {
     type: ActionTypes.DELETE_FILTERED_DATA_SUCCESS,
-    dataset
+    dataset,
+    visState
   }
 };
 

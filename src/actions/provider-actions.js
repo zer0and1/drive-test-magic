@@ -195,6 +195,10 @@ export const loadDatasetError = createAction(ActionTypes.LOAD_DATASET_ERROR, pay
 export const initDataset = createAction(ActionTypes.INIT_DATASET, payload => payload);
 
 /** @type {typeof import('./provider-actions').reloadDataset} */
-export const reloadDataset = createAction(ActionTypes.RELOAD_DATASET, payload => payload);
+export const reloadDataset = (dataset, visState) => ({
+  type: ActionTypes.RELOAD_DATASET,
+  dataset,
+  visState
+});
 
 

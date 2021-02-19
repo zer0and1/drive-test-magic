@@ -463,23 +463,17 @@ export function setMqttMessageUpdater(state, { mqttTopic: topic, mqttMessage: pa
   const minion = topic.split('/')?.[0];
   const cmd = topic.split('/')?.[1];
 
-  const reflections = {
-    ack: {
-      lastAck: {
-        ...lastAck,
-        [minion]: payload + moment().format(' @ HH:mm:ss')
-      }
-    },
-    command: { command: payload },
-    operation_mode: { operationMode: payload },
-    interval: { sleepInterval: parseFloat(payload) },
-    session_id: { sessionId: parseInt(payload) },
-  };
+  if (!minion || cmd != 'ack') {
+    return state;
+  }
 
   return {
     ...state,
+    lastAck: {
+      ...lastAck,
+      [minion]: payload + moment().format(' @ HH:mm:ss')
+    },
     isCommandExecuting: false,
-    ...(reflections?.[cmd])
   };
 }
 
@@ -579,7 +573,7 @@ export function setMarkerScaleUpdater(state, { markerScale }) {
   }
 };
 
-export function deleteFilteredDataUpdater(state, { dataset }) {
+export function deleteFilteredDataUpdater(state, { dataset, visState }) {
   const { fields, filteredIndexForDomain, allData } = dataset;
   const dateFieldIdx = fields.findIndex(f => f.name == 'date');
 
@@ -590,16 +584,16 @@ export function deleteFilteredDataUpdater(state, { dataset }) {
   const datesToDelete = filteredIndexForDomain.map(i => `"${allData[i][dateFieldIdx]}"`);
   const mutation = GQL_DELETE_SIGNAL_SAMPLES(datesToDelete);
   const task = GRAPHQL_MUTATION_TASK({ mutation }).bimap(
-    () => deleteFilteredDataSuccess(dataset),
+    () => deleteFilteredDataSuccess(dataset, visState),
     err => deleteFilteredDataError(err)
   );
 
   return withTask(state, task);
 };
 
-export function deleteFilteredDataSuccessUpdater(state, { dataset }) {
+export function deleteFilteredDataSuccessUpdater(state, { dataset, visState }) {
   const tasks = [
-    ACTION_TASK().map(_ => reloadDataset(dataset)),
+    ACTION_TASK().map(_ => reloadDataset(dataset, visState)),
     ACTION_TASK().map(_ => closeDeleteDataModal())
   ];
 

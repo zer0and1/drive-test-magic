@@ -58,7 +58,7 @@ export const DeleteFilteredDataModal = ({ dataset, onCancel, onDelete, filters, 
   const _onDelete = () => {
     setIsDeleting(true);
     onDelete();
-    filters.forEach((f, idx) => removeFilter(idx));
+    // filters.forEach((f, idx) => removeFilter(idx));
   };
 
   return (

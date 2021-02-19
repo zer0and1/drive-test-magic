@@ -126,12 +126,12 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     componentWillUnmount() {
       this.props.removeMarker();
       this.props.selectMinion([]);
-      this._mounted = false;
       this.props.setLoopingEnabled(false);
+      this._mounted = false;
     }
 
     shouldComponentUpdate(nextProps) {
-      const { minions, targetMinions } = nextProps;
+      const { minions } = nextProps;
       this.isSelectingAll = nextProps.isSelectingAll;
       this.isUnselectingAll = nextProps.isUnselectingAll;
       global.minionGridRef = this.refs.minionGrid;

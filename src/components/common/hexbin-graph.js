@@ -122,7 +122,8 @@ function HexbinGraphFactory() {
         cellnames,
         starttime,
         endtime,
-        bins
+        bins,
+        enodebFieldIndex
       } = this.props;
 
       const step = bins * 3600000;
@@ -130,7 +131,7 @@ function HexbinGraphFactory() {
       const data = lineChart.map((item) => {
         const obj = {
           value: item.data[index - 1],
-          enodeb: item.data[11],
+          enodeb: item.data[enodebFieldIndex],
 
           // groupBy time with "some fixed values starting with 1h then like 4h, 1d, 4d, 10d, 1m, 3month"
           groupTime: Math.floor((new Date(item.data[8]).getTime() - starttime) / step) * step + starttime

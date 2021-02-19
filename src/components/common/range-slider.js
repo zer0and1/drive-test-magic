@@ -18,17 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component, createRef} from 'react';
-import {polyfill} from 'react-lifecycles-compat';
-import {createSelector} from 'reselect';
+import React, { Component, createRef } from 'react';
+import { polyfill } from 'react-lifecycles-compat';
+import { createSelector } from 'reselect';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import RangePlotFactory from './range-plot';
 import Slider from 'components/common/slider/slider';
-import {Input} from 'components/common/styled-components';
+import { Input } from 'components/common/styled-components';
 import { Span } from 'components/common/icons';
 
-import {roundValToStep} from 'utils/data-utils';
+import { roundValToStep } from 'utils/data-utils';
 
 const SliderInput = styled(Input)`
   width: ${props => props.theme.sliderInputWidth}px;
@@ -76,17 +76,17 @@ export default function RangeSliderFactory(RangePlot) {
       sliderHandleWidth: 12,
       inputTheme: '',
       inputSize: 'small',
-      onChange: () => {}
+      onChange: () => { }
     };
 
     static getDerivedStateFromProps(props, state) {
       let update = null;
-      const {value0, value1} = props;
+      const { value0, value1 } = props;
       if (props.value0 !== state.prevValue0 && !isNaN(value0)) {
-        update = {...(update || {}), value0, prevValue0: value0};
+        update = { ...(update || {}), value0, prevValue0: value0 };
       }
       if (props.value1 !== state.prevValue1 && !isNaN(value1)) {
-        update = {...(update || {}), value1, prevValue1: value1};
+        update = { ...(update || {}), value1, prevValue1: value1 };
       }
       return update;
     }
@@ -119,29 +119,29 @@ export default function RangeSliderFactory(RangePlot) {
     );
 
     _isVal0InRange = val => {
-      const {value1, range} = this.props;
+      const { value1, range } = this.props;
 
       return Boolean(val >= range[0] && val <= value1);
     };
 
     _isVal1InRange = val => {
-      const {range, value0} = this.props;
+      const { range, value0 } = this.props;
 
       return Boolean(val <= range[1] && val >= value0);
     };
 
     _roundValToStep = val => {
-      const {range, step} = this.props;
+      const { range, step } = this.props;
 
       if (val >= range[1] || val <= range[0]) {
         return val;
-      } 
+      }
 
       return roundValToStep(range[0], step, val);
     };
 
     _setRangeVal1 = val => {
-      const {value0, onChange} = this.props;
+      const { value0, onChange } = this.props;
       const val1 = Number(val);
       if (this._isVal1InRange(val1)) {
         onChange([value0, this._roundValToStep(val1)]);
@@ -151,7 +151,7 @@ export default function RangeSliderFactory(RangePlot) {
     };
 
     _setRangeVal0 = val => {
-      const {value1, onChange} = this.props;
+      const { value1, onChange } = this.props;
       const val0 = Number(val);
 
       if (this._isVal0InRange(val0)) {
@@ -164,11 +164,11 @@ export default function RangeSliderFactory(RangePlot) {
     _resize() {
       const width = this.sliderContainer.current.offsetWidth;
       if (width !== this.state.width) {
-        this.setState({width});
+        this.setState({ width });
       }
     }
     _onChangeInput = (key, e) => {
-      this.setState({[key]: e.target.value});
+      this.setState({ [key]: e.target.value });
     };
 
     _renderInput(key) {
@@ -176,7 +176,7 @@ export default function RangeSliderFactory(RangePlot) {
       const ref = key === 'value0' ? this.inputValue0 : this.inputValue1;
       const update = e => {
         if (!setRange(e.target.value)) {
-          this.setState({[key]: this.state[key]});
+          this.setState({ [key]: this.state[key] });
         }
       };
 
@@ -218,14 +218,14 @@ export default function RangeSliderFactory(RangePlot) {
         step
       } = this.props;
 
-      const {width} = this.state;
+      const { width } = this.state;
       const plotWidth = Math.max(width - sliderHandleWidth, 0);
       const renderPlot = (histogram && histogram.length) || lineChart;
 
       return (
         <div
           className="kg-range-slider"
-          style={{width: '100%', padding: `0 ${sliderHandleWidth / 2}px`}}
+          style={{ width: '100%', padding: `0 ${sliderHandleWidth / 2}px` }}
           ref={this.sliderContainer}
         >
           {renderPlot ? (
@@ -249,7 +249,7 @@ export default function RangeSliderFactory(RangePlot) {
             showInput={showInput}
           >
             {this.props.xAxis ? (
-              <div style={{height: '30px'}}>
+              <div style={{ height: '30px' }}>
                 <this.props.xAxis
                   width={plotWidth}
                   domain={range}
@@ -279,7 +279,9 @@ export default function RangeSliderFactory(RangePlot) {
           {isRanged && showInput ? (
             <RangeInputWrapper className="range-slider__input-group">
               {this._renderInput('value0')}
-              <Span />
+              <div style={{color: 'grey', marginRight: '-18px', paddingTop: '2px' }} onClick={() => onChange(range)}>
+                <Span height="16px" />
+              </div>
               {this._renderInput('value1')}
             </RangeInputWrapper>
           ) : null}
