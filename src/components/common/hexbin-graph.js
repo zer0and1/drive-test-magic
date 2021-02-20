@@ -159,13 +159,13 @@ function HexbinGraphFactory() {
 
       Object.keys(result).forEach(function (k) {
         // calculate aggregation values
-        result[k].average = result[k].value != undefined ? mean(result[k].values).toFixed(2) : null;
-        result[k].max = result[k].value != undefined ? max(result[k].values).toFixed(2) : null;
-        result[k].min = result[k].value != undefined ? min(result[k].values).toFixed(2) : null;
-        result[k].median = result[k].value != undefined ? median(result[k].values).toFixed(2) : null;
-        result[k].sum = result[k].value != undefined ? sum(result[k].values).toFixed(2) : null;
-        result[k].stdev = result[k].values.length > 1 ? deviation(result[k].values).toFixed(2) : 0;
-        result[k].v = result[k].values.length > 1 ? variance(result[k].values).toFixed(2) : 0;
+        result[k].average = result[k].value != undefined ? mean(result[k].values)?.toFixed(2) : null;
+        result[k].max = result[k].value != undefined ? max(result[k].values)?.toFixed(2) : null;
+        result[k].min = result[k].value != undefined ? min(result[k].values)?.toFixed(2) : null;
+        result[k].median = result[k].value != undefined ? median(result[k].values)?.toFixed(2) : null;
+        result[k].sum = result[k].value != undefined ? sum(result[k].values)?.toFixed(2) : null;
+        result[k].stdev = result[k].values.length > 1 ? deviation(result[k].values)?.toFixed(2) : 0;
+        result[k].v = result[k].values.length > 1 ? variance(result[k].values)?.toFixed(2) : 0;
       })
 
       const smps = Object.values(_.groupBy(data, 'enodeb')).map(item => { return { "key": item[0].enodeb, "value": item.length } });
@@ -224,7 +224,7 @@ function HexbinGraphFactory() {
             backgroundColor: colors[iter]
           },
           legendText: cellnames[ids] + "<br/>" +
-            "<span style='color:" + colors[iter] + "'>#avg:</span>" + mean(yvalues[ids]).toFixed(2) +
+            "<span style='color:" + colors[iter] + "'>#avg:</span>" + mean(yvalues[ids])?.toFixed(2) +
             "<span style='color:" + colors[iter] + "'>#max:</span>" + max(yvalues[ids]) +
             "<span style='color:" + colors[iter] + "'>#min:</span>" + min(yvalues[ids]) +
             "<span style='color:" + colors[iter] + "'>#smp:</span>" + smps.filter(item => item.key === ids)[0].value,
