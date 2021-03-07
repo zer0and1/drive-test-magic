@@ -31,6 +31,7 @@ import LoadingDialog from './loading-dialog';
 const StyledTextArea = styled.textarea`
   width: 100%;
   height: 50px;
+  resize: vertical;
 `;
 
 const StyledModalFooter = styled.div`

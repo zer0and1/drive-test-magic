@@ -93,11 +93,12 @@ export const INITIAL_AUTH_STATE = {
 };
 
 export const getAuthInfoUpdater = (state, { userToken }) => {
-  if (!userToken) {
-    const authInfo = localStorage.getItem('auth-info');
+  const authInfoStr = localStorage.getItem('auth-info');
+  const authInfo = authInfoStr && JSON.parse(authInfoStr);
 
+  if (!userToken || (authInfo && authInfo?.user_info?.user_token == userToken)) {
     if (authInfo) {
-      return getAuthInfoSuccessUpdater(state, { info: JSON.parse(authInfo), disabledReloading: true });
+      return getAuthInfoSuccessUpdater(state, { info: authInfo, disabledReloading: true });
     }
     else {
       const task = ACTION_TASK().map(_ => toggleModal(INPUT_USER_TOKEN_ID));

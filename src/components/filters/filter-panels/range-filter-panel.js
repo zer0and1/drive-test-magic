@@ -40,6 +40,8 @@ const StyledAggrBar = styled.div`
 const StyledAggrItem = styled.div`
   float: left;
   width: 33.33%;
+  font-weight: 500;
+  font-size: 10px;
   text-align: ${props => props.align ? props.align : 'center'};
   ${props => props.align == 'left' ? 'margin-left: 6px;' : (props.align == 'right' ? 'margin-right: 6px;' : null)}
 `
@@ -68,7 +70,7 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter, FilterS
 
       if (dataset && filterInputIndex) {
         const { allData, color: rgb } = dataset;
-        const fieldData = filterInputIndex.map(idx => allData[idx]).map(d => d[fieldIdx[0]]);
+        const fieldData = filterInputIndex.map(idx => allData[idx]).filter(d => d).map(d => d[fieldIdx[0]]);
         min = numToStr(_.min(fieldData), 1);
         max = numToStr(_.max(fieldData), 1);
         avg = numToStr(_.mean(fieldData), 1);

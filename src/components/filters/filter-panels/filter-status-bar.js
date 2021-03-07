@@ -16,7 +16,9 @@ const StyledStatusBar = styled.div`
 
 const StyledStatusItem = styled.div`
   float: left;
-  width: 50%;
+  width: 33.33%;
+  font-weight: 500;
+  font-size: 10px;
   text-align: ${props => props.align ? props.align : 'center'};
   ${props => props.align == 'left' ? 'margin-left: 6px;' : (props.align == 'right' ? 'margin-right: 6px;' : null)}
 `;
@@ -49,10 +51,13 @@ function FilterStatusBarFactory() {
 
       return (
         <StyledStatusBar>
-          <StyledStatusItem align="left">{selected} selected</StyledStatusItem>
-          <StyledStatusItem align="right">
+          <StyledStatusItem align="left">
+            {selected} selected
+            </StyledStatusItem>
+          <StyledStatusItem align="center">
             {inputPercent}% of input
-            <br />
+          </StyledStatusItem>
+          <StyledStatusItem align="right">
             {totalPercent}% of total
           </StyledStatusItem>
         </StyledStatusBar>

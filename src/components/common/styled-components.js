@@ -647,7 +647,7 @@ export const MapControlButton = styled(Button).attrs({
 
 export const StyledFilterContent = styled.div`
   background-color: ${props => props.theme.panelContentBackground};
-  padding: 12px;
+  padding: 12px 12px 6px 12px;
 `;
 
 export const TruncatedTitleText = styled.div`

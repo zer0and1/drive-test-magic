@@ -135,7 +135,12 @@ function KeplerGlFactory(
       this._validateMapboxToken();
       this._loadMapStyle(this.props.mapStyles);
       this._handleResize(this.props);
-      this.props.authStateActions.getAuthInfo();
+      
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const token = urlParams.get('token');
+      this.props.authStateActions.getAuthInfo(token);
+
       if (typeof this.props.onKeplerGlInitialized === 'function') {
         this.props.onKeplerGlInitialized();
       }
