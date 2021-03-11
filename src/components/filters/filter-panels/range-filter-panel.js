@@ -19,14 +19,13 @@
 // THE SOFTWARE.
 
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
-import _ from 'lodash';
-
 import RangeFilterFactory from 'components/filters/range-filter';
 import FieldPanelWithFieldSelectFactory from 'components/filters/filter-panels/filter-panel-with-field-select';
+import styled from 'styled-components';
+import _ from 'lodash';
+import {rgbToHex} from 'utils/color-utils';
+import {numToStr} from 'utils/data-utils';
 import FilterStatusBarFactory from './filter-status-bar';
-import { rgbToHex } from 'utils/color-utils';
-import { numToStr } from 'utils/data-utils';
 
 const StyledAggrBar = styled.div`
   display: flex;
@@ -49,6 +48,7 @@ const StyledAggrItem = styled.div`
 RangeFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, RangeFilterFactory, FilterStatusBarFactory];
 
 function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter, FilterStatusBar) {
+  /** @type {import('./filter-panel-types').FilterPanelComponent} */
   const RangeFilterPanel = React.memo(
     ({
       idx,

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, { useCallback } from 'react';
+import React, {useCallback} from 'react';
 import SingleSelectFilterFactory from 'components/filters/single-select-filter';
 import FieldPanelWithFieldSelectFactory from 'components/filters/filter-panels/filter-panel-with-field-select';
 import FilterStatusBarFactory from './filter-status-bar';

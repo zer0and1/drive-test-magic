@@ -26,7 +26,6 @@ import PropTypes from 'prop-types';
 import {notNullorUndefined} from 'utils/data-utils';
 import {getTooltipDisplayValue, getTooltipDisplayDeltaValue} from 'utils/interaction-utils';
 
-
 export const StyledLayerName = styled(CenterFlexbox)`
   color: ${props => props.theme.textColorHl};
   font-size: 12px;
@@ -54,6 +53,7 @@ const StyledTable = styled.table`
   }
 `;
 
+/** @type {import('./layer-hover-info').RowComponent} */
 const Row = ({name, value, deltaValue, url}) => {
   // Set 'url' to 'value' if it looks like a url
   if (!url && value && typeof value === 'string' && value.match(/^http/)) {
@@ -120,7 +120,7 @@ const EntryInfoRow = ({item, fields, data, primaryData, compareType}) => {
     compareType
   });
 
-  return <Row name={item.name} value={displayValue} deltaValue={displayDeltaValue} />;
+  return <Row name={field.name} value={displayValue} deltaValue={displayDeltaValue} />;
 };
 
 // TODO: supporting comparative value for aggregated cells as well
@@ -134,14 +134,14 @@ const CellInfo = ({data, layer}) => {
         <Row
           name={layer.getVisualChannelDescription('color').measure}
           key="color"
-          value={data.colorValue.toFixed(2) || 'N/A'}
+          value={data.colorValue || 'N/A'}
         />
       ) : null}
       {sizeField && layer.visualChannels.size ? (
         <Row
           name={layer.getVisualChannelDescription('size').measure}
           key="size"
-          value={data.elevationValue.toFixed(2) || 'N/A'}
+          value={data.elevationValue || 'N/A'}
         />
       ) : null}
     </tbody>
@@ -173,8 +173,7 @@ const LayerHoverInfoFactory = () => {
     fields: PropTypes.arrayOf(PropTypes.any),
     fieldsToShow: PropTypes.arrayOf(PropTypes.any),
     layer: PropTypes.object,
-    data: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.any), PropTypes.object]),
-    isGraphShow: PropTypes.bool
+    data: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.any), PropTypes.object])
   };
   return LayerHoverInfo;
 };
