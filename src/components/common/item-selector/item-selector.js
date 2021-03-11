@@ -279,7 +279,6 @@ class ItemSelector extends Component {
       }),
       disabled: this.props.disabled,
       onClick: this._showTypeahead,
-      onFocus: this._showPopover,
       error: this.props.isError,
       inputTheme: this.props.inputTheme,
       size: this.props.size
@@ -314,7 +313,7 @@ class ItemSelector extends Component {
                     light={this.props.inputTheme === 'light'}
                   />
                 ) : (
-                  <FormattedMessage id={this.props.placeholder} />
+                  <FormattedMessage id={this.props.placeholder || 'placeholder.selectValue'} />
                 )}
               </DropdownSelectValue>
               {this.props.erasable && hasValue ? (

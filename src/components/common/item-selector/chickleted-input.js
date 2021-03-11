@@ -120,6 +120,8 @@ const ChickletedInput = ({
           disabled,
           key: `${displayOption(item)}_${i}`,
           name: displayOption(item),
+          displayOption,
+          item,
           remove: e => removeItem(item, e)
         };
         return CustomChickletComponent ? (
@@ -130,7 +132,7 @@ const ChickletedInput = ({
       })
     ) : (
       <span className={`${className} chickleted-input__placeholder`}>
-        <FormattedMessage id={placeholder} />
+        <FormattedMessage id={placeholder || 'placeholder.enterValue'} />
       </span>
     )}
   </ChickletedInputContainer>

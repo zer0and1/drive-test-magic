@@ -18,19 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import throttle from 'lodash.throttle';
 import styled from 'styled-components';
-import { createSelector } from 'reselect';
+import {createSelector} from 'reselect';
 
-import { Minus, Span } from 'components/common/icons';
+import {Minus, Span} from 'components/common/icons';
 import RangeSliderFactory from 'components/common/range-slider';
 import TimeSliderMarkerFactory from 'components/common/time-slider-marker';
 import PlaybackControlsFactory from 'components/common/animation-control/playback-controls';
 
-import { DEFAULT_TIME_FORMAT } from 'constants/default-settings';
+import {DEFAULT_TIME_FORMAT} from 'constants/default-settings';
 
 const animationControlWidth = 176;
 
@@ -98,7 +98,7 @@ export default function TimeRangeSliderFactory(PlaybackControls, RangeSlider, Ti
 
             return accu;
           },
-          { displayDate: [], displayTime: [] }
+          {displayDate: [], displayTime: []}
         );
       }
     );
@@ -109,7 +109,7 @@ export default function TimeRangeSliderFactory(PlaybackControls, RangeSlider, Ti
     };
 
     render() {
-      const { domain, value, isEnlarged, hideTimeTitle, animationControlProps } = this.props;
+      const {domain, value, isEnlarged, hideTimeTitle, animationControlProps} = this.props;
 
       return (
         <div className="time-range-slider">
@@ -206,7 +206,7 @@ const TimeTitle = ({ value, isEnlarged, onChange, range, timeFormat = DEFAULT_TI
   </TimeValueWrapper>
 );
 
-const TimeValue = ({ value, split }) => (
+const TimeValue = ({value, split}) => (
   // render two lines if not enlarged
   <div className="time-value">
     {split ? (
