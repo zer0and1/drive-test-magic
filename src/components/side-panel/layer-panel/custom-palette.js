@@ -22,7 +22,7 @@ import React, {Component, createRef} from 'react';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import styled, {css} from 'styled-components';
-import {sortableContainer, sortableElement, sortableHandle} from 'react-sortable-hoc';
+import {SortableContainer, SortableElement, SortableHandle} from 'react-sortable-hoc';
 import Portaled from 'components/common/portaled';
 
 import {Button, InlineInput} from 'components/common/styled-components';
@@ -49,13 +49,13 @@ const StyledSortableItem = styled.div`
   :not(.sorting) {
     :hover {
       background-color: ${props => props.theme.panelBackgroundHover};
-      ${dragHandleActive}
+      ${dragHandleActive};
     }
   }
 
   &.sorting-colors {
     background-color: ${props => props.theme.panelBackgroundHover};
-    ${dragHandleActive}
+    ${dragHandleActive};
   }
 `;
 
@@ -123,7 +123,7 @@ const StyledInlineInput = styled.div`
   }
 `;
 
-const SortableItem = sortableElement(({children, isSorting}) => (
+const SortableItem = SortableElement(({children, isSorting}) => (
   <StyledSortableItem
     className={classnames('custom-palette__sortable-items', {sorting: isSorting})}
   >
@@ -131,9 +131,12 @@ const SortableItem = sortableElement(({children, isSorting}) => (
   </StyledSortableItem>
 ));
 
-const SortableContainer = sortableContainer(({children}) => <div>{children}</div>);
+// TODO: Should className be applied to the div here?
+const WrappedSortableContainer = SortableContainer(({children, className}) => (
+  <div className={className}>{children}</div>
+));
 
-const DragHandle = sortableHandle(({className, children}) => (
+const DragHandle = SortableHandle(({className, children}) => (
   <StyledDragHandle className={className}>{children}</StyledDragHandle>
 ));
 
@@ -225,7 +228,7 @@ class CustomPalette extends Component {
         <StyledColorRange>
           <ColorPalette colors={colors} />
         </StyledColorRange>
-        <SortableContainer
+        <WrappedSortableContainer
           className="custom-palette-container"
           onSortEnd={this._onSortEnd}
           onSortStart={this._onSortStart}
@@ -238,7 +241,7 @@ class CustomPalette extends Component {
               <DragHandle className="layer__drag-handle">
                 <VertDots height="20px" />
               </DragHandle>
-              <StyledSwatch color={color} onClick={e => this._onSwatchClick(index, e)} />
+              <StyledSwatch color={color} onClick={() => this._onSwatchClick(index)} />
               <StyledInlineInput>
                 <InlineInput
                   type="text"
@@ -248,7 +251,7 @@ class CustomPalette extends Component {
                     e.stopPropagation();
                   }}
                   onChange={e => this._inputColorHex(index, e)}
-                  id="input-layer-label"
+                  id={`input-layer-label-${index}`}
                 />
               </StyledInlineInput>
               <StyledTrash onClick={() => this._onColorDelete(index)}>
@@ -256,7 +259,7 @@ class CustomPalette extends Component {
               </StyledTrash>
             </SortableItem>
           ))}
-        </SortableContainer>
+        </WrappedSortableContainer>
         {/* Add Step Button */}
         <Button className="add-step__button" link onClick={this._onColorAdd}>
           + Add Step

@@ -60,7 +60,10 @@ const StyledLayerVisualConfigurator = styled.div.attrs({
 `;
 
 export const getLayerFields = (datasets, layer) =>
-  datasets[layer.config.dataId] ? datasets[layer.config.dataId].fields : [];
+  layer.config && datasets[layer.config.dataId] ? datasets[layer.config.dataId].fields : [];
+
+export const getLayerDataset = (datasets, layer) =>
+  layer.config && datasets[layer.config.dataId] ? datasets[layer.config.dataId] : null;
 
 export const getLayerConfiguratorProps = props => ({
   layer: props.layer,
@@ -500,7 +503,7 @@ export default function LayerConfiguratorFactory(
             )}
             <ConfigGroupCollapsibleContent>
               <ChannelByValueSelector
-                channel={layer.visualChannels.color}
+                channel={layer.visualChannels.sourceColor}
                 {...layerChannelConfigProps}
               />
               <VisConfigSlider {...layer.visConfigSettings.opacity} {...visConfiguratorProps} />
@@ -900,13 +903,15 @@ export default function LayerConfiguratorFactory(
 
     render() {
       const {layer, datasets, updateLayerConfig, layerTypeOptions, updateLayerType} = this.props;
-      const {fields = [], fieldPairs} = layer.config.dataId ? datasets[layer.config.dataId] : {};
+      const {fields = [], fieldPairs = undefined} = layer.config.dataId
+        ? datasets[layer.config.dataId]
+        : {};
       const {config} = layer;
 
       const visConfiguratorProps = getVisConfiguratorProps(this.props);
       const layerConfiguratorProps = getLayerConfiguratorProps(this.props);
       const layerChannelConfigProps = getLayerChannelConfigProps(this.props);
-
+      const dataset = getLayerDataset(datasets, layer);
       const renderTemplate = layer.type && `_render${capitalizeFirstLetter(layer.type)}LayerConfig`;
 
       return (
@@ -944,6 +949,7 @@ export default function LayerConfiguratorFactory(
           {this[renderTemplate] &&
             this[renderTemplate]({
               layer,
+              dataset,
               visConfiguratorProps,
               layerChannelConfigProps,
               layerConfiguratorProps

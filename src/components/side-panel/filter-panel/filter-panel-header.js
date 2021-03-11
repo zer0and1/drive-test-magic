@@ -21,9 +21,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
-import { Trash, ArrowDown, ArrowUp } from 'components/common/icons';
-import { createLinearGradient } from 'utils/color-utils';
-import { StyledPanelHeader } from 'components/common/styled-components';
+import {Trash, ArrowDown, ArrowUp} from 'components/common/icons';
+import {createLinearGradient} from 'utils/color-utils';
+import {StyledPanelHeader} from 'components/common/styled-components';
 
 export const StyledFilterHeader = styled(StyledPanelHeader)`
   cursor: pointer;
@@ -37,7 +37,7 @@ export const StyledFilterHeader = styled(StyledPanelHeader)`
   ${props =>
     props.labelRCGColorValues && props.labelRCGColorValues.length > 0
       ? `border-image: ${createLinearGradient('bottom', props.labelRCGColorValues)} 3;`
-      : 'border-color: transparent;'}
+      : 'border-color: transparent;'};
 `;
 
 const StyledChildrenContainer = styled.div`

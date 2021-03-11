@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, { PureComponent } from 'react';
+import React, {PureComponent} from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from 'localization';
+import {FormattedMessage} from 'localization';
 
-import { CenterFlexbox, Tooltip } from 'components/common/styled-components';
+import {CenterFlexbox, Tooltip} from 'components/common/styled-components';
 import { ArrowRight, Table, Trash, Reload, Spinner, EyeSeen, EyeUnseen, Gear } from 'components/common/icons';
 import DatasetTagFactory from 'components/side-panel/common/dataset-tag';
 
@@ -39,7 +39,6 @@ const StyledDatasetTitle = styled.div`
   .source-data-arrow {
     height: 16px;
   }
-
   :hover {
     cursor: ${props => (props.clickable ? 'pointer' : 'auto')};
 
@@ -82,7 +81,7 @@ const ShowDataTable = ({ id, showDatasetTable = nop }) => (
   </DataTagAction>
 );
 
-const RemoveDataset = ({ datasetKey, removeDataset = nop }) => (
+const RemoveDataset = ({datasetKey, removeDataset = nop}) => (
   <DataTagAction
     className="dataset-action remove-dataset"
     data-tip
@@ -218,7 +217,7 @@ export default function DatasetTitleFactory(DatasetTag) {
       return (
         <StyledDatasetTitle
           className="source-data-title"
-          clickable={showDatasetTable || onTitleClick}
+          clickable={Boolean(showDatasetTable || onTitleClick)}
         >
           <DatasetTag dataset={dataset} onClick={this._onClickTitle} />
           {showDatasetTable ? (

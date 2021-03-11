@@ -18,21 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, { Component, useCallback } from 'react';
+import React, {Component, useCallback} from 'react';
 import classnames from 'classnames';
-import { connect } from 'react-redux';
 
 import PropTypes from 'prop-types';
-import { sortableContainer, sortableElement } from 'react-sortable-hoc';
+import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import styled from 'styled-components';
-import { createSelector } from 'reselect';
-import { injectIntl } from 'react-intl';
-import { FormattedMessage } from 'localization';
-import { arrayMove } from 'utils/data-utils';
+import {createSelector} from 'reselect';
+import {injectIntl} from 'react-intl';
+import {FormattedMessage} from 'localization';
+import {arrayMove} from 'utils/data-utils';
 
 import LayerPanelFactory from './layer-panel/layer-panel';
 import SourceDataCatalogFactory from './common/source-data-catalog';
-import { Add } from 'components/common/icons';
+import {Add} from 'components/common/icons';
 import ItemSelector from 'components/common/item-selector/item-selector';
 import {
   Button,
@@ -41,7 +40,7 @@ import {
   SidePanelSection
 } from 'components/common/styled-components';
 
-import { LAYER_BLENDINGS } from 'constants/default-settings';
+import {LAYER_BLENDINGS} from 'constants/default-settings';
 
 import $ from 'jquery';
 import 'gasparesganga-jquery-loading-overlay';
@@ -50,11 +49,11 @@ import { GQL_GET_SIGNAL_SAMPLES } from 'graphqls';
 import { getFieldsFromData } from 'processors';
 import { addDataToMap } from 'actions/index.js';
 
-const LayerBlendingSelector = ({ layerBlending, updateLayerBlending, intl }) => {
+const LayerBlendingSelector = ({layerBlending, updateLayerBlending, intl}) => {
   const labeledLayerBlendings = Object.keys(LAYER_BLENDINGS).reduce(
     (acc, current) => ({
       ...acc,
-      [intl.formatMessage({ id: LAYER_BLENDINGS[current].label })]: current
+      [intl.formatMessage({id: LAYER_BLENDINGS[current].label})]: current
     }),
     {}
   );
@@ -70,7 +69,7 @@ const LayerBlendingSelector = ({ layerBlending, updateLayerBlending, intl }) => 
         <FormattedMessage id="layerBlending.title" />
       </PanelLabel>
       <ItemSelector
-        selectedItems={intl.formatMessage({ id: LAYER_BLENDINGS[layerBlending].label })}
+        selectedItems={intl.formatMessage({id: LAYER_BLENDINGS[layerBlending].label})}
         options={Object.keys(labeledLayerBlendings)}
         multiSelect={false}
         searchable={false}
@@ -108,7 +107,7 @@ const SortableStyledItem = styled.div`
 `;
 
 export function AddDataButtonFactory() {
-  const AddDataButton = ({ onClick, isInactive }) => (
+  const AddDataButton = ({onClick, isInactive}) => (
     <Button
       className="add-data-button"
       onClick={onClick}
@@ -129,15 +128,15 @@ LayerManagerFactory.deps = [AddDataButtonFactory, LayerPanelFactory, SourceDataC
 function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
   // By wrapping layer panel using a sortable element we don't have to implement the drag and drop logic into the panel itself;
   // Developers can provide any layer panel implementation and it will still be sortable
-  const SortableItem = sortableElement(({ children, isSorting }) => {
+  const SortableItem = SortableElement(({children, isSorting}) => {
     return (
-      <SortableStyledItem className={classnames('sortable-layer-items', { sorting: isSorting })}>
+      <SortableStyledItem className={classnames('sortable-layer-items', {sorting: isSorting})}>
         {children}
       </SortableStyledItem>
     );
   });
 
-  const SortableContainer = sortableContainer(({ children }) => {
+  const WrappedSortableContainer = SortableContainer(({children}) => {
     return <div>{children}</div>;
   });
 
@@ -157,6 +156,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       layerVisConfigChange: PropTypes.func.isRequired,
       openModal: PropTypes.func.isRequired,
       removeLayer: PropTypes.func.isRequired,
+      duplicateLayer: PropTypes.func.isRequired,
       removeDataset: PropTypes.func.isRequired,
       startReloadingDataset: PropTypes.func.isRequired,
       enableDataset: PropTypes.func.isRequired,
@@ -195,26 +195,26 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       this.props.addLayer();
     };
 
-    _handleSort = ({ oldIndex, newIndex }) => {
+    _handleSort = ({oldIndex, newIndex}) => {
       this.props.updateLayerOrder(arrayMove(this.props.layerOrder, oldIndex, newIndex));
-      this.setState({ isSorting: false });
+      this.setState({isSorting: false});
     };
 
     _onSortStart = () => {
-      this.setState({ isSorting: true });
+      this.setState({isSorting: true});
     };
 
-    _updateBeforeSortStart = ({ index }) => {
+    _updateBeforeSortStart = ({index}) => {
       // if layer config is active, close it
-      const { layerOrder, layers, layerConfigChange } = this.props;
+      const {layerOrder, layers, layerConfigChange} = this.props;
       const layerIdx = layerOrder[index];
       if (layers[layerIdx].config.isConfigActive) {
-        layerConfigChange(layers[layerIdx], { isConfigActive: false });
+        layerConfigChange(layers[layerIdx], {isConfigActive: false});
       }
     };
 
     render() {
-      const { layers, datasets, layerOrder, openModal, intl, userRole } = this.props;
+      const {layers, datasets, layerOrder, openModal, intl, userRole} = this.props;
       const hadDBPrivilege = userRole == 'admin' || userRole == 'user';
       const defaultDataset = Object.keys(datasets)[0];
       const layerTypeOptions = this.layerTypeOptionsSelector(this.props);
@@ -226,7 +226,8 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
         layerTypeChange: this.props.layerTypeChange,
         layerVisConfigChange: this.props.layerVisConfigChange,
         layerTextLabelChange: this.props.layerTextLabelChange,
-        removeLayer: this.props.removeLayer
+        removeLayer: this.props.removeLayer,
+        duplicateLayer: this.props.duplicateLayer
       };
 
       const panelProps = {
@@ -250,7 +251,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
           {hadDBPrivilege && <AddDataButton onClick={this.props.showAddDataModal} isInactive={!defaultDataset} />}
           <SidePanelDivider />
           <SidePanelSection>
-            <SortableContainer
+            <WrappedSortableContainer
               onSortEnd={this._handleSort}
               onSortStart={this._onSortStart}
               updateBeforeSortStart={this._updateBeforeSortStart}
@@ -277,7 +278,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
                     </SortableItem>
                   )
               )}
-            </SortableContainer>
+            </WrappedSortableContainer>
           </SidePanelSection>
           <SidePanelSection>
             {defaultDataset ? (
@@ -296,10 +297,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       );
     }
   }
-
-  const dispatchToProps = dispatch => ({ dispatch });
-
-  return injectIntl(connect(null, dispatchToProps)(LayerManager));
+  return injectIntl(LayerManager);
 }
 
 export default LayerManagerFactory;

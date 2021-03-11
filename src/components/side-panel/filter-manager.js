@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, { useCallback, useMemo } from 'react';
+import React, {useCallback, useMemo} from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'localization';
-import { Button, SidePanelDivider, SidePanelSection } from 'components/common/styled-components';
-import { Add, Trash } from 'components/common/icons';
+import {FormattedMessage} from 'localization';
+import {Button, SidePanelDivider, SidePanelSection} from 'components/common/styled-components';
+import {Add, Trash} from 'components/common/icons';
 import SourceDataCatalogFactory from './common/source-data-catalog';
 import FilterPanelFactory from './filter-panel/filter-panel';
 

@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import styled from 'styled-components';
 import { format } from 'd3-format';
 import { FormattedMessage } from 'localization';
 import moment from 'moment';
-import { timeDifference } from 'utils/utils';
+import {timeDifference} from 'utils/utils';
 
 const numFormat = format(',');
 
