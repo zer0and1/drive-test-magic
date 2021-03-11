@@ -189,41 +189,24 @@ export function serializeLayer(newLayer) {
 export function mergeLayers(state, layersToMerge, fromConfig) {
   const preserveLayerOrder = fromConfig ? layersToMerge.map(l => l.id) : state.preserveLayerOrder;
 
-  const mergedLayer = [];
-  const unmerged = [];
-
-  const { datasets } = state;
-
   if (!Array.isArray(layersToMerge) || !layersToMerge.length) {
     return state;
   }
 
-  layersToMerge.forEach(layer => {
-    let validateLayer;
-    if (datasets[layer.config.dataId]) {
-      // datasets are already loaded
-      validateLayer = validateLayerWithData(
-        datasets[layer.config.dataId],
-        layer,
-        state.layerClasses
-      );
-    }
-
-    if (validateLayer) {
-      mergedLayer.push(validateLayer);
-    } else {
-      // datasets not yet loaded
-      unmerged.push(layer);
-    }
-  });
+  const {validated: mergedLayer, failed: unmerged} = validateLayersByDatasets(
+    state.datasets,
+    state.layerClasses,
+    layersToMerge
+  );
 
   // put new layers in front of current layers
-  const { newLayerOrder, newLayers } = insertLayerAtRightOrder(
+  const {newLayerOrder, newLayers} = insertLayerAtRightOrder(
     state.layers,
     mergedLayer,
     state.layerOrder,
     preserveLayerOrder
   );
+
   return {
     ...state,
     layers: newLayers,
@@ -295,11 +278,11 @@ export function mergeInteractions(state, interactionToBeMerged) {
 
       const currentConfig = state.interactionConfig[key].config;
 
-      const { enabled, ...configSaved } = interactionToBeMerged[key] || {};
+      const {enabled, ...configSaved} = interactionToBeMerged[key] || {};
       let configToMerge = configSaved;
 
       if (key === 'tooltip') {
-        const { mergedTooltip, unmergedTooltip } = mergeInteractionTooltipConfig(state, configSaved);
+        const {mergedTooltip, unmergedTooltip} = mergeInteractionTooltipConfig(state, configSaved);
 
         // merge new dataset tooltips with original dataset tooltips
         configToMerge = {
@@ -310,7 +293,7 @@ export function mergeInteractions(state, interactionToBeMerged) {
         };
 
         if (Object.keys(unmergedTooltip).length) {
-          unmerged.tooltip = { fieldsToShow: unmergedTooltip, enabled };
+          unmerged.tooltip = {fieldsToShow: unmergedTooltip, enabled};
         }
       }
 
@@ -319,14 +302,14 @@ export function mergeInteractions(state, interactionToBeMerged) {
         enabled,
         ...(currentConfig
           ? {
-            config: pick(
-              {
-                ...currentConfig,
-                ...configToMerge
-              },
-              Object.keys(currentConfig)
-            )
-          }
+              config: pick(
+                {
+                  ...currentConfig,
+                  ...configToMerge
+                },
+                Object.keys(currentConfig)
+              )
+            }
           : {})
       };
     });
@@ -389,7 +372,7 @@ export function mergeInteractionTooltipConfig(state, tooltipConfig = {}) {
   const mergedTooltip = {};
 
   if (!tooltipConfig.fieldsToShow || !Object.keys(tooltipConfig.fieldsToShow).length) {
-    return { mergedTooltip, unmergedTooltip };
+    return {mergedTooltip, unmergedTooltip};
   }
 
   for (const dataId in tooltipConfig.fieldsToShow) {
@@ -407,7 +390,7 @@ export function mergeInteractionTooltipConfig(state, tooltipConfig = {}) {
     }
   }
 
-  return { mergedTooltip, unmergedTooltip };
+  return {mergedTooltip, unmergedTooltip};
 }
 /**
  * Merge layerBlending with saved
@@ -458,11 +441,11 @@ export function validateSavedLayerColumns(fields, savedCols = {}, emptyCols) {
   // Prepare columns for the validator
   const columns = {};
   for (const key of Object.keys(emptyCols)) {
-    columns[key] = { ...emptyCols[key] };
+    columns[key] = {...emptyCols[key]};
 
     const saved = savedCols[key];
     if (saved) {
-      const fieldIdx = fields.findIndex(({ name }) => name === saved);
+      const fieldIdx = fields.findIndex(({name}) => name === saved);
 
       if (fieldIdx > -1) {
         // update found columns
@@ -509,8 +492,8 @@ export function validateSavedTextLabel(fields, [layerTextLabel], savedTextLabel)
   return savedTextLabels.map(textLabel => {
     const field = textLabel.field
       ? fields.find(fd =>
-        Object.keys(textLabel.field).every(key => textLabel.field[key] === fd[key])
-      )
+          Object.keys(textLabel.field).every(key => textLabel.field[key] === fd[key])
+        )
       : null;
 
     return Object.keys(layerTextLabel).reduce(
@@ -526,29 +509,26 @@ export function validateSavedTextLabel(fields, [layerTextLabel], savedTextLabel)
 /**
  * Validate saved visual channels config with new data,
  * refer to vis-state-schema.js VisualChannelSchemaV1
- *
- * @param {Array<Object>} fields
- * @param {Object} newLayer
- * @param {Object} savedLayer
- * @return {Object} - newLayer
+ * @type {typeof import('./vis-state-merger').validateSavedVisualChannels}
  */
 export function validateSavedVisualChannels(fields, newLayer, savedLayer) {
-  Object.values(newLayer.visualChannels).forEach(({ field, scale, key }) => {
+  Object.values(newLayer.visualChannels).forEach(({field, scale, key}) => {
     let foundField;
-    if (savedLayer.config[field]) {
-      foundField = fields.find(fd =>
-        Object.keys(savedLayer.config[field]).every(
-          prop => savedLayer.config[field][prop] === fd[prop]
-        )
-      );
-    }
+    if (savedLayer.config) {
+      if (savedLayer.config[field]) {
+        foundField = fields.find(
+          fd => savedLayer.config && fd.name === savedLayer.config[field].name
+        );
+      }
 
-    const foundChannel = {
-      ...(foundField ? { [field]: foundField } : {}),
-      ...(savedLayer.config[scale] ? { [scale]: savedLayer.config[scale] } : {})
-    };
-    if (Object.keys(foundChannel).length) {
-      newLayer.updateLayerConfig(foundChannel);
+      const foundChannel = {
+        ...(foundField ? {[field]: foundField} : {}),
+        ...(savedLayer.config[scale] ? {[scale]: savedLayer.config[scale]} : {})
+      };
+      if (Object.keys(foundChannel).length) {
+        newLayer.updateLayerConfig(foundChannel);
+      }
+
       newLayer.validateVisualChannel(key);
     }
   });
