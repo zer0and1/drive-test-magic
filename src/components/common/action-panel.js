@@ -36,9 +36,7 @@ const StyledItem = styled.div`
   background-color: ${props => props.theme.dropdownListBgd};
   width: ${props => props.theme.actionPanelWidth}px;
   position: relative;
-  ${props => (props.color ? `border-left: 3px solid rgb(${props.color});` : '')}
-
-  :hover {
+  ${props => (props.color ? `border-left: 3px solid rgb(${props.color});` : '')} :hover {
     cursor: pointer;
     color: ${props => props.theme.textColorHl};
     .nested-group {
@@ -95,13 +93,14 @@ const renderChildren = (child, index) =>
     className: classnames('action-panel-item', child.props.className)
   });
 
+/** @type {typeof import('./action-panel').ActionPanelItem} */
 export const ActionPanelItem = React.memo(
   ({children, color, className, Icon, label, onClick, isSelection, isActive, style}) => {
     const onClickCallback = useCallback(
       event => {
         event.preventDefault();
         event.stopPropagation();
-        onClick();
+        onClick?.();
       },
       [onClick]
     );
@@ -124,7 +123,7 @@ export const ActionPanelItem = React.memo(
         ) : (
           <span className="label">{label}</span>
         )}
-        {children && children.length ? (
+        {children ? (
           <div>
             <div className="label-icon">
               <ArrowRight height="16px" />
@@ -150,15 +149,14 @@ const StyledActionPanel = styled.div`
     ${props =>
       props.direction === 'column'
         ? `border-bottom: 1px solid ${props.theme.panelHeaderIcon}`
-        : `border-right: 1px solid ${props.theme.panelHeaderIcon}`}
-
-    &:last-of-type {
+        : `border-right: 1px solid ${props.theme.panelHeaderIcon}`} &:last-of-type {
       border-bottom: 0;
     }
   }
 `;
 
 // React compound element https://medium.com/@Dane_s/react-js-compound-components-a6e54b5c9992
+/** @type {typeof import('./action-panel').ActionPanel} */
 const ActionPanel = ({children, className, direction = 'column'}) => (
   <StyledActionPanel className={className} direction={direction}>
     {React.Children.map(children, renderChildren)}
