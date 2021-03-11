@@ -956,7 +956,7 @@ export const toggleFilterFeatureUpdater = (state, action) => {
  */
 export const removeFilterUpdater = (state, action) => {
   const {idx} = action;
-  const {dataId, id} = state.filters[idx];
+  const {dataId, id, type} = state.filters[idx];
 
   const newFilters = [
     ...state.filters.slice(0, idx),
