@@ -31,8 +31,13 @@ import {authStateReducerFactory} from './auth-state';
 
 import composers from './composers';
 
+/**
+ * @type {typeof import('./core').combineReducers_}
+ */
+const combineReducers_ = combineReducers;
+
 const combined = (initialState = {}) =>
-  combineReducers({
+  combineReducers_({
     minionState: minionStateReducerFactory(initialState.minionState),
     visState: visStateReducerFactory(initialState.visState),
     mapState: mapStateReducerFactory(initialState.mapState),

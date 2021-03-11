@@ -31,6 +31,8 @@ const actionHandler = {
 
   [ActionTypes.ADD_LAYER]: visStateUpdaters.addLayerUpdater,
 
+  [ActionTypes.DUPLICATE_LAYER]: visStateUpdaters.duplicateLayerUpdater,
+
   [ActionTypes.ENLARGE_FILTER]: visStateUpdaters.enlargeFilterUpdater,
 
   [ActionTypes.INTERACTION_CONFIG_CHANGE]: visStateUpdaters.interactionConfigChangeUpdater,
@@ -105,6 +107,8 @@ const actionHandler = {
 
   [ActionTypes.UPDATE_VIS_DATA]: visStateUpdaters.updateVisDataUpdater,
 
+  [ActionTypes.RENAME_DATASET]: visStateUpdaters.renameDatasetUpdater,
+
   [ActionTypes.SET_FEATURES]: visStateUpdaters.setFeaturesUpdater,
 
   [ActionTypes.DELETE_FEATURE]: visStateUpdaters.deleteFeatureUpdater,
@@ -147,6 +151,7 @@ const actionHandler = {
 
 // construct vis-state reducer
 export const visStateReducerFactory = (initialState = {}) =>
+  // @ts-ignore
   handleActions(actionHandler, {
     ...visStateUpdaters.INITIAL_VIS_STATE,
     ...initialState,

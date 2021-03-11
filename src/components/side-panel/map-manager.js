@@ -20,7 +20,6 @@
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
 
 import {Button, SidePanelSection} from 'components/common/styled-components';
 import MapStyleSelectorFactory from 'components/side-panel/map-style-panel/map-style-selector';
@@ -82,7 +81,7 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
             setColor,
             isRange: false,
             label: intl.formatMessage({id: 'mapManager.3dBuildingColor'})
-         }
+          }
         ]
       );
 
@@ -133,9 +132,7 @@ function MapManagerFactory(MapStyleSelector, LayerGroupSelector, MapProfileSelec
    }
  }
 
-  const dispatchToProps = dispatch => ({dispatch});
-
-  return injectIntl(connect(dispatchToProps)(MapManager));
+  return injectIntl(MapManager);
 }
 
 export default MapManagerFactory;

@@ -60,11 +60,13 @@ const actionHandler = {
   [ActionTypes.LOAD_FILES_ERR]: uiStateUpdaters.loadFilesErrUpdater,
 
   [ActionTypes.TOGGLE_SPLIT_MAP]: uiStateUpdaters.toggleSplitMapUpdater,
+  [ActionTypes.SHOW_DATASET_TABLE]: uiStateUpdaters.showDatasetTableUpdater,
   [ActionTypes.SET_LOCALE]: uiStateUpdaters.setLocaleUpdater
 };
 
 /* Reducer */
 export const uiStateReducerFactory = (initialState = {}) =>
+  // @ts-ignore
   handleActions(actionHandler, {
     ...uiStateUpdaters.INITIAL_UI_STATE,
     ...initialState,

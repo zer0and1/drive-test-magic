@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, { PureComponent } from 'react';
-import { FormattedMessage } from 'localization';
+import React, {PureComponent} from 'react';
+import {FormattedMessage} from 'localization';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import get from 'lodash.get';
@@ -145,9 +145,7 @@ export default function SidePanelFactory(
     };
 
     _showDatasetTable = dataId => {
-      // this will open data table modal
       this.props.visStateActions.showDatasetTable(dataId);
-      this.props.uiStateActions.toggleModal(DATA_TABLE_ID);
     };
 
     _showAddDataModal = () => {
@@ -268,6 +266,7 @@ export default function SidePanelFactory(
         showDatasetTable: this._showDatasetTable,
         showAddDataModal: this._showAddDataModal,
         removeLayer: visStateActions.removeLayer,
+        duplicateLayer: visStateActions.duplicateLayer,
         removeDataset: this._removeDataset,
         startReloadingDataset: visStateActions.startReloadingDataset,
         setupDataset: this._setupDataset,
@@ -404,12 +403,10 @@ export default function SidePanelFactory(
                 {activeSidePanel === 'map' && (
                   <MapManager {...mapManagerActions} mapStyle={this.props.mapStyle} mapProfile={this.props.mapProfile} {...authState} />
                 )}
-                {(customPanels || []).find(p => p.id === activeSidePanel) ? (
-                  <CustomPanels
-                    {...getCustomPanelProps(this.props)}
-                    activeSidePanel={activeSidePanel}
-                  />
-                ) : null}
+                <CustomPanels
+                  {...getCustomPanelProps(this.props)}
+                  activeSidePanel={activeSidePanel}
+                />
               </div>
             </SidePanelContent>
           </Sidebar>

@@ -323,6 +323,21 @@ export function removeLayer(idx) {
 }
 
 /**
+ * Duplicate a layer
+ * @memberof visStateActions
+ * @param idx idx of layer to be duplicated
+ * @returns action
+ * @type {typeof import('./vis-state-actions').duplicateLayer}
+ * @public
+ */
+export function duplicateLayer(idx) {
+  return {
+    type: ActionTypes.DUPLICATE_LAYER,
+    idx
+  };
+}
+
+/**
  * Remove a dataset and all layers, filters, tooltip configs that based on it
  * @memberof visStateActions
  * @param dataId dataset id
@@ -431,6 +446,23 @@ export function updateVisData(datasets, options, config) {
     datasets,
     options,
     config
+  };
+}
+
+/**
+ * Rename an existing dataset in `visState`
+ * @memberof visStateActions
+ * @param dataId - ***required** Id of the dataset to update
+ * @param label - ***required** New name for the dataset
+ * @returns action
+ * @type {typeof import('./vis-state-actions').renameDataset}
+ * @public
+ */
+export function renameDataset(dataId, label) {
+  return {
+    type: ActionTypes.RENAME_DATASET,
+    dataId,
+    label
   };
 }
 

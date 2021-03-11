@@ -48,7 +48,7 @@ export function findDefaultLayer(dataset, layerClasses) {
   return layerProps.map(props => {
     const layer = new layerClasses[props.type](props);
     return typeof layer.setInitialLayerConfig === 'function' && Array.isArray(dataset.allData)
-      ? layer.setInitialLayerConfig(dataset.allData)
+      ? layer.setInitialLayerConfig(dataset)
       : layer;
   });
 }
@@ -78,9 +78,7 @@ export function getLayerHoverProp({
   hoverInfo,
   layers,
   layersToRender,
-  datasets,
-  isGraphShow,
-  uiStateActions
+  datasets
 }) {
   if (interactionConfig.tooltip.enabled && hoverInfo && hoverInfo.picked) {
     // if anything hovered
@@ -89,25 +87,56 @@ export function getLayerHoverProp({
     // deckgl layer to kepler-gl layer
     const layer = layers[overlay.props.idx];
 
-    if (layer.getHoverData && layersToRender[layer.id]) {
+    if (object && layer && layer.getHoverData && layersToRender[layer.id]) {
       // if layer is visible and have hovered data
       const {
         config: {dataId}
       } = layer;
+      if (!dataId) {
+        return null;
+      }
       const {allData, fields} = datasets[dataId];
-      const data = layer.getHoverData(object, allData);
+      const data = layer.getHoverData(object, allData, fields);
       const fieldsToShow = interactionConfig.tooltip.config.fieldsToShow[dataId];
 
       return {
         data,
         fields,
         fieldsToShow,
-        layer,
-        isGraphShow,
-        toggleGraphShow: uiStateActions.toggleGraphShow
+        layer
       };
     }
   }
 
   return null;
+}
+
+export function renderDeckGlLayer(props, layerCallbacks, idx) {
+  const {
+    datasets,
+    layers,
+    layerData,
+    hoverInfo,
+    clicked,
+    mapState,
+    interactionConfig,
+    animationConfig
+  } = props;
+  const layer = layers[idx];
+  const data = layerData[idx];
+  const {gpuFilter} = datasets[layer.config.dataId] || {};
+
+  const objectHovered = clicked || hoverInfo;
+
+  // Layer is Layer class
+  return layer.renderLayer({
+    data,
+    gpuFilter,
+    idx,
+    interactionConfig,
+    layerCallbacks,
+    mapState,
+    animationConfig,
+    objectHovered
+  });
 }

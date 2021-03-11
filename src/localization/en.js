@@ -201,6 +201,7 @@ export default {
     hide: 'hide',
     show: 'show',
     removeLayer: 'Remove layer',
+    duplicateLayer: 'Duplicate layer',
     layerSettings: 'Layer settings',
     closePanel: 'Close current panel',
     switchToDualView: 'Switch to dual map view',
@@ -475,6 +476,7 @@ export default {
     altitude: 'altitude',
     icon: 'icon',
     geojson: 'geojson',
+    token: 'token',
     arc: {
       lat0: 'source lat',
       lng0: 'source lng',
@@ -516,7 +518,7 @@ export default {
     or: 'or'
   },
   geocoder: {
-    title: 'Enter an Address'
+    title: 'Enter an address or coordinates, ex 37.79,-122.40'
   },
   fieldSelector: {
     clearAll: 'Clear All',

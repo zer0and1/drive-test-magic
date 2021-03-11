@@ -18,9 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import { ascending, extent, histogram as d3Histogram, ticks } from 'd3-array';
+import {ascending, extent, histogram as d3Histogram, ticks} from 'd3-array';
 import keyMirror from 'keymirror';
+import {console as Console} from 'global/console';
 import get from 'lodash.get';
+import isEqual from 'lodash.isequal';
+
 import booleanWithin from '@turf/boolean-within';
 import { point as turfPoint } from '@turf/helpers';
 import { Decimal } from 'decimal.js';
@@ -1150,4 +1153,18 @@ export function filterDatasetCPU(state, dataId) {
   };
 
   return set(['datasets', dataId], cpuFilteredDataset, state);
+}
+
+/**
+ * Retrieve interval bins for time filter
+ * @type {typeof import('./filter-utils').getIntervalBins}
+ */
+export function getIntervalBins(filter) {
+  const {bins} = filter;
+  const interval = filter.plotType && filter.plotType.interval;
+  if (!interval || !bins || Object.keys(bins).length === 0) {
+    return null;
+  }
+  const values = Object.values(bins);
+  return values[0] ? values[0][interval] : null;
 }

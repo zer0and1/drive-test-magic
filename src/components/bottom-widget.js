@@ -25,8 +25,8 @@ import TimeWidgetFactory from './filters/time-widget';
 import GraphWidgetFactory from './common/graph-widget';
 import AnimationControlFactory from './common/animation-control/animation-control';
 import AnimationControllerFactory from './common/animation-control/animation-controller';
-import MinionSessionFactory from './minion-session';
-import {ANIMATION_WINDOW, FILTER_TYPES} from 'constants';
+import {ANIMATION_WINDOW, FILTER_TYPES} from 'constants/default-settings';
+import {getIntervalBins} from 'utils/filter-utils';
 
 const propTypes = {
   filters: PropTypes.arrayOf(PropTypes.object),
@@ -57,17 +57,9 @@ const BottomWidgetContainer = styled.div`
 
 FilterAnimationControllerFactory.deps = [AnimationControllerFactory];
 export function FilterAnimationControllerFactory(AnimationController) {
-  const FilterAnimationController = ({
-    filter = {},
-    filterIdx,
-    setFilterAnimationTime,
-    children
-  }) => {
-    const intervalBins = useMemo(() => {
-      const bins = filter && filter.bins;
-      const interval = filter.plotType && filter.plotType.interval;
-      return bins && Object.keys(bins).length && Object.values(bins)[0][interval];
-    }, [filter]);
+  const FilterAnimationController = ({filter = {}, filterIdx, setFilterAnimationTime, children}) => {
+    const intervalBins = useMemo(() => getIntervalBins(filter), [filter]);
+
     const steps = useMemo(() => (intervalBins ? intervalBins.map(x => x.x0) : null), [
       intervalBins
     ]);
@@ -132,16 +124,14 @@ BottomWidgetFactory.deps = [
   TimeWidgetFactory,
   AnimationControlFactory,
   FilterAnimationControllerFactory,
-  LayerAnimationControllerFactory,
-  MinionSessionFactory
+  LayerAnimationControllerFactory
 ];
 export default function BottomWidgetFactory(
   GraphWidget,
   TimeWidget,
   AnimationControl,
   FilterAnimationController,
-  LayerAnimationController,
-  MinionSession
+  LayerAnimationController
 ) {
   const BottomWidget = props => {
     const {
@@ -164,7 +154,9 @@ export default function BottomWidgetFactory(
       () => filters.findIndex(f => f.enlarged && f.type === FILTER_TYPES.timeRange),
       [filters]
     );
-    const animatedFilter = useMemo(() => filters.find(f => f.isAnimating), [filters]);
+    const animatedFilterIdx = useMemo(() => filters.findIndex(f => f.isAnimating), [filters]);
+    const animatedFilter = animatedFilterIdx > -1 ? filters[animatedFilterIdx] : null;
+
     const enlargedFilterWidth = isOpen ? containerW - sidePanelWidth : containerW;
 
     // show playback control if layers contain trip layer & at least one trip layer is visible
@@ -180,7 +172,6 @@ export default function BottomWidgetFactory(
     const showFloatingTimeDisplay = !animatableLayer.length;
     const showAnimationControl = animatableLayer.length && readyToAnimation;
     const showTimeWidget = enlargedFilterIdx > -1 && Object.keys(datasets).length > 0;
-    const showSessionWidget = uiState.activeSidePanel == 'minion';
     const selectedField = visState?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
 
     const layerId = visState?.layer?.id;
@@ -188,16 +179,16 @@ export default function BottomWidgetFactory(
     const allData = datasets[datasetName]?.allData
     const fields = datasets[datasetName]?.fields;
     
+    // if filter is not animating, pass in enlarged filter here because
+    // animation controller needs to call reset on it
+    const filter = animatedFilter || filters[enlargedFilterIdx];
+    
     return (
       <BottomWidgetContainer
         width={Math.min(maxWidth, enlargedFilterWidth)}
         className="bottom-widget--container"
-        hasPadding={showTimeWidget || showAnimationControl || showSessionWidget || isGraphShow}
+        hasPadding={showAnimationControl || showTimeWidget || isGraphShow}
       >
-        {showSessionWidget ? (
-          <MinionSession />
-        ) : null}
-        
         <LayerAnimationController
           animationConfig={animationConfig}
           setLayerAnimationTime={visStateActions.setLayerAnimationTime}
@@ -226,11 +217,8 @@ export default function BottomWidgetFactory(
           ) : null
         }
         <FilterAnimationController
-          /* pass if filter is not animating, pass in 
-           enlarged filter here because animation controller needs to call reset on it
-           we can */
-          filter={animatedFilter || filters[enlargedFilterIdx]}
-          filterIdx={enlargedFilterIdx}
+          filter={filter}
+          filterIdx={animatedFilterIdx > -1 ? animatedFilterIdx : enlargedFilterIdx}
           setFilterAnimationTime={visStateActions.setFilterAnimationTime}
         >
           {animationControlProps =>

@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import { withTask } from 'react-palm/tasks';
-import { default as Console } from 'global/console';
-import { generateHashId, getError, isPlainObject } from 'utils/utils';
+import {withTask} from 'react-palm/tasks';
+import {default as Console} from 'global/console';
+import {generateHashId, getError, isPlainObject} from 'utils/utils';
 import {
   EXPORT_FILE_TO_CLOUD_TASK,
   ACTION_TASK,
@@ -145,11 +145,11 @@ function _validateProvider(provider, method) {
 /**
  * @type {typeof import('./provider-state-updaters').createGlobalNotificationTasks}
  */
-function createGlobalNotificationTasks({ type, message, delayClose = true }) {
+function createGlobalNotificationTasks({type, message, delayClose = true}) {
   const id = generateHashId();
   const successNote = {
     id,
-    type: DEFAULT_NOTIFICATION_TYPES[type] || DEFAULT_NOTIFICATION_TYPES.success,
+    type: DEFAULT_NOTIFICATION_TYPES[type || ''] || DEFAULT_NOTIFICATION_TYPES.success,
     topic: DEFAULT_NOTIFICATION_TOPICS.global,
     message
   };
@@ -164,7 +164,7 @@ function createGlobalNotificationTasks({ type, message, delayClose = true }) {
  * @type {typeof import('./provider-state-updaters').exportFileToCloudUpdater}
  */
 export const exportFileToCloudUpdater = (state, action) => {
-  const { mapData, provider, options = {}, onSuccess, onError, closeModal } = action.payload;
+  const {mapData, provider, options = {}, onSuccess, onError, closeModal} = action.payload;
 
   if (!_validateProvider(provider, 'uploadMap')) {
     return state;
@@ -181,11 +181,11 @@ export const exportFileToCloudUpdater = (state, action) => {
     mapData,
     options
   };
-  const uploadFileTask = EXPORT_FILE_TO_CLOUD_TASK({ provider, payload }).bimap(
+  const uploadFileTask = EXPORT_FILE_TO_CLOUD_TASK({provider, payload}).bimap(
     // success
-    response => exportFileSuccess({ response, provider, options, onSuccess, closeModal }),
+    response => exportFileSuccess({response, provider, options, onSuccess, closeModal}),
     // error
-    error => exportFileError({ error, provider, options, onError })
+    error => exportFileError({error, provider, options, onError})
   );
 
   return withTask(newState, uploadFileTask);
@@ -196,7 +196,7 @@ export const exportFileToCloudUpdater = (state, action) => {
  * @type {typeof import('./provider-state-updaters').exportFileSuccessUpdater}
  */
 export const exportFileSuccessUpdater = (state, action) => {
-  const { response, provider, options = {}, onSuccess, closeModal } = action.payload;
+  const {response, provider, options = {}, onSuccess, closeModal} = action.payload;
 
   const newState = {
     ...state,
@@ -205,15 +205,15 @@ export const exportFileSuccessUpdater = (state, action) => {
     successInfo: response,
     ...(!options.isPublic
       ? {
-        mapSaved: provider.name
-      }
+          mapSaved: provider.name
+        }
       : {})
   };
 
   const tasks = [
-    createActionTask(onSuccess, { response, provider, options }),
+    createActionTask(onSuccess, {response, provider, options}),
     closeModal &&
-    ACTION_TASK().map(_ => postSaveLoadSuccess(`Map saved to ${state.currentProvider}!`))
+      ACTION_TASK().map(_ => postSaveLoadSuccess(`Map saved to ${state.currentProvider}!`))
   ].filter(d => d);
 
   return tasks.length ? withTask(newState, tasks) : newState;
@@ -229,7 +229,7 @@ export const postSaveLoadSuccessUpdater = (state, action) => {
   const tasks = [
     ACTION_TASK().map(_ => toggleModal(null)),
     ACTION_TASK().map(_ => resetProviderStatus()),
-    ...createGlobalNotificationTasks({ message })
+    ...createGlobalNotificationTasks({message})
   ];
 
   return withTask(state, tasks);
@@ -240,7 +240,7 @@ export const postSaveLoadSuccessUpdater = (state, action) => {
  * @type {typeof import('./provider-state-updaters').exportFileErrorUpdater}
  */
 export const exportFileErrorUpdater = (state, action) => {
-  const { error, provider, onError } = action.payload;
+  const {error, provider, onError} = action.payload;
 
   const newState = {
     ...state,
@@ -253,13 +253,13 @@ export const exportFileErrorUpdater = (state, action) => {
   }
 
   newState.providerError = getError(error);
-  const task = createActionTask(onError, { error, provider });
+  const task = createActionTask(onError, {error, provider});
 
   return task ? withTask(newState, task) : newState;
 };
 
 export const loadCloudMapUpdater = (state, action) => {
-  const { loadParams, provider, onSuccess, onError } = action.payload;
+  const {loadParams, provider, onSuccess, onError} = action.payload;
   if (!loadParams) {
     Console.warn('load map error: loadParams is undefined');
     return state;
@@ -275,11 +275,11 @@ export const loadCloudMapUpdater = (state, action) => {
   };
 
   // payload called by provider.downloadMap
-  const uploadFileTask = LOAD_CLOUD_MAP_TASK({ provider, payload: loadParams }).bimap(
+  const uploadFileTask = LOAD_CLOUD_MAP_TASK({provider, payload: loadParams}).bimap(
     // success
-    response => loadCloudMapSuccess({ response, loadParams, provider, onSuccess, onError }),
+    response => loadCloudMapSuccess({response, loadParams, provider, onSuccess, onError}),
     // error
-    error => loadCloudMapError({ error, provider, onError })
+    error => loadCloudMapError({error, provider, onError})
   );
 
   return withTask(newState, uploadFileTask);
@@ -324,7 +324,7 @@ function getDatasetHandler(format) {
 }
 
 function parseLoadMapResponse(response, loadParams, provider) {
-  const { map, format } = response;
+  const {map, format} = response;
   const processorMethod = getDatasetHandler(format);
 
   const parsedDatasets = toArray(map.datasets).map((ds, i) => {
@@ -332,9 +332,9 @@ function parseLoadMapResponse(response, loadParams, provider) {
       // no need to obtain id, directly pass them in
       return processorMethod(ds);
     }
-    const info = (ds && ds.info) || { id: generateHashId(6) };
+    const info = (ds && ds.info) || {id: generateHashId(6)};
     const data = processorMethod(ds.data || ds);
-    return { info, data };
+    return {info, data};
   });
 
   const info = {
@@ -345,7 +345,7 @@ function parseLoadMapResponse(response, loadParams, provider) {
   return {
     datasets: parsedDatasets,
     info,
-    ...(map.config ? { config: map.config } : {})
+    ...(map.config ? {config: map.config} : {})
   };
 }
 
@@ -354,13 +354,13 @@ function parseLoadMapResponse(response, loadParams, provider) {
  * @type {typeof import('./provider-state-updaters').loadCloudMapSuccessUpdater}
  */
 export const loadCloudMapSuccessUpdater = (state, action) => {
-  const { response, loadParams, provider, onSuccess, onError } = action.payload;
+  const {response, loadParams, provider, onSuccess, onError} = action.payload;
 
   const formatError = checkLoadMapResponseError(response);
   if (formatError) {
     // if response format is not correct
     return exportFileErrorUpdater(state, {
-      payload: { error: formatError, provider, onError }
+      payload: {error: formatError, provider, onError}
     });
   }
 
@@ -376,7 +376,7 @@ export const loadCloudMapSuccessUpdater = (state, action) => {
 
   const tasks = [
     ACTION_TASK().map(_ => addDataToMap(payload)),
-    createActionTask(onSuccess, { response, loadParams, provider }),
+    createActionTask(onSuccess, {response, loadParams, provider}),
     ACTION_TASK().map(_ => postSaveLoadSuccess(`Map from ${provider.name} loaded`))
   ].filter(d => d);
 
@@ -401,7 +401,7 @@ export const loadCloudMapErrorUpdater = (state, action) => {
 
   return withTask(
     newState,
-    createGlobalNotificationTasks({ type: 'error', message, delayClose: false })
+    createGlobalNotificationTasks({type: 'error', message, delayClose: false})
   );
 };
 
@@ -441,9 +441,9 @@ export const getSavedMapsUpdater = (state, action) => {
 
   const getSavedMapsTask = GET_SAVED_MAPS_TASK(provider).bimap(
     // success
-    visualizations => getSavedMapsSuccess({ visualizations, provider }),
+    visualizations => getSavedMapsSuccess({visualizations, provider}),
     // error
-    error => getSavedMapsError({ error, provider })
+    error => getSavedMapsError({error, provider})
   );
 
   return withTask(
@@ -483,7 +483,7 @@ export const getSavedMapsErrorUpdater = (state, action) => {
 
   return withTask(
     newState,
-    createGlobalNotificationTasks({ type: 'error', message, delayClose: false })
+    createGlobalNotificationTasks({type: 'error', message, delayClose: false})
   );
 };
 

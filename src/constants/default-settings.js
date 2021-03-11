@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import keyMirror from 'keymirror';
-import { EditorModes } from 'react-map-gl-draw';
+import {EditorModes} from 'react-map-gl-draw';
 
 import {
   scaleLinear,
@@ -42,9 +42,9 @@ import {
   Clipboard,
   Cancel
 } from 'components/common/icons';
-import { getHTMLMapModeTileUrl } from 'utils/utils';
-import { TOOLTIP_FORMAT_TYPES } from './tooltip';
-import { LAYER_TYPES } from 'layers/types';
+import {getHTMLMapModeTileUrl} from 'utils/utils';
+import {TOOLTIP_FORMAT_TYPES} from './tooltip';
+import {LAYER_TYPES} from 'layers/types';
 
 export const ACTION_PREFIX = '@@kepler.gl/';
 export const CLOUDFRONT = 'https://d1a3f4spazzrp4.cloudfront.net/kepler.gl';
@@ -182,9 +182,9 @@ export const DIMENSIONS = {
 
 /**
  * Theme name that can be passed to `KeplerGl` `prop.theme`.
- * Available themes are `Theme.light` and `Theme.dark`. Default theme is `Theme.dark`
+ * Available themes are `THEME.light` and `THEME.dark`. Default theme is `THEME.dark`
  * @constant
- * @type {string}
+ * @type {object}
  * @public
  * @example
  * ```js
@@ -233,32 +233,32 @@ export const PANELS = SIDEBAR_PANELS;
 export const DEFAULT_LAYER_GROUPS = [
   {
     slug: 'label',
-    filter: ({ id }) => id.match(/(?=(label|place-|poi-))/),
+    filter: ({id}) => id.match(/(?=(label|place-|poi-))/),
     defaultVisibility: true
   },
   {
     slug: 'road',
-    filter: ({ id }) => id.match(/(?=(road|railway|tunnel|street|bridge))(?!.*label)/),
+    filter: ({id}) => id.match(/(?=(road|railway|tunnel|street|bridge))(?!.*label)/),
     defaultVisibility: true
   },
   {
     slug: 'border',
-    filter: ({ id }) => id.match(/border|boundaries/),
+    filter: ({id}) => id.match(/border|boundaries/),
     defaultVisibility: false
   },
   {
     slug: 'building',
-    filter: ({ id }) => id.match(/building/),
+    filter: ({id}) => id.match(/building/),
     defaultVisibility: true
   },
   {
     slug: 'water',
-    filter: ({ id }) => id.match(/(?=(water|stream|ferry))/),
+    filter: ({id}) => id.match(/(?=(water|stream|ferry))/),
     defaultVisibility: true
   },
   {
     slug: 'land',
-    filter: ({ id }) => id.match(/(?=(parks|landcover|industrial|sand|hillshade))/),
+    filter: ({id}) => id.match(/(?=(parks|landcover|industrial|sand|hillshade))/),
     defaultVisibility: true
   },
   {
@@ -329,6 +329,7 @@ export const TRIP_ARC_FIELDS = {
 export const FILTER_TYPES = keyMirror({
   range: null,
   select: null,
+  input: null,
   timeRange: null,
   multiSelect: null,
   polygon: null
@@ -402,14 +403,14 @@ export const TABLE_OPTION_LIST = [
     icon: Cancel,
     condition: props => props.isSorted
   },
-  { value: TABLE_OPTION.PIN, display: 'Pin Column', icon: Pin, condition: props => !props.isPinned },
+  {value: TABLE_OPTION.PIN, display: 'Pin Column', icon: Pin, condition: props => !props.isPinned},
   {
     value: TABLE_OPTION.UNPIN,
     display: 'Unpin Column',
     icon: Cancel,
     condition: props => props.isPinned
   },
-  { value: TABLE_OPTION.COPY, display: 'Copy Column', icon: Clipboard }
+  {value: TABLE_OPTION.COPY, display: 'Copy Column', icon: Clipboard}
 ];
 
 const ORANGE = '248, 194, 28';
@@ -705,13 +706,13 @@ export const EXPORT_IMG_RATIO_OPTIONS = [
   {
     id: EXPORT_IMG_RATIOS.SCREEN,
     label: 'modal.exportImage.ratioOriginalScreen',
-    getSize: (screenW, screenH) => ({ width: screenW, height: screenH })
+    getSize: (screenW, screenH) => ({width: screenW, height: screenH})
   },
   {
     id: EXPORT_IMG_RATIOS.CUSTOM,
     hidden: true,
     label: 'modal.exportImage.ratioCustom',
-    getSize: (mapW, mapH) => ({ width: mapW, height: mapH })
+    getSize: (mapW, mapH) => ({width: mapW, height: mapH})
   },
   {
     id: EXPORT_IMG_RATIOS.FOUR_BY_THREE,
@@ -830,6 +831,9 @@ export const DEFAULT_NOTIFICATION_TOPICS = keyMirror({
   global: null,
   file: null
 });
+
+// Minimum time between identical notifications about deck.gl errors
+export const THROTTLE_NOTIFICATION_TIME = 2500;
 
 // Animation
 export const BASE_SPEED = 600;

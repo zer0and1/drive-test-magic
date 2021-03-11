@@ -31,10 +31,10 @@ import {
   filterDataset
 } from 'utils/filter-utils';
 
-import { getInitialMapLayersForSplitMap } from 'utils/split-map-utils';
-import { resetFilterGpuMode, assignGpuChannels } from 'utils/gpu-filter-utils';
-
-import { LAYER_BLENDINGS } from 'constants/default-settings';
+import {getInitialMapLayersForSplitMap} from 'utils/split-map-utils';
+import {resetFilterGpuMode, assignGpuChannels} from 'utils/gpu-filter-utils';
+import {LAYER_BLENDINGS} from 'constants/default-settings';
+import {CURRENT_VERSION, visStateSchema} from 'schemas';
 
 /**
  * Merge loaded filters with current state, if no fields or data are loaded
@@ -153,6 +153,31 @@ export function mergeFilters(state, filtersToMerge, filterIdx) {
     datasets: filtered,
     filterToBeMerged: [...state.filterToBeMerged, ...unmerged]
   };
+}
+
+export function createLayerFromConfig(state, layerConfig) {
+  // first validate config against dataset
+  const {validated, failed} = validateLayersByDatasets(state.datasets, state.layerClasses, [
+    layerConfig
+  ]);
+
+  if (failed.length || !validated.length) {
+    // failed
+    return null;
+  }
+
+  const newLayer = validated[0];
+  newLayer.updateLayerDomain(state.datasets);
+  return newLayer;
+}
+
+export function serializeLayer(newLayer) {
+  const savedVisState = visStateSchema[CURRENT_VERSION].save({
+    layers: [newLayer],
+    layerOrder: [0]
+  }).visState;
+  const loadedLayer = visStateSchema[CURRENT_VERSION].load(savedVisState).visState.layers[0];
+  return loadedLayer;
 }
 
 /**
@@ -530,20 +555,43 @@ export function validateSavedVisualChannels(fields, newLayer, savedLayer) {
   return newLayer;
 }
 
+export function validateLayersByDatasets(datasets, layerClasses, layers) {
+  const validated = [];
+  const failed = [];
+
+  layers.forEach(layer => {
+    let validateLayer;
+    if (!layer || !layer.config) {
+      validateLayer = null;
+    } else if (datasets[layer.config.dataId]) {
+      // datasets are already loaded
+      validateLayer = validateLayerWithData(datasets[layer.config.dataId], layer, layerClasses);
+    }
+
+    if (validateLayer) {
+      validated.push(validateLayer);
+    } else {
+      // datasets not yet loaded
+      failed.push(layer);
+    }
+  });
+
+  return {validated, failed};
+}
 /**
  * Validate saved layer config with new data,
  * update fieldIdx based on new fields
  * @type {typeof import('./vis-state-merger').validateLayerWithData}
  */
 export function validateLayerWithData(
-  { fields, id: dataId },
+  {fields, id: dataId},
   savedLayer,
   layerClasses,
   options = {}
 ) {
-  const { type } = savedLayer;
+  const {type} = savedLayer;
   // layer doesnt have a valid type
-  if (!layerClasses.hasOwnProperty(type) || !savedLayer.config || !savedLayer.config.columns) {
+  if (!type || !layerClasses.hasOwnProperty(type) || !savedLayer.config) {
     return null;
   }
 
@@ -561,7 +609,7 @@ export function validateLayerWithData(
   if (Object.keys(columnConfig).length) {
     const columns = validateSavedLayerColumns(fields, savedLayer.config.columns, columnConfig);
     if (columns) {
-      newLayer.updateLayerConfig({ columns });
+      newLayer.updateLayerConfig({columns});
     } else if (!options.allowEmptyColumn) {
       return null;
     }
@@ -581,7 +629,7 @@ export function validateLayerWithData(
   const visConfig = newLayer.copyLayerConfig(
     newLayer.config.visConfig,
     savedLayer.config.visConfig || {},
-    { shallowCopy: ['colorRange', 'strokeColorRange'] }
+    {shallowCopy: ['colorRange', 'strokeColorRange']}
   );
 
   newLayer.updateLayerConfig({
@@ -597,10 +645,10 @@ export function isValidMerger(merger) {
 }
 
 export const VIS_STATE_MERGERS = [
-  { merge: mergeLayers, prop: 'layers', toMergeProp: 'layerToBeMerged' },
-  { merge: mergeFilters, prop: 'filters', toMergeProp: 'filterToBeMerged' },
-  { merge: mergeInteractions, prop: 'interactionConfig', toMergeProp: 'interactionToBeMerged' },
-  { merge: mergeLayerBlending, prop: 'layerBlending' },
-  { merge: mergeSplitMaps, prop: 'splitMaps', toMergeProp: 'splitMapsToBeMerged' },
-  { merge: mergeAnimationConfig, prop: 'animationConfig' }
+  {merge: mergeLayers, prop: 'layers', toMergeProp: 'layerToBeMerged'},
+  {merge: mergeFilters, prop: 'filters', toMergeProp: 'filterToBeMerged'},
+  {merge: mergeInteractions, prop: 'interactionConfig', toMergeProp: 'interactionToBeMerged'},
+  {merge: mergeLayerBlending, prop: 'layerBlending'},
+  {merge: mergeSplitMaps, prop: 'splitMaps', toMergeProp: 'splitMapsToBeMerged'},
+  {merge: mergeAnimationConfig, prop: 'animationConfig'}
 ];

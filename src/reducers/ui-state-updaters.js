@@ -21,6 +21,7 @@
 // @ts-nocheck
 import {
   ADD_DATA_ID,
+  DATA_TABLE_ID,
   DEFAULT_NOTIFICATION_TOPICS,
   DELETE_DATA_ID,
   DELETE_FILTERED_DATA_ID,
@@ -670,10 +671,21 @@ export const setExportMapHTMLModeUpdater = (state, {payload: mode}) => ({
  * @type {typeof import('./ui-state-updaters').addNotificationUpdater}
  * @public
  */
-export const addNotificationUpdater = (state, {payload}) => ({
-  ...state,
-  notifications: [...(state.notifications || []), createNotification(payload)]
-});
+export const addNotificationUpdater = (state, {payload}) => {
+  let notifications;
+
+  const payloadId = payload?.id;
+  const notificationToUpdate = payloadId ? state.notifications.find(n => n.id === payloadId) : null;
+  if (notificationToUpdate) {
+    notifications = state.notifications.map(n =>
+      n.id === payloadId ? createNotification(payload) : n
+    );
+  } else {
+    notifications = [...(state.notifications || []), createNotification(payload)];
+  }
+
+  return {...state, notifications};
+};
 
 /**
  * Remove a notification
@@ -769,6 +781,16 @@ export const toggleSplitMapUpdater = state => ({
     {}
   )
 });
+
+/**
+ * Toggle modal data
+ * @memberof uiStateUpdaters
+ * @param state
+ * @returns nextState
+ * @type {typeof import('./ui-state-updaters').showDatasetTableUpdater}
+ * @public
+ */
+export const showDatasetTableUpdater = state => toggleModalUpdater(state, {payload: DATA_TABLE_ID});
 
 /**
  * Set the locale of the UI

@@ -18,14 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { css } from 'styled-components';
-import { findDOMNode } from 'react-dom';
-import { createSelector } from 'reselect';
+import {css} from 'styled-components';
+import {findDOMNode} from 'react-dom';
+import {createSelector} from 'reselect';
 import get from 'lodash.get';
 import document from 'global/document';
 
+import {EXPORT_DATA_TYPE_OPTIONS} from 'constants/default-settings';
 import ModalDialogFactory from './modals/modal-dialog';
 import { exportJson, exportHtml, exportData, exportImage, exportMap } from 'utils/export-utils';
 import { isValidMapInfo } from 'utils/map-info-utils';
@@ -46,7 +47,7 @@ import ShareMapModalFactory from './modals/share-map-modal';
 import InputTokenModalFactory from './modals/input-token-modal';
 
 // Breakpoints
-import { media } from 'styles/media-breakpoints';
+import {media} from 'styles/media-breakpoints';
 
 // Template
 import {
@@ -64,9 +65,9 @@ import {
   OVERWRITE_MAP_ID,
   INPUT_USER_TOKEN_ID
 } from 'constants/default-settings';
-import { EXPORT_MAP_FORMATS } from 'constants/default-settings';
+import {EXPORT_MAP_FORMATS} from 'constants/default-settings';
 import KeyEvent from 'constants/keyevent';
-import { getFileFormatNames, getFileExtensions } from '../reducers/vis-state-selectors';
+import {getFileFormatNames, getFileExtensions} from '../reducers/vis-state-selectors';
 
 const DataTableModalStyle = css`
   top: 80px;
@@ -76,12 +77,10 @@ const DataTableModalStyle = css`
 
   ${media.portable`
     padding: 0;
-  `}
-
-  ${media.palm`
+  `} ${media.palm`
     padding: 0;
     margin: 0 auto;
-  `}
+  `};
 `;
 const smallModalCss = css`
   width: 40%;
@@ -213,8 +212,8 @@ export default function ModalContainerFactory(
     };
 
     _onExportMap = () => {
-      const { uiState } = this.props;
-      const { format } = uiState.exportMap;
+      const {uiState} = this.props;
+      const {format} = uiState.exportMap;
       (format === EXPORT_MAP_FORMATS.HTML ? exportHtml : exportJson)(
         this.props,
         this.props.uiState.exportMap[format] || {}
@@ -222,7 +221,7 @@ export default function ModalContainerFactory(
       this._closeModal();
     };
 
-    _exportFileToCloud = ({ provider, isPublic, overwrite, closeModal }) => {
+    _exportFileToCloud = ({provider, isPublic, overwrite, closeModal}) => {
       const toSave = exportMap(this.props);
 
       this.props.providerActions.exportFileToCloud({
@@ -240,7 +239,7 @@ export default function ModalContainerFactory(
     };
 
     _onSaveMap = (overwrite = false) => {
-      const { currentProvider } = this.props.providerState;
+      const {currentProvider} = this.props.providerState;
       // @ts-ignore
       const provider = this.props.cloudProviders.find(p => p.name === currentProvider);
       this._exportFileToCloud({
@@ -256,7 +255,7 @@ export default function ModalContainerFactory(
     };
 
     _onShareMapUrl = provider => {
-      this._exportFileToCloud({ provider, isPublic: true, overwrite: false, closeModal: false });
+      this._exportFileToCloud({provider, isPublic: true, overwrite: false, closeModal: false});
     };
 
     _onCloseSaveMap = () => {
@@ -289,8 +288,8 @@ export default function ModalContainerFactory(
         authStateActions,
         providerState
       } = this.props;
-      const { currentModal, datasetKeyToRemove, datasetKeyToDetete, datasetKeyToUpdate } = uiState;
-      const { datasets, layers, editingDataset } = visState;
+      const {currentModal, datasetKeyToRemove, datasetKeyToDetete, datasetKeyToUpdate} = uiState;
+      const {datasets, layers, editingDataset} = visState;
 
       let template = null;
       let modalProps = {};
@@ -326,7 +325,7 @@ export default function ModalContainerFactory(
               ${DataTableModalStyle};
               ${media.palm`
                 width: ${width}px;
-              `}
+              `};
             `;
             break;
           case DELETE_DATA_ID:
@@ -455,6 +454,7 @@ export default function ModalContainerFactory(
             template = (
               <ExportDataModal
                 {...uiState.exportData}
+                supportedDataTypes={EXPORT_DATA_TYPE_OPTIONS}
                 datasets={datasets}
                 applyCPUFilter={this.props.visStateActions.applyCPUFilter}
                 onClose={this._closeModal}

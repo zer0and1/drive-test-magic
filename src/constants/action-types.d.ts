@@ -20,14 +20,16 @@ export type ActionType = {
   MOUSE_MOVE: string;
   REMOVE_FILTER: string;
   REMOVE_LAYER: string;
+  DUPLICATE_LAYER: string;
   REMOVE_DATASET: string;
   REORDER_LAYER: string;
   SET_FILTER: string;
-  SET_FILTER_ANIMATION_TIME:  string;
+  SET_FILTER_ANIMATION_TIME: string;
   SET_FILTER_ANIMATION_WINDOW: string;
   SHOW_DATASET_TABLE: string;
   UPDATE_LAYER_BLENDING: string;
   UPDATE_VIS_DATA: string;
+  RENAME_DATASET: string;
   TOGGLE_FILTER_ANIMATION: string;
   UPDATE_FILTER_ANIMATION_SPEED: string;
   PLAY_ANIMATION: string;
