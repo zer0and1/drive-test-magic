@@ -315,6 +315,7 @@ function KeplerGlFactory(
         layerBlending,
         onSaveMap,
         uiState,
+        mapState,
         minionState,
         mapStyleActions,
         mapProfileActions,

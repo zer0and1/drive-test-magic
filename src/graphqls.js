@@ -5,6 +5,7 @@ query MyQuery {
   signal_db_minions {
     id
     name
+    type
     lastupdate
     gps_fix_lastupdate
     gps_fix

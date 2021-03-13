@@ -80,9 +80,9 @@ export const secondaryBtnActColor = '#FFFFFF';
 export const secondaryBtnBgdHover = '#A0A7B4';
 export const secondaryBtnBorder = '0';
 
-export const ctaBtnBgd = '#0F9668';
-export const ctaBtnBgdHover = '#13B17B';
-export const ctaBtnActBgd = '#13B17B';
+export const ctaBtnBgd = activeColor;
+export const ctaBtnBgdHover = activeColorHover;
+export const ctaBtnActBgd = activeColor;
 export const ctaBtnColor = '#FFFFFF';
 export const ctaBtnActColor = '#FFFFFF';
 

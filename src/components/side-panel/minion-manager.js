@@ -27,6 +27,14 @@ import moment from 'moment-timezone';
 import $ from 'jquery';
 import JqxGrid, { jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxgrid';
 import JqxSplitter from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxsplitter';
+import JqxWindow from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxwindow';
+import JqxInput from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxinput';
+import JqxDropDownList from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxdropdownlist';
+import { Button, SidePanelSection } from 'components/common/styled-components';
+import { Settings, Add, Trash, Picker } from 'components/common/icons';
+import { FormattedMessage } from 'localization';
+
+import WebMercatorViewport from 'viewport-mercator-project';
 
 import GPSGroupFactory from './minion-panel/gps-group';
 import SignalSampleGroupFactory from './minion-panel/signal-sample-group';
@@ -67,6 +75,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       command: PropTypes.string,
       isCommandExecuting: PropTypes.bool,
       details: PropTypes.object,
+      mapState: PropTypes.object,
       minions: PropTypes.array
     };
 
@@ -75,12 +84,19 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     };
 
     timeoutId = 0;
-    panelRatio = 0.2;
+    panelRatio = 0.3;
     sortCol = null;
     sortDir = null;
     isResizingPanel = false;
     isSelectingAll = false;
     isUnselectingAll = false;
+    selectedMinion = null;
+
+    minSettingWnd = createRef();
+    minionName = createRef();
+    minionType = createRef();
+    latitude = createRef();
+    longitude = createRef();
 
     strRenderer(row, columnproperties, value) {
       return `<div style='text-align: center; margin-top: 5px;'>${value}</div>`
@@ -127,6 +143,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       this.props.removeMarker();
       this.props.selectMinion([]);
       this.props.setLoopingEnabled(false);
+      this.closeWindow();
       this._mounted = false;
     }
 
@@ -138,13 +155,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
       if (nextProps.isSelectingAll) {
         this.refs.minionGrid.selectallrows();
-        // this.props.selectMinion(minions.filter(m => targetMinions.findIndex(tm => tm.name == m.name) >= 0));
         this.props.selectMinion(minions);
       }
 
       if (nextProps.isUnselectingAll) {
-        // targetMinions.forEach((_, idx) => this.refs.minionGrid.unselectrow(idx));
-        // this.props.selectMinion(minions.filter(m => targetMinions.findIndex(tm => tm.name == m.name) < 0));
         this.refs.minionGrid.clearselection();
         this.props.selectMinion([]);
       }
@@ -173,6 +187,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
       if (minions.length == 1) {
         $('#minion-group').LoadingOverlay('show');
+        this.selectedMinion = minions[0];
         this.props.loadMinions();
       }
     }
@@ -194,8 +209,79 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       }
     }
 
+    openWindow() {
+      this.minSettingWnd.current?.open();
+      this.minSettingWnd.current?.move(460, 20);
+    }
+
+    closeWindow() {
+      this.minSettingWnd.current?.close();
+    }
+
+    addButtonClick() {
+      this.latitude.current.val('0');
+      this.longitude.current.val('0');
+      this.minionName.current.val('dt-minion-x');
+      this.minionType.current.val('fixed');
+      
+      this.openWindow();
+    }
+
+    editButtonClick() {
+      const {longitude, latitude, name, type} = this.props.details;
+      this.latitude.current.val(latitude);
+      this.longitude.current.val(longitude);
+      this.minionName.current.val(name);
+      this.minionType.current.val(type);
+      this.openWindow();
+    }
+
+    deleteButtonClick() {
+
+    }
+    
+    pickerButtonClick() {
+      if (this.minionType.current.val() == 'mobile') {
+        return;
+      }
+
+      const overlay = document.getElementById('default-deckgl-overlay');
+      overlay.style.cursor = 'crosshair';
+      
+      const mousedownHandler = ({x, y, button}) => {
+        this.clicked = (button == 0 ? { x, y } : { x: -1, y: -1 });
+      };
+      const mouseupHandler = ({x, y}) => {
+        if (this.clicked.x == x && this.clicked.y == y) {
+          overlay.style.cursor = 'grab';
+
+          const viewport = new WebMercatorViewport(this.props.mapState);
+          const [lng, lat] = viewport.unproject([x, y]);
+          this.latitude.current?.val(lat);
+          this.longitude.current?.val(lng);
+        }
+        else {
+          overlay.addEventListener('mousedown', mousedownHandler, { once: true });
+          overlay.addEventListener('mouseup', mouseupHandler, { once: true });
+        }
+      };
+
+      overlay.addEventListener('mousedown', mousedownHandler, { once: true });
+      overlay.addEventListener('mouseup', mouseupHandler, { once: true });
+    }
+
+    saveButtonClick() {
+      this.closeWindow();
+    }
+
+    cancelButtonClick() {
+      this.closeWindow();
+    }
+
     render() {
-      const { width, height, selectedMinions, minions } = this.props;
+      const { width, height, selectedMinions, minions, details } = this.props;
+      const editable = selectedMinions.length != 1 || !Object.keys(details).length;
+
       const commandGroupFields = {
         sleepInterval: this.props.sleepInterval,
         operationMode: this.props.operationMode,
@@ -220,7 +306,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         setMqttMessage: this.props.setMqttMessage,
         loadMinionCommand: this.props.loadMinionCommand,
       };
-      
+
       return (
         <div className="minion-manager">
           <JqxSplitter
@@ -239,6 +325,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 ref={'minionGrid'}
                 width={'100%'}
                 height={'100%'}
+                style={{ paddingBottom: '35px' }}
                 theme={'metrodark'}
                 source={new jqx.dataAdapter({
                   localdata: minions,
@@ -246,6 +333,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                   datafields: [
                     { name: 'id', type: 'int' },
                     { name: 'name', type: 'string' },
+                    { name: 'type', type: 'string' },
                     { name: 'lastupdate', type: 'date' },
                     { name: 'gps_fix_lastupdate', type: 'date' },
                     { name: 'operation_mode', type: 'string' }
@@ -273,13 +361,115 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 }}
                 onBindingcomplete={() => this.refs.minionGrid.sortby(this.sortCol, this.sortDir)}
               />
+              <SidePanelSection style={{ height: '35px', padding: '5px', marginTop: '-35px' }}>
+                <Button primary style={{padding: '5px'}} onClick={this.addButtonClick.bind(this)}>
+                  <Add height="12px" />
+                  Add
+                </Button>
+                <Button 
+                  cta 
+                  style={{ marginLeft: '5px', padding: '5px' }} 
+                  onClick={this.editButtonClick.bind(this)}
+                  disabled={editable}
+                >
+                  <Settings height="12px" />
+                  Edit
+                </Button>
+                <Button 
+                  negative 
+                  distabled={editable}
+                  style={{ padding: '5px 5px 5px 11px', float: 'right', textAlign: 'center' }} 
+                  onClick={this.deleteButtonClick.bind(this)}
+                >
+                  <Trash height="15px" />
+                </Button>
+              </SidePanelSection>
             </div>
             <StyledMinionGroup className={"splitter-panel"} id="minion-group">
-              <GPSGroup data={this.props.details} disabled={selectedMinions.length > 1} />
-              <MinionSignalSampleGroup data={this.props.details} disabled={selectedMinions.length > 1} />
+              <GPSGroup data={details} disabled={selectedMinions.length > 1} />
+              <MinionSignalSampleGroup data={details} disabled={selectedMinions.length > 1} />
               <CommandGroup {...commandGroupFields} {...commandGroupActions} />
             </StyledMinionGroup>
           </JqxSplitter>
+          <JqxWindow ref={this.minSettingWnd} theme={"metrodark"} width={250} height={200} autoOpen={false} resizable={false}>
+            <div>Minion Edit</div>
+            <div style={{ overflow: 'hidden' }}>
+              <table>
+                <tbody>
+                  <tr>
+                    <td align={'right'}>Name:</td>
+                    <td align={'left'} colspan={'2'}>
+                      <JqxInput theme={"metrodark"} ref={this.minionName} width={150} height={23} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align={'right'}>Type:</td>
+                    <td align={'left'} colspan={'2'}>
+                      <JqxDropDownList 
+                        theme={"metrodark"} 
+                        ref={this.minionType} 
+                        width={150} 
+                        height={23} 
+                        autoDropDownHeight={true}
+                        source={['mobile', 'fixed']}
+                        onChange={({args: {item: {value}}}) => {
+                          if (value == 'mobile') {
+                            this.latitude.current?.setOptions({ disabled: true });
+                            this.longitude.current?.setOptions({ disabled: true });
+                          }
+                          else {
+                            this.latitude.current?.setOptions({ disabled: false });
+                            this.longitude.current?.setOptions({ disabled: false });
+                          }
+                        }}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align={'right'}>Latitude:</td>
+                    <td align={'left'}>
+                      <JqxInput theme={"metrodark"} ref={this.latitude} width={100} height={23} />
+                    </td>
+                    <td rowspan={'2'}>
+                      <Button 
+                        link 
+                        style={{padding: '5px 0px', border: '2px solid gray', borderRadius: '5px'}}
+                        onClick={this.pickerButtonClick.bind(this)}
+                      >
+                        <Picker height={'30px'} style={{margin: '0px', fill: 'currentcolor'}}/>
+                      </Button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align={'right'}>Longitude:</td>
+                    <td align={'left'}>
+                      <JqxInput theme={"metrodark"} ref={this.longitude} width={100} height={23} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align={'right'} />
+                    <td style={{ paddingTop: '10px' }} align={'right'} colspan={'2'}>
+                      <Button 
+                        style={{ display: 'inline-block', marginRight: '5px' }} 
+                        width={50}
+                        onClick={this.saveButtonClick.bind(this)}
+                      >
+                        Save
+                      </Button>
+                      <Button 
+                        style={{ display: 'inline-block', marginRight: '5px' }} 
+                        width={50}
+                        secondary
+                        onClick={this.cancelButtonClick.bind(this)}
+                      >
+                        Cancel
+                      </Button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </JqxWindow>
         </div>
       );
     }

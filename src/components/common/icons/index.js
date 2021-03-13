@@ -72,6 +72,7 @@ export {default as Minus} from './minus';
 export {default as Minion} from './minion';
 export {default as Messages} from './messages';
 export {default as Pause} from './pause';
+export {default as Picker} from './picker';
 export {default as Picture} from './picture';
 export {default as Pin} from './pin';
 export {default as Place} from './place';

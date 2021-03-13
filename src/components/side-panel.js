@@ -206,6 +206,7 @@ export default function SidePanelFactory(
         layerBlending,
         layerClasses,
         uiState,
+        mapState,
         minionState,
         authState,
         layerOrder,
@@ -368,6 +369,7 @@ export default function SidePanelFactory(
                     {...minionManagerActions}
                     {...minionState}
                     {...authState}
+                    mapState={mapState}
                     width={this.props.width}
                     height={this.props.height - 54/*header*/ - 30 /*toggler*/ - 16 /*top-padding*/ - 48/*title*/}
                   />
