@@ -33,7 +33,7 @@ module.exports = {
     app: resolve('./src/main.js')
   },
   output: {
-    path: resolve(__dirname, 'build'),
+    path: resolve(__dirname, 'dist'),
     publicPath: '/',
     filename: 'bundle.js'
   },
