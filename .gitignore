@@ -1,6 +1,6 @@
 node_modules/
-dist/
-build/
+dist/bundle*.js
+dist/bundle*.js.map
 yarn-error.log
 package-lock.json
 
@@ -8,6 +8,5 @@ package-lock.json
 .idea
 .vscode/
 
-/bundle*.js
 
 npm-debug.log
