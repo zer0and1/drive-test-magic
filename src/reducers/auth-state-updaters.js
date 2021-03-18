@@ -22,7 +22,7 @@ import { disableStackCapturing, withTask } from 'react-palm/tasks';
 import { AUTH_SEVER_API_URL } from 'constants/default-settings';
 import { AXIOS_REQUEST_TASK, ACTION_TASK } from 'tasks/tasks';
 import { getAuthInfoSuccess, getAuthInfoError } from 'actions/auth-state-actions';
-import { loadStaticData, loadMinions } from 'actions/minion-state-actions';
+import { loadMinionCommand, loadMinions } from 'actions/minion-state-actions';
 import { loadProfile } from 'actions/map-profile-actions';
 
 import { ApolloClient, InMemoryCache } from '@apollo/client';
@@ -111,9 +111,6 @@ export const getAuthInfoUpdater = (state, { userToken }) => {
       url: AUTH_SEVER_API_URL,
       data: {
         user_token: userToken
-      },
-      headers: {
-        'Access-Control-Allow-Origin': 'http://localhost:8080,http://kminion.herokuapp.com'
       }
     }).bimap(
       res => getAuthInfoSuccess(res.data),
@@ -160,7 +157,7 @@ export const getAuthInfoSuccessUpdater = (state, { info, disabledReloading }) =>
   else {
     const tasks = [
       ACTION_TASK().map(_ => loadMinions(true)),
-      role != 'not-allowed' && ACTION_TASK().map(_ => loadStaticData()),
+      role != 'not-allowed' && ACTION_TASK().map(_ => loadMinionCommand()),
       role != 'not-allowed' && ACTION_TASK().map(_ => loadProfile())
     ].filter(d => d);
   
