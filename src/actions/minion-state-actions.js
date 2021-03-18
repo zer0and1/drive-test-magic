@@ -83,13 +83,6 @@ export function selectMinion(minions) {
   };
 }
 
-export function unselectMinion(name) {
-  return {
-    type: ActionTypes.UNSELECT_MINION,
-    name
-  };
-}
-
 /**
  * Set minion operation mode
  * @memberof minionStateActions
@@ -195,16 +188,16 @@ export function setMqttMessage(topic, message) {
   };
 }
 
-export function loadMinionCommand() {
+export function loadStaticData() {
   return {
-    type: ActionTypes.LOAD_MINION_COMMAND
+    type: ActionTypes.LOAD_STATIC_DATA
   }
 }
 
-export function loadMinionCommandSuccess(commands) {
+export function loadStaticDataSuccess(data) {
   return {
-    type: ActionTypes.LOAD_MINION_COMMAND_SUCCESS,
-    commands
+    type: ActionTypes.LOAD_STATIC_DATA_SUCCESS,
+    data
   }
 };
 
@@ -256,6 +249,28 @@ export function deleteFilteredDataError(error) {
     error
   }
 };
+
+export function updateMinion(data) {
+  return {
+    type: ActionTypes.UPDATE_MINION,
+    data
+  }
+}
+
+export function addMinion(data) {
+  return {
+    type: ActionTypes.ADD_MINION,
+    data
+  }
+}
+
+export function deleteMinion(name) {
+  return {
+    type: ActionTypes.DELETE_MINION,
+    name
+  }
+}
+
 /**
  * This declaration is needed to group actions in docs
  */

@@ -233,16 +233,9 @@ export default function SidePanelFactory(
       };
 
       const minionManagerActions = {
-        updateVisData: visStateActions.updateVisData,
-        onMouseMove: visStateActions.onMouseMove,
-        updateMap: mapStateActions.updateMap,
-        addMarker: visStateActions.addMarker,
-        removeMarker: visStateActions.removeMarker,
-
         setLoopingEnabled: minionStateActions.setLoopingEnabled,
         loadMinions: minionStateActions.loadMinions,
         selectMinion: minionStateActions.selectMinion,
-        unselectMinion: minionStateActions.unselectMinion,
         setOperationMode: minionStateActions.setOperationMode,
         setSleepInterval: minionStateActions.setSleepInterval,
         setSessionId: minionStateActions.setSessionId,
@@ -251,7 +244,10 @@ export default function SidePanelFactory(
         sendCommand: minionStateActions.sendCommand,
         setMqttClient: minionStateActions.setMqttClient,
         setMqttMessage: minionStateActions.setMqttMessage,
-        loadMinionCommand: minionStateActions.loadMinionCommand,
+        loadStaticData: minionStateActions.loadStaticData,
+        addMinion: minionStateActions.addMinion,
+        updateMinion: minionStateActions.updateMinion,
+        deleteMinion: minionStateActions.deleteMinion
       };
 
       const layerManagerActions = {

@@ -33,7 +33,6 @@ const actionHandler = {
   [ActionTypes.LOAD_MINIONS_ERROR]: minionStateUpdaters.loadMinionsErrorUpdater,
   [ActionTypes.SET_SLEEP_INTERVAL]: minionStateUpdaters.setSleepIntervalUpdater,
   [ActionTypes.SELECT_MINION]: minionStateUpdaters.selectMinionUpdater,
-  [ActionTypes.UNSELECT_MINION]: minionStateUpdaters.unselectMinionUpdater,
   [ActionTypes.SET_OPERATION_MODE]: minionStateUpdaters.setOperationModeUpdater,
   [ActionTypes.SET_SESSION_ID]: minionStateUpdaters.setSessionIdUpdater,
   [ActionTypes.SEND_SESSION_COMMAND]: minionStateUpdaters.sendSessionCommandUpdater,
@@ -41,8 +40,8 @@ const actionHandler = {
   [ActionTypes.SEND_COMMAND]: minionStateUpdaters.sendCommandUpdater,
   [ActionTypes.SET_MQTT_CLIENT]: minionStateUpdaters.setMqttClientUpdater,
   [ActionTypes.SET_MQTT_MESSAGE]: minionStateUpdaters.setMqttMessageUpdater,
-  [ActionTypes.LOAD_MINION_COMMAND]: minionStateUpdaters.loadMinionCommandUpdater,
-  [ActionTypes.LOAD_MINION_COMMAND_SUCCESS]: minionStateUpdaters.loadMinionCommandSuccessUpdater,
+  [ActionTypes.LOAD_STATIC_DATA]: minionStateUpdaters.loadStaticDataUpdater,
+  [ActionTypes.LOAD_STATIC_DATA_SUCCESS]: minionStateUpdaters.loadStaticDataSuccessUpdater,
   [ActionTypes.SELECT_ALL]: minionStateUpdaters.selectAllUpdater,
   [ActionTypes.EXPAND]: minionStateUpdaters.expandUpdater,
   [ActionTypes.COLLAPSE]: minionStateUpdaters.collapseUpdater,
@@ -50,6 +49,9 @@ const actionHandler = {
   [ActionTypes.DELETE_FILTERED_DATA]: minionStateUpdaters.deleteFilteredDataUpdater,
   [ActionTypes.DELETE_FILTERED_DATA_SUCCESS]: minionStateUpdaters.deleteFilteredDataSuccessUpdater,
   [ActionTypes.DELETE_FILTERED_DATA_ERROR]: minionStateUpdaters.deleteFilteredDataErrorUpdater,
+  [ActionTypes.ADD_MINION]: minionStateUpdaters.addMinionUpdater,
+  [ActionTypes.UPDATE_MINION]: minionStateUpdaters.updateMinionUpdater,
+  [ActionTypes.DELETE_MINION]: minionStateUpdaters.deleteMinionUpdater,
 };
 
 // construct vis-state reducer

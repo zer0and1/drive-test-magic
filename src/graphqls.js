@@ -6,6 +6,7 @@ query MyQuery {
     id
     name
     type
+    antenna_type
     lastupdate
     gps_fix_lastupdate
     gps_fix
@@ -61,10 +62,13 @@ query MyQuery {
 }
 `;
 
-export const GQL_GET_MINION_COMMANDS = () => gql`
+export const GQL_GET_STATIC_DATA = () => gql`
 query MyQuery {
   signal_db_minion_commands {
     id, command
+  }
+  signal_db_antennas {
+    id, antenna_type
   }
 }
 `;
@@ -208,6 +212,84 @@ mutation {
     where: { date: { _in: [${datesToDelete.toString()}] } }
   ) {
     affected_rows
+  }
+}
+`;
+
+
+export const GQL_INSERT_MINION = () => gql`
+mutation($name: String!, $longitude: String, $latitude: String, $type: String, $antenna: String) {
+  insert_signal_db_minions_one(
+    object: {
+      name: $name,
+      longitude: $longitude,
+      latitude: $latitude,
+      type: $type,
+      antenna_type: $antenna
+    }
+  ) {
+    id
+    name
+    type
+    antenna_type
+    lastupdate
+    gps_fix_lastupdate
+    gps_fix
+    session_id
+    operation_mode
+    longitude
+    latitude
+    gps_sat
+    gps_precision
+    command
+    command_id
+    command_id_ack
+    sleep_interval
+    aux
+  }
+}
+`;
+
+export const GQL_UPDATE_MINION = () => gql`
+mutation($id: integer!, $name: String!, $longitude: String, $latitude: String, $type: String, $antenna: String) {
+  update_signal_db_profiles_by_pk (
+    pk_columns: {id: $id}
+    _set: {
+      name: $name,
+      longitude: $longitude,
+      latitude: $latitude,
+      type: $type,
+      antenna_type: $antenna
+    }
+  ) {
+    id
+    name
+    type
+    antenna_type
+    lastupdate
+    gps_fix_lastupdate
+    gps_fix
+    session_id
+    operation_mode
+    longitude
+    latitude
+    gps_sat
+    gps_precision
+    command
+    command_id
+    command_id_ack
+    sleep_interval
+    aux
+  }
+}
+`;
+
+export const GQL_DELETE_MINION = () => gql`
+mutation($id: Integer!) {
+  delete_signal_db_mobiles_by_pk (
+    id: $id
+  ) {
+    id
   }
 }
 `;

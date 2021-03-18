@@ -28,7 +28,7 @@ import {
 
 import {
   GQL_GET_MINIONS,
-  GQL_GET_MINION_COMMANDS,
+  GQL_GET_STATIC_DATA,
   GQL_DELETE_SIGNAL_SAMPLES
 } from 'graphqls';
 
@@ -36,7 +36,7 @@ import {
   loadMinions,
   loadMinionsSuccess,
   loadMinionsError,
-  loadMinionCommandSuccess,
+  loadStaticDataSuccess,
   deleteFilteredDataSuccess,
   deleteFilteredDataError
 } from 'actions/minion-state-actions';
@@ -113,6 +113,7 @@ export const INITIAL_MINION_STATE = {
   lastAck: {},
   command: null,
   commands: [],
+  antennas: [],
   isCommandExecuting: false,
   mqttClient: null,
   mqttMessage: null,
@@ -120,8 +121,7 @@ export const INITIAL_MINION_STATE = {
   selectedAll: false,
   markerScale: 'large',
   loopingEnabled: false,
-  minions: [],
-  loadingMinionName: null
+  minions: []
 };
 
 export function setLoopingEnabledUpdater(state, { enabled }) {
@@ -193,7 +193,7 @@ export function calcLevel(val, factor, type) {
  *
  */
 export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
-  const { selectedMinions, loopingEnabled, loadingMinionName } = state;
+  const { selectedMinions, loopingEnabled } = state;
   let newState = {
     ...state,
     isLoadingMinions: false,
@@ -293,21 +293,6 @@ export function selectMinionUpdater(state, { minions }) {
     isSelectingAll: false,
     isUnselectingAll: false,
     selectedMinions: minions
-  };
-}
-
-/**
- * Set selected minion's name and index
- * @type {typeof import('./minion-state-updaters').selectMinionUpdater}
- *
- */
-export function unselectMinionUpdater(state, { name }) {
-  const selectedMinions = state.selectedMinions.filter(m => m.name != name);
-
-  return {
-    ...state,
-    selectedMinions,
-    selectedAll: selectedMinions.length != 1
   };
 }
 
@@ -478,20 +463,21 @@ export function setMqttMessageUpdater(state, { mqttTopic: topic, mqttMessage: pa
   };
 }
 
-export function loadMinionCommandUpdater(state) {
-  const query = GQL_GET_MINION_COMMANDS();
+export function loadStaticDataUpdater(state) {
+  const query = GQL_GET_STATIC_DATA();
   const task = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
-    res => loadMinionCommandSuccess(res.data.signal_db_minion_commands),
+    res => loadStaticDataSuccess(res.data),
     err => { }
   );
 
   return withTask(state, task);
 }
 
-export function loadMinionCommandSuccessUpdater(state, { commands }) {
+export function loadStaticDataSuccessUpdater(state, { data }) {
   return {
     ...state,
-    commands: commands.map(c => c.command)
+    commands: data.signal_db_minion_commands.map(c => c.command),
+    antennas: data.signal_db_antennas.map(a => a.antenna_type)
   }
 }
 
@@ -607,4 +593,17 @@ export function deleteFilteredDataErrorUpdater(state, { error }) {
   ];
 
   return withTask(state, tasks);
+};
+
+export function addMinionUpdater(state, {data}) {
+  console.log(data);
+  return state;
+};
+
+export function updateMinionUpdater(state,  {name, data}) {
+  return state;
+};
+
+export function deleteMinionUpdater(state, {name}) {
+  return state;
 };
