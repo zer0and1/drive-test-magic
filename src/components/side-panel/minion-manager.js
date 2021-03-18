@@ -54,6 +54,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
   class MinionManager extends Component {
     static propTypes = {
+      removeMarker: PropTypes.func.isRequired,
       setLoopingEnabled: PropTypes.func.isRequired,
       loadMinions: PropTypes.func.isRequired,
       selectMinion: PropTypes.func.isRequired,

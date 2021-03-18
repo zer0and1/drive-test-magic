@@ -233,6 +233,7 @@ export default function SidePanelFactory(
       };
 
       const minionManagerActions = {
+        removeMarker: visStateActions.removeMarker,
         setLoopingEnabled: minionStateActions.setLoopingEnabled,
         loadMinions: minionStateActions.loadMinions,
         selectMinion: minionStateActions.selectMinion,
