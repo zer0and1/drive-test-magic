@@ -111,6 +111,9 @@ export const getAuthInfoUpdater = (state, { userToken }) => {
       url: AUTH_SEVER_API_URL,
       data: {
         user_token: userToken
+      },
+      headers: {
+        'Access-Control-Allow-Origin': 'http://localhost:8080,http://kminion.herokuapp.com'
       }
     }).bimap(
       res => getAuthInfoSuccess(res.data),

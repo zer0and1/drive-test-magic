@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { GraphQLClient, gql } = require('graphql-request');
 
 const HASURA_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
