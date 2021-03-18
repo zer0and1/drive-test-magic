@@ -203,9 +203,8 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
     details: signalSample ? state.details : {}
   };
 
-  $('#minion-grid').LoadingOverlay('hide', true);
-
   if (loopingEnabled == false) {
+    $('#minion-grid').LoadingOverlay('hide', true);
     $('#minion-group').LoadingOverlay('hide', true);
     return newState;
   }
@@ -238,11 +237,11 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
       sessionId: minionDetails.session_id,
       sleepInterval: minionDetails.sleep_interval
     };
-
-    $('#minion-group').LoadingOverlay('hide', true);
   }
 
-  
+  $('#minion-grid').LoadingOverlay('hide', true);
+  $('#minion-group').LoadingOverlay('hide', true);
+
   if (minions.length) {
     const markers = minions.map(m => ({
       lngLat: [m.longitude, m.latitude],
