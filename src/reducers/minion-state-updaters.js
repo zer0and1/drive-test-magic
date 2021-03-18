@@ -241,7 +241,10 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
     
     newState = {
       ...newState,
-      details
+      details,
+      operationMode: details?.operation_mode,
+      sleepInterval: details?.sleep_interval,
+      sessionId: details?.session_id
     };
 
     $('#minion-group').LoadingOverlay('hide', true);
