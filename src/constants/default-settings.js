@@ -53,7 +53,7 @@ export const DEFAULT_MAPBOX_API_URL = 'https://api.mapbox.com';
 export const MQTT_BROKER_URL = 'wss://159.89.0.130:9001';
 
 export const HASURA_SERVER_API_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
-export const AUTH_SEVER_API_URL = 'https://minion-auth-server.herokuapp.com/api/get_token';
+export const AUTH_SEVER_API_URL = 'https://kminion.herokuapp.com/api/get_token';
 
 // export const HASURA_SERVER_API_ENDPOINT = 'http://159.89.0.130:8080/v1/graphql';
 // export const AUTH_SEVER_API_URL = 'http://159.89.0.130:5000/api/get_token';

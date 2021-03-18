@@ -65,8 +65,7 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     publicPath: '/',
-    port: 8080,
-    host: '0.0.0.0'
+    port: 8080
     // writeToDisk: true
   },
 
