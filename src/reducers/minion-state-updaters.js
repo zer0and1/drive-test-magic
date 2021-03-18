@@ -675,7 +675,8 @@ export function deleteMinionUpdater(state, {id}) {
 export function deleteMinionSuccessUpdater(state, {data}) {  
   return {
     ...state,
-    minions: state.minions.filter(m => m.id != data.id)
+    minions: state.minions.filter(m => m.id != data.id),
+    selectedMinions: state.selectedMinions.filter(m => m.id != data.id)
   }
 }
 
