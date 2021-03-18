@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
+const jsonWebToken = require('jsonwebtoken');
 const { GraphQLClient, gql } = require('graphql-request');
 
 const HASURA_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
@@ -39,7 +39,7 @@ mutation($token: String!) {
 `;
 
 const generateJWT = ({ role, user_token }) => {
-  return jwt.sign({
+  return jsonWebToken.sign({
       "https://hasura.io/jwt/claims": {
           "x-hasura-allowed-roles": ["admin", "user", "guest", 'not-allowed'],
           "x-hasura-default-role": role,
