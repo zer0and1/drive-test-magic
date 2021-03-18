@@ -219,18 +219,19 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     updateButtonClick() {
-      const {longitude, latitude, name, type} = this.props.details;
+      const {id, longitude, latitude, name, type, antenna_type} = this.props.details;
       this.latitude.current.val(latitude);
       this.longitude.current.val(longitude);
       this.minionName.current.val(name);
       this.minionType.current.val(type);
+      this.antennaType.current.val(antenna_type);
       this.editingMode = 'update';
-      this.minionToUpdate = name;
+      this.minionToUpdate = id;
       this.openEditWindow();
     }
 
     deleteButtonClick() {
-
+      this.props.deleteMinion(this.props.details.id);
     }
     
     pickerButtonClick() {
@@ -269,7 +270,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         longitude: this.longitude.current.val(),
         minion_type: this.minionType.current.val(),
         antenna_type: this.antennaType.current.val(),
-        name: this.minionName.current.val()
+        name: this.minionName.current.val(),
       };
 
       if (this.editingMode == 'add') {

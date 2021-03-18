@@ -29,7 +29,10 @@ import {
 import {
   GQL_GET_MINIONS,
   GQL_GET_STATIC_DATA,
-  GQL_DELETE_SIGNAL_SAMPLES
+  GQL_DELETE_SIGNAL_SAMPLES,
+  GQL_INSERT_MINION,
+  GQL_UPDATE_MINION,
+  GQL_DELETE_MINION
 } from 'graphqls';
 
 import {
@@ -38,7 +41,13 @@ import {
   loadMinionsError,
   loadStaticDataSuccess,
   deleteFilteredDataSuccess,
-  deleteFilteredDataError
+  deleteFilteredDataError,
+  addMinionSuccess,
+  addMinionError,
+  updateMinionSuccess,
+  updateMinionError,
+  deleteMinionSuccess,
+  deleteMinionError
 } from 'actions/minion-state-actions';
 
 import { reloadDataset } from 'actions/provider-actions';
@@ -210,33 +219,29 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
     return newState;
   }
 
-  if (selectedMinions.length == 1 && signalSample) {
+  if (selectedMinions.length == 1) {
     const { name } = selectedMinions[0];
-
-    if (name != signalSample.minion_id) {
-      return newState;
-    }
-
     const minionDetails = minions.find(m => m.name == name);
-    const connectionType = signalSample.connection_type;
-    const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi, mcs } = signalSample;
-    const details = {
-      ...minionDetails,
-      ...signalSample,
-      ...calcLevel(rssi, 'rssi', connectionType),
-      ...calcLevel(rsrq, 'rsrq', connectionType),
-      ...calcLevel(rsrp_rscp, 'rsrp_rscp', connectionType),
-      ...calcLevel(sinr_ecio, 'sinr_ecio', connectionType),
-      ...calcLevel(cqi, 'cqi', connectionType),
-      ...calcLevel(mcs, 'mcs', connectionType),
-    };
+    let details = minionDetails;
 
+    if (signalSample && name == signalSample.minion_id) {
+      const connectionType = signalSample.connection_type;
+      const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi, mcs } = signalSample;
+      details = {
+        ...details,
+        ...signalSample,
+        ...calcLevel(rssi, 'rssi', connectionType),
+        ...calcLevel(rsrq, 'rsrq', connectionType),
+        ...calcLevel(rsrp_rscp, 'rsrp_rscp', connectionType),
+        ...calcLevel(sinr_ecio, 'sinr_ecio', connectionType),
+        ...calcLevel(cqi, 'cqi', connectionType),
+        ...calcLevel(mcs, 'mcs', connectionType),
+      };
+    }
+    
     newState = {
       ...newState,
-      details,
-      operationMode: minionDetails.operation_mode,
-      sessionId: minionDetails.session_id,
-      sleepInterval: minionDetails.sleep_interval
+      details
     };
 
     $('#minion-group').LoadingOverlay('hide', true);
@@ -596,14 +601,88 @@ export function deleteFilteredDataErrorUpdater(state, { error }) {
 };
 
 export function addMinionUpdater(state, {data}) {
-  console.log(data);
-  return state;
+  const mutation = GQL_INSERT_MINION();
+  const task = GRAPHQL_MUTATION_TASK({ 
+    variables: data, 
+    mutation 
+  }).bimap(
+    res => addMinionSuccess(res.data.insert_signal_db_minions_one),
+    err => addMinionError(err)
+  );
+
+  return withTask(state, task);
 };
 
-export function updateMinionUpdater(state,  {name, data}) {
-  return state;
+export function addMinionSuccessUpdater(state, {data}) {  
+  return {
+    ...state,
+    minions: [
+      ...state.minions,
+      data
+    ]
+  }
+}
+
+export function addMinionErrorUpdater(state, {error}) {
+  console.log(error);
+  
+  return {
+    ...state
+  }
+}
+
+export function updateMinionUpdater(state,  {data}) {
+  const mutation = GQL_UPDATE_MINION();
+  const task = GRAPHQL_MUTATION_TASK({ 
+    variables: data, 
+    mutation 
+  }).bimap(
+    res => updateMinionSuccess(res.data.update_signal_db_minions_by_pk),
+    err => updateMinionError(err)
+  );
+
+  return withTask(state, task);
 };
 
-export function deleteMinionUpdater(state, {name}) {
-  return state;
+export function updateMinionSuccessUpdater(state, {data}) {  
+  return {
+    ...state,
+    minions: state.minions.map(m => m.id == data.id ? data : m)
+  }
+}
+
+export function updateMinionErrorUpdater(state, {error}) {
+  console.log(error);
+  
+  return {
+    ...state
+  }
+}
+
+export function deleteMinionUpdater(state, {id}) {
+  const mutation = GQL_DELETE_MINION();
+  const task = GRAPHQL_MUTATION_TASK({ 
+    variables: { id }, 
+    mutation 
+  }).bimap(
+    res => deleteMinionSuccess(res.data.delete_signal_db_minions_by_pk),
+    err => deleteMinionError(err)
+  );
+
+  return withTask(state, task);
 };
+
+export function deleteMinionSuccessUpdater(state, {data}) {  
+  return {
+    ...state,
+    minions: state.minions.filter(m => m.id != data.id)
+  }
+}
+
+export function deleteMinionErrorUpdater(state, {error}) {
+  console.log(error);
+  
+  return {
+    ...state
+  }
+}

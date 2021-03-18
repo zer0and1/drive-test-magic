@@ -50,8 +50,14 @@ const actionHandler = {
   [ActionTypes.DELETE_FILTERED_DATA_SUCCESS]: minionStateUpdaters.deleteFilteredDataSuccessUpdater,
   [ActionTypes.DELETE_FILTERED_DATA_ERROR]: minionStateUpdaters.deleteFilteredDataErrorUpdater,
   [ActionTypes.ADD_MINION]: minionStateUpdaters.addMinionUpdater,
+  [ActionTypes.ADD_MINION_SUCCESS]: minionStateUpdaters.addMinionSuccessUpdater,
+  [ActionTypes.ADD_MINION_ERROR]: minionStateUpdaters.addMinionErrorUpdater,
   [ActionTypes.UPDATE_MINION]: minionStateUpdaters.updateMinionUpdater,
+  [ActionTypes.UPDATE_MINION_SUCCESS]: minionStateUpdaters.updateMinionSuccessUpdater,
+  [ActionTypes.UPDATE_MINION_ERROR]: minionStateUpdaters.updateMinionErrorUpdater,
   [ActionTypes.DELETE_MINION]: minionStateUpdaters.deleteMinionUpdater,
+  [ActionTypes.DELETE_MINION_SUCCESS]: minionStateUpdaters.deleteMinionSuccessUpdater,
+  [ActionTypes.DELETE_MINION_ERROR]: minionStateUpdaters.deleteMinionErrorUpdater,
 };
 
 // construct vis-state reducer

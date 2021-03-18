@@ -250,13 +250,6 @@ export function deleteFilteredDataError(error) {
   }
 };
 
-export function updateMinion(data) {
-  return {
-    type: ActionTypes.UPDATE_MINION,
-    data
-  }
-}
-
 export function addMinion(data) {
   return {
     type: ActionTypes.ADD_MINION,
@@ -264,10 +257,62 @@ export function addMinion(data) {
   }
 }
 
-export function deleteMinion(name) {
+export function addMinionSuccess(data) {
+  return {
+    type: ActionTypes.ADD_MINION_SUCCESS,
+    data
+  }
+}
+
+export function addMinionError(error) {
+  return {
+    type: ActionTypes.ADD_MINION_ERROR,
+    error
+  }
+}
+
+export function updateMinion(id, data) {
+  return {
+    type: ActionTypes.UPDATE_MINION,
+    data: {
+      ...data,
+      id
+    }
+  }
+}
+
+export function updateMinionSuccess(data) {
+  return {
+    type: ActionTypes.UPDATE_MINION_SUCCESS,
+    data
+  }
+}
+
+export function updateMinionError(error) {
+  return {
+    type: ActionTypes.UPDATE_MINION_ERROR,
+    error
+  }
+}
+
+export function deleteMinion(id) {
   return {
     type: ActionTypes.DELETE_MINION,
-    name
+    id
+  }
+}
+
+export function deleteMinionSuccess(data) {
+  return {
+    type: ActionTypes.DETELE_MINION_SUCCESS,
+    data
+  }
+}
+
+export function deleteMinionError(error) {
+  return {
+    type: ActionTypes.DELETE_MINION_ERROR,
+    error
   }
 }
 

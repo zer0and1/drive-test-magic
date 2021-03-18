@@ -23,7 +23,6 @@ query MyQuery {
     aux
   }
   signal_db_signal_samples(where:{minion_id: {_eq: "${minionId}"}}, order_by: {date: desc }, limit: 1) {
-    id
     date
     minion_id
     mcc_mnc
@@ -52,7 +51,6 @@ query MyQuery {
     rsrp_rscp
     rsrq
     rssi
-    session_id
     sinr_ecio
     ul_chan_bandwidth
     mcs
@@ -218,14 +216,17 @@ mutation {
 
 
 export const GQL_INSERT_MINION = () => gql`
-mutation($name: String!, $longitude: String, $latitude: String, $type: String, $antenna: String) {
+mutation($name: String!, $longitude: numeric, $latitude: numeric, $minion_type: String, $antenna_type: String) {
   insert_signal_db_minions_one(
     object: {
       name: $name,
       longitude: $longitude,
       latitude: $latitude,
-      type: $type,
-      antenna_type: $antenna
+      type: $minion_type,
+      antenna_type: $antenna_type
+      operation_mode: "idle",
+      session_id: 0,
+      sleep_interval: 2
     }
   ) {
     id
@@ -251,15 +252,15 @@ mutation($name: String!, $longitude: String, $latitude: String, $type: String, $
 `;
 
 export const GQL_UPDATE_MINION = () => gql`
-mutation($id: integer!, $name: String!, $longitude: String, $latitude: String, $type: String, $antenna: String) {
-  update_signal_db_profiles_by_pk (
+mutation($id: Int!, $name: String!, $longitude: numeric, $latitude: numeric, $minion_type: String, $antenna_type: String) {
+  update_signal_db_minions_by_pk (
     pk_columns: {id: $id}
     _set: {
       name: $name,
       longitude: $longitude,
       latitude: $latitude,
-      type: $type,
-      antenna_type: $antenna
+      type: $minion_type,
+      antenna_type: $antenna_type
     }
   ) {
     id
@@ -285,8 +286,8 @@ mutation($id: integer!, $name: String!, $longitude: String, $latitude: String, $
 `;
 
 export const GQL_DELETE_MINION = () => gql`
-mutation($id: Integer!) {
-  delete_signal_db_mobiles_by_pk (
+mutation($id: Int!) {
+  delete_signal_db_minions_by_pk (
     id: $id
   ) {
     id
