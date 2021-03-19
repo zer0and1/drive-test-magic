@@ -49,8 +49,9 @@ function LegendDomainPanelFactory(RangeSlider, LayerConfigGroup, FieldSelector) 
 
     render() {
       const {colorField} = this.props;
-
-      return colorField?.type == 'real' || colorField?.type == 'integer' ? (
+      const enabled = colorField && (colorField.type == 'real' || colorField.type == 'integer');
+      
+      return enabled ? (
         <LayerConfigGroup label={'panel.text.legend'}>
          
         </LayerConfigGroup>
