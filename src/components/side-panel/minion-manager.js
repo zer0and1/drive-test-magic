@@ -82,7 +82,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     isUnselectingAll = false;
     selectedMinion = null;
 
-    minSettingWnd = createRef();
+    editWnd = createRef();
+    confirmWnd = createRef();
     minionName = createRef();
     minionType = createRef();
     antennaType = createRef();
@@ -95,9 +96,9 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
     convertToHRTime(dateString) {
       if (!dateString) {
-        return 'Fixed';
+        return 'never seen';
       }
-      
+
       const date = moment(dateString).format('YYYY-MM-DD HH:mm:ss');
       const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
       let diff = moment(now).diff(moment(date), 'seconds');
@@ -115,9 +116,14 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
       return date;
     }
 
-    datetimeRenderer(row, columnproperties, value) {
+    lastupdateRenderer(row, columnproperties, value) {
       return this.strRenderer(row, columnproperties, this.convertToHRTime(value));
-    };
+    }
+
+    lastfixRenderer(row, columnproperties, value) {
+      const { type } = arguments[5];
+      return this.strRenderer(row, columnproperties, type == 'fixed' ? 'FWA' : this.convertToHRTime(value));
+    }
 
     constructor(props) {
       super(props);
@@ -205,12 +211,21 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     openEditWindow() {
-      this.minSettingWnd.current?.open();
-      this.minSettingWnd.current?.move(460, 20);
+      this.editWnd.current?.open();
+      this.editWnd.current?.move(460, 20);
     }
 
     closeEditWindow() {
-      this.minSettingWnd.current?.close();
+      this.editWnd.current?.close();
+    }
+
+    openConfirmWindow() {
+      this.confirmWnd.current?.open();
+      this.confirmWnd.current?.move(460, 20);
+    }
+
+    closeConfirmWindow() {
+      this.confirmWnd.current?.close();
     }
 
     addButtonClick() {
@@ -223,7 +238,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     updateButtonClick() {
-      const {id, longitude, latitude, name, type, antenna_type} = this.props.details;
+      const { id, longitude, latitude, name, type, antenna_type } = this.props.details;
       this.latitude.current.val(latitude);
       this.longitude.current.val(longitude);
       this.minionName.current.val(name);
@@ -235,10 +250,15 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     deleteButtonClick() {
-      const {selectedMinions} = this.props;
-      this.props.deleteMinion(selectedMinions.map(m => m.id));
+      this.openConfirmWindow();
     }
-    
+
+    confirmButtonClick() {
+      const { selectedMinions } = this.props;
+      this.props.deleteMinion(selectedMinions.map(m => m.id));
+      this.closeConfirmWindow();
+    }
+
     pickerButtonClick() {
       if (this.minionType.current.val() == 'mobile') {
         return;
@@ -246,11 +266,11 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
       const overlay = document.getElementById('default-deckgl-overlay');
       overlay.style.cursor = 'crosshair';
-      
-      const mousedownHandler = ({x, y, button}) => {
+
+      const mousedownHandler = ({ x, y, button }) => {
         this.clicked = (button == 0 ? { x, y } : { x: -1, y: -1 });
       };
-      const mouseupHandler = ({x, y}) => {
+      const mouseupHandler = ({ x, y }) => {
         if (this.clicked.x == x && this.clicked.y == y) {
           overlay.style.cursor = 'grab';
 
@@ -294,7 +314,6 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
     render() {
       const { width, height, selectedMinions, minions, details } = this.props;
-      const editable = selectedMinions.length != 1 || !Object.keys(details).length;
 
       const commandGroupFields = {
         sleepInterval: this.props.sleepInterval,
@@ -355,8 +374,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 })}
                 columns={[
                   { text: 'Name', datafield: 'name', cellsalign: 'center', align: 'center', width: '20%', cellsrenderer: this.strRenderer.bind(this) },
-                  { text: 'Last Update', datafield: 'lastupdate', cellsalign: 'center', cellsrenderer: this.datetimeRenderer.bind(this), align: 'center', width: '34%' },
-                  { text: 'Last Fix', datafield: 'gps_fix_lastupdate', align: 'center', cellsalign: 'center', cellsrenderer: this.datetimeRenderer.bind(this), width: '34%' },
+                  { text: 'Last Update', datafield: 'lastupdate', cellsalign: 'center', cellsrenderer: this.lastupdateRenderer.bind(this), align: 'center', width: '34%' },
+                  { text: 'Last Fix', datafield: 'gps_fix_lastupdate', align: 'center', cellsalign: 'center', cellsrenderer: this.lastfixRenderer.bind(this), width: '34%' },
                   { text: 'Mode', datafield: 'operation_mode', cellsalign: 'center', align: 'center', cellsrenderer: this.strRenderer.bind(this), width: '12%' },
                   { datafield: 'id', hidden: true }
                 ]}
@@ -376,24 +395,24 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 onBindingcomplete={() => this.refs.minionGrid.sortby(this.sortCol, this.sortDir)}
               />
               <SidePanelSection style={{ height: '35px', padding: '5px', marginTop: '-35px' }}>
-                <Button primary style={{padding: '5px'}} onClick={this.addButtonClick.bind(this)}>
+                <Button primary style={{ padding: '5px' }} onClick={this.addButtonClick.bind(this)}>
                   <Add height="12px" />
                   Add
                 </Button>
-                <Button 
-                  cta 
-                  style={{ marginLeft: '5px', padding: '5px' }} 
+                <Button
+                  cta
+                  style={{ marginLeft: '5px', padding: '5px' }}
                   onClick={this.updateButtonClick.bind(this)}
-                  disabled={editable}
+                  disabled={selectedMinions.length != 1}
                 >
                   <Settings height="12px" />
                   Edit
                 </Button>
-                <Button 
-                  negative 
-                  distabled={editable}
-                  style={{ padding: '5px 5px 5px 11px', float: 'right', textAlign: 'center' }} 
-                  onClick={this.deleteButtonClick.bind(this)}
+                <Button
+                  negative
+                  disabled={selectedMinions.length == 0}
+                  style={{ padding: '5px 5px 5px 11px', float: 'right', textAlign: 'center' }}
+                  onClick={this.openConfirmWindow.bind(this)}
                 >
                   <Trash height="15px" />
                 </Button>
@@ -405,28 +424,28 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
               <CommandGroup {...commandGroupFields} {...commandGroupActions} />
             </StyledMinionGroup>
           </JqxSplitter>
-          <JqxWindow ref={this.minSettingWnd} theme={"metrodark"} width={250} height={230} autoOpen={false} resizable={false}>
+          <JqxWindow ref={this.editWnd} theme={"metrodark"} width={280} height={230} autoOpen={false} resizable={false}>
             <div>Minion Edit</div>
             <div style={{ overflow: 'hidden' }}>
-              <table style={{width: '100%'}}>
+              <table style={{ width: '100%' }}>
                 <tbody>
                   <tr>
                     <td align={'right'}>Name:</td>
                     <td align={'left'} colSpan={'2'}>
-                      <JqxInput theme={"metrodark"} ref={this.minionName} width={162} height={23} />
+                      <JqxInput theme={"metrodark"} ref={this.minionName} width={192} height={23} />
                     </td>
                   </tr>
                   <tr>
                     <td align={'right'}>Type:</td>
                     <td align={'left'} colSpan={'2'}>
-                      <JqxDropDownList 
-                        theme={"metrodark"} 
-                        ref={this.minionType} 
-                        width={160} 
-                        height={23} 
+                      <JqxDropDownList
+                        theme={"metrodark"}
+                        ref={this.minionType}
+                        width={190}
+                        height={23}
                         autoDropDownHeight={true}
                         source={['mobile', 'fixed']}
-                        onChange={({args: {item: {value}}}) => {
+                        onChange={({ args: { item: { value } } }) => {
                           if (value == 'mobile') {
                             this.latitude.current?.setOptions({ disabled: true });
                             this.longitude.current?.setOptions({ disabled: true });
@@ -442,11 +461,11 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                   <tr>
                     <td align={'right'}>Antenna:</td>
                     <td align={'left'} colSpan={'2'}>
-                      <JqxDropDownList 
+                      <JqxDropDownList
                         ref={this.antennaType}
-                        theme={"metrodark"} 
-                        width={160} 
-                        height={23} 
+                        theme={"metrodark"}
+                        width={190}
+                        height={23}
                         autoDropDownHeight={true}
                         source={this.props.antennas}
                       />
@@ -454,37 +473,37 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                   </tr>
                   <tr>
                     <td align={'right'}>Latitude:</td>
-                    <td align={'left'}>
-                      <JqxInput theme={"metrodark"} ref={this.latitude} width={120} height={23} />
+                    <td align={'left'} style={{ width: '156px' }}>
+                      <JqxInput theme={"metrodark"} ref={this.latitude} width={145} height={23} />
                     </td>
                     <td rowSpan={'2'}>
-                      <Button 
-                        link 
-                        style={{padding: '5px 0px', border: '2px solid gray', borderRadius: '5px'}}
+                      <Button
+                        link
+                        style={{ padding: '5px 0px', border: '2px solid gray', borderRadius: '5px' }}
                         onClick={this.pickerButtonClick.bind(this)}
                       >
-                        <Picker height={'30px'} style={{margin: '0px', fill: 'currentcolor'}}/>
+                        <Picker height={'30px'} style={{ margin: '0px', fill: 'currentcolor' }} />
                       </Button>
                     </td>
                   </tr>
                   <tr>
                     <td align={'right'}>Longitude:</td>
                     <td align={'left'}>
-                      <JqxInput theme={"metrodark"} ref={this.longitude} width={120} height={23} />
+                      <JqxInput theme={"metrodark"} ref={this.longitude} width={145} height={23} />
                     </td>
                   </tr>
                   <tr>
                     <td align={'right'} />
                     <td style={{ paddingTop: '10px' }} align={'right'} colSpan={'2'}>
-                      <Button 
-                        style={{ display: 'inline-block', marginRight: '5px' }} 
+                      <Button
+                        style={{ display: 'inline-block', marginRight: '5px' }}
                         width={50}
                         onClick={this.saveButtonClick.bind(this)}
                       >
                         Save
                       </Button>
-                      <Button 
-                        style={{ display: 'inline-block', marginRight: '5px' }} 
+                      <Button
+                        style={{ display: 'inline-block', marginRight: '5px' }}
                         width={50}
                         secondary
                         onClick={this.cancelButtonClick.bind(this)}
@@ -495,6 +514,40 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </JqxWindow>
+          <JqxWindow
+            ref={this.confirmWnd}
+            theme={"metrodark"}
+            width={250}
+            height={115}
+            autoOpen={false}
+            resizable={false}
+            isModal={true}
+          >
+            <div>Confirm Dialog</div>
+            <div>
+              <div style={{ padding: '10px' }}>
+                Are you sure to delete minions selected?
+              </div>
+              <div>
+                <Button
+                  style={{ display: 'inline-block', marginRight: '5px', float: 'right' }}
+                  width={50}
+                  negative
+                  onClick={this.confirmButtonClick.bind(this)}
+                >
+                  Delete
+                </Button>
+                <Button
+                  style={{ display: 'inline-block', marginRight: '5px', float: 'right' }}
+                  width={50}
+                  secondary
+                  onClick={this.closeConfirmWindow.bind(this)}
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </JqxWindow>
         </div>

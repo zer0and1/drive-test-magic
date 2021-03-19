@@ -224,17 +224,16 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
     let details = minionDetails;
 
     if (signalSample && name == signalSample.minion_id) {
-      const connectionType = signalSample.connection_type;
-      const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi, mcs } = signalSample;
+      const { rssi, rsrq, rsrp_rscp, sinr_ecio, cqi, mcs, connection_type: conn } = signalSample;
       details = {
-        ...details,
         ...signalSample,
-        ...calcLevel(rssi, 'rssi', connectionType),
-        ...calcLevel(rsrq, 'rsrq', connectionType),
-        ...calcLevel(rsrp_rscp, 'rsrp_rscp', connectionType),
-        ...calcLevel(sinr_ecio, 'sinr_ecio', connectionType),
-        ...calcLevel(cqi, 'cqi', connectionType),
-        ...calcLevel(mcs, 'mcs', connectionType),
+        ...minionDetails,
+        ...calcLevel(rssi, 'rssi', conn),
+        ...calcLevel(rsrq, 'rsrq', conn),
+        ...calcLevel(rsrp_rscp, 'rsrp_rscp', conn),
+        ...calcLevel(sinr_ecio, 'sinr_ecio', conn),
+        ...calcLevel(cqi, 'cqi', conn),
+        ...calcLevel(mcs, 'mcs', conn),
       };
     }
     
@@ -606,6 +605,8 @@ export function deleteFilteredDataErrorUpdater(state, { error }) {
 };
 
 export function addMinionUpdater(state, {data}) {
+  $('#minion-grid').LoadingOverlay('show');
+
   const mutation = GQL_INSERT_MINION();
   const task = GRAPHQL_MUTATION_TASK({ 
     variables: data, 
@@ -619,16 +620,20 @@ export function addMinionUpdater(state, {data}) {
 };
 
 export function addMinionSuccessUpdater(state, {data}) {  
+  $('#minion-grid').LoadingOverlay('hide', true);
+
   return {
     ...state,
     minions: [
       ...state.minions,
       data
-    ]
+    ],
+    isUnselectingAll: true
   }
 }
 
 export function addMinionErrorUpdater(state, {error}) {
+  $('#minion-grid').LoadingOverlay('hide', true);
   console.log(error);
   
   return {
@@ -637,6 +642,8 @@ export function addMinionErrorUpdater(state, {error}) {
 }
 
 export function updateMinionUpdater(state,  {data}) {
+  $('#minion-grid').LoadingOverlay('show');
+  
   const mutation = GQL_UPDATE_MINION();
   const task = GRAPHQL_MUTATION_TASK({ 
     variables: data, 
@@ -650,13 +657,16 @@ export function updateMinionUpdater(state,  {data}) {
 };
 
 export function updateMinionSuccessUpdater(state, {data}) {  
+  $('#minion-grid').LoadingOverlay('hide', true);
+
   return {
     ...state,
-    minions: state.minions.map(m => m.id == data.id ? data : m)
+    minions: state.minions.map(m => m.id == data.id ? data : m),
   }
 }
 
 export function updateMinionErrorUpdater(state, {error}) {
+  $('#minion-grid').LoadingOverlay('hide', true);
   console.log(error);
   
   return {
@@ -665,6 +675,8 @@ export function updateMinionErrorUpdater(state, {error}) {
 }
 
 export function deleteMinionUpdater(state, {ids}) {
+  $('#minion-grid').LoadingOverlay('show');
+
   const mutation = GQL_DELETE_MINION(ids);
   const task = GRAPHQL_MUTATION_TASK({ mutation }).bimap(
     res => deleteMinionSuccess(ids, res.data.affected_rows),
@@ -675,6 +687,8 @@ export function deleteMinionUpdater(state, {ids}) {
 };
 
 export function deleteMinionSuccessUpdater(state, {data}) {  
+  $('#minion-grid').LoadingOverlay('hide', true);
+
   return {
     ...state,
     minions: state.minions.filter(m => data.findIndex(id => id == m.id) < 0),
@@ -683,6 +697,7 @@ export function deleteMinionSuccessUpdater(state, {data}) {
 }
 
 export function deleteMinionErrorUpdater(state, {error}) {
+  $('#minion-grid').LoadingOverlay('hide', true);
   console.log(error);
   
   return {

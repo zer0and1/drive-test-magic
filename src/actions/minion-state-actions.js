@@ -304,7 +304,7 @@ export function deleteMinion(ids) {
 
 export function deleteMinionSuccess(data) {
   return {
-    type: ActionTypes.DETELE_MINION_SUCCESS,
+    type: ActionTypes.DELETE_MINION_SUCCESS,
     data
   }
 }
