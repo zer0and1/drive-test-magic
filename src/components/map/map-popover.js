@@ -26,6 +26,7 @@ import {Pin, ArrowLeft, ArrowRight} from 'components/common/icons';
 import ErrorBoundary from 'components/common/error-boundary';
 import {injectIntl} from 'react-intl';
 import {FormattedMessage} from 'localization';
+import {Button} from 'components/common/styled-components';
 
 const MAX_WIDTH = 500;
 const MAX_HEIGHT = 600;
@@ -101,6 +102,20 @@ const StyledIcon = styled.div`
   :hover {
     cursor: pointer;
     color: ${props => props.theme.linkBtnColor};
+  }
+`;
+
+const StyledToggleButton = styled(Button)`
+  padding: 2px 5px;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+  background-color: ${props => props.toggled ? props.theme.activeColor : props.theme.secondaryBtnBgd};
+  :hover,
+  :focus,
+  :active,
+  &.active {
+    background-color: ${props => props.theme.activeColorHover};
   }
 `;
 
@@ -199,7 +214,8 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
       {layerHoverProp, x, y, mapW, mapH},
       popover
     );
-
+    const dsc = layerHoverProp?.layer.getVisualChannelDescription('color').measure;
+    
     return (
       <ErrorBoundary>
         <StyledMapPopover
@@ -232,6 +248,16 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
                   <FormattedMessage id="mapPopover.primary" />
                 </div>
               )}
+              {layerHoverProp?.layer?.isAggregated && dsc != undefined && dsc != 'property.pointCount' ? (
+                <div className="primary-label gutter" style={{ marginRight: -10 }}>
+                  <StyledToggleButton
+                    toggled={layerHoverProp.isGraphShow}
+                    onClick={layerHoverProp.toggleGraphShow}
+                  >
+                    GRAPH
+                  </StyledToggleButton>
+                </div>
+              ) : null}
             </div>
           ) : null}
           {Array.isArray(coordinate) && <CoordinateInfo coordinate={coordinate} zoom={zoom} />}

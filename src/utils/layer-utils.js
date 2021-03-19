@@ -78,7 +78,9 @@ export function getLayerHoverProp({
   hoverInfo,
   layers,
   layersToRender,
-  datasets
+  datasets,
+  isGraphShow,
+  uiStateActions
 }) {
   if (interactionConfig.tooltip.enabled && hoverInfo && hoverInfo.picked) {
     // if anything hovered
@@ -103,7 +105,9 @@ export function getLayerHoverProp({
         data,
         fields,
         fieldsToShow,
-        layer
+        layer,
+        isGraphShow,
+        toggleGraphShow: uiStateActions.toggleGraphShow
       };
     }
   }

@@ -134,14 +134,14 @@ const CellInfo = ({data, layer}) => {
         <Row
           name={layer.getVisualChannelDescription('color').measure}
           key="color"
-          value={data.colorValue || 'N/A'}
+          value={data.colorValue.toFixed(2) || 'N/A'}
         />
       ) : null}
       {sizeField && layer.visualChannels.size ? (
         <Row
           name={layer.getVisualChannelDescription('size').measure}
           key="size"
-          value={data.elevationValue || 'N/A'}
+          value={data.elevationValue.toFixed(2) || 'N/A'}
         />
       ) : null}
     </tbody>
