@@ -215,7 +215,6 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
   $('#minion-grid').LoadingOverlay('hide', true);
 
   if (loopingEnabled == false) {
-    $('#minion-group').LoadingOverlay('hide', true);
     return newState;
   }
 
@@ -247,6 +246,9 @@ export function loadMinionsSuccessUpdater(state, { minions, signalSample }) {
       sessionId: details?.session_id
     };
 
+    $('#minion-group').LoadingOverlay('hide', true);
+  }
+  else if (selectedMinions.length > 1) {
     $('#minion-group').LoadingOverlay('hide', true);
   }
 
@@ -662,13 +664,10 @@ export function updateMinionErrorUpdater(state, {error}) {
   }
 }
 
-export function deleteMinionUpdater(state, {id}) {
-  const mutation = GQL_DELETE_MINION();
-  const task = GRAPHQL_MUTATION_TASK({ 
-    variables: { id }, 
-    mutation 
-  }).bimap(
-    res => deleteMinionSuccess(res.data.delete_signal_db_minions_by_pk),
+export function deleteMinionUpdater(state, {ids}) {
+  const mutation = GQL_DELETE_MINION(ids);
+  const task = GRAPHQL_MUTATION_TASK({ mutation }).bimap(
+    res => deleteMinionSuccess(ids, res.data.affected_rows),
     err => deleteMinionError(err)
   );
 
@@ -678,8 +677,8 @@ export function deleteMinionUpdater(state, {id}) {
 export function deleteMinionSuccessUpdater(state, {data}) {  
   return {
     ...state,
-    minions: state.minions.filter(m => m.id != data.id),
-    selectedMinions: state.selectedMinions.filter(m => m.id != data.id)
+    minions: state.minions.filter(m => data.findIndex(id => id == m.id) < 0),
+    isUnselectingAll: true
   }
 }
 

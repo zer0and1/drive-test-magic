@@ -285,12 +285,12 @@ mutation($id: Int!, $name: String!, $longitude: numeric, $latitude: numeric, $mi
 }
 `;
 
-export const GQL_DELETE_MINION = () => gql`
-mutation($id: Int!) {
-  delete_signal_db_minions_by_pk (
-    id: $id
+export const GQL_DELETE_MINION = (ids) => gql`
+mutation {
+  delete_signal_db_minions (
+    where: { id: { _in: [${ids.toString()}] } }
   ) {
-    id
+    affected_rows
   }
 }
 `;

@@ -94,6 +94,10 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     };
 
     convertToHRTime(dateString) {
+      if (!dateString) {
+        return 'Fixed';
+      }
+      
       const date = moment(dateString).format('YYYY-MM-DD HH:mm:ss');
       const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
       let diff = moment(now).diff(moment(date), 'seconds');
@@ -231,7 +235,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     deleteButtonClick() {
-      this.props.deleteMinion(this.props.details.id);
+      const {selectedMinions} = this.props;
+      this.props.deleteMinion(selectedMinions.map(m => m.id));
     }
     
     pickerButtonClick() {

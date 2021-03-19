@@ -295,10 +295,10 @@ export function updateMinionError(error) {
   }
 }
 
-export function deleteMinion(id) {
+export function deleteMinion(ids) {
   return {
     type: ActionTypes.DELETE_MINION,
-    id
+    ids
   }
 }
 
