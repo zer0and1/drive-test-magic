@@ -101,6 +101,10 @@ export default function MapMarkerFactory() {
           mode = 'offline';
         }
       }
+      else if (!updateDiff) {
+        mode = 'offline';
+      }
+
       const props = { x, y, name, mode, scale };
       let offset = 0, height = 0, placeComp = Place;
 
