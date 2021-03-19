@@ -71,7 +71,8 @@ export default {
       fontColor: 'Font color',
       textAnchor: 'Text anchor',
       alignment: 'Alignment',
-      addMoreLabel: 'Add More Label'
+      addMoreLabel: 'Add More Label',
+      legend: 'Legend Domain'
     }
   },
   sidebar: {

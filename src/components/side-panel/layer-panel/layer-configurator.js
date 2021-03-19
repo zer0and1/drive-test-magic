@@ -37,6 +37,7 @@ import VisConfigSwitchFactory from './vis-config-switch';
 import VisConfigSliderFactory from './vis-config-slider';
 import LayerConfigGroupFactory, {ConfigGroupCollapsibleContent} from './layer-config-group';
 import TextLabelPanelFactory from './text-label-panel';
+import LegendDomainPanelFactory from './legend-domain-panel'; 
 
 import {capitalizeFirstLetter} from 'utils/utils';
 
@@ -93,7 +94,8 @@ LayerConfiguratorFactory.deps = [
   ChannelByValueSelectorFactory,
   LayerColumnConfigFactory,
   LayerTypeSelectorFactory,
-  VisConfigSwitchFactory
+  VisConfigSwitchFactory,
+  LegendDomainPanelFactory
 ];
 
 export default function LayerConfiguratorFactory(
@@ -104,7 +106,8 @@ export default function LayerConfiguratorFactory(
   ChannelByValueSelector,
   LayerColumnConfig,
   LayerTypeSelector,
-  VisConfigSwitch
+  VisConfigSwitch,
+  LegendDomainPanel
 ) {
   class LayerConfigurator extends Component {
     static propTypes = {
@@ -133,6 +136,8 @@ export default function LayerConfiguratorFactory(
       layerChannelConfigProps,
       layerConfiguratorProps
     }) {
+      const colorField = layer.config.colorField;
+
       return (
         <StyledLayerVisualConfigurator>
           {/* Fill Color */}
@@ -215,6 +220,14 @@ export default function LayerConfiguratorFactory(
               ) : null}
             </ConfigGroupCollapsibleContent>
           </LayerConfigGroup>
+
+          {/* Legend */}
+          <LegendDomainPanel 
+            legendDomain={layer.config.legendDomain}
+            legendRange={layer.config.legendRange}
+            colorField={layer.config.colorField}
+            updateLegendDomain={this.props.updateLegendDomain}
+          />
 
           {/* text label */}
           <TextLabelPanel
