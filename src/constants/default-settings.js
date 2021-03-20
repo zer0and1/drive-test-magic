@@ -152,7 +152,7 @@ export const SHARE_MAP_ID = 'shareMap';
 export const INPUT_USER_TOKEN_ID = 'inputUserToken';
 
 
-export const KEPLER_GL_NAME = 'drive.test.magic';
+export const KEPLER_GL_NAME = 'drive-test-magic.io';
 
 // __PACKAGE_VERSION__ is automatically injected by Babel/Webpack during the building process
 // Since we are injecting this during the build process with babel
