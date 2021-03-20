@@ -136,8 +136,6 @@ export default function LayerConfiguratorFactory(
       layerChannelConfigProps,
       layerConfiguratorProps
     }) {
-      const colorField = layer.config.colorField;
-
       return (
         <StyledLayerVisualConfigurator>
           {/* Fill Color */}
@@ -221,14 +219,6 @@ export default function LayerConfiguratorFactory(
             </ConfigGroupCollapsibleContent>
           </LayerConfigGroup>
 
-          {/* Legend */}
-          <LegendDomainPanel 
-            legendDomain={layer.config.legendDomain}
-            legendRange={layer.config.legendRange}
-            colorField={layer.config.colorField}
-            updateLegendDomain={this.props.updateLegendDomain}
-          />
-
           {/* text label */}
           <TextLabelPanel
             fields={visConfiguratorProps.fields}
@@ -236,6 +226,12 @@ export default function LayerConfiguratorFactory(
             textLabel={layer.config.textLabel}
             colorPalette={visConfiguratorProps.colorPalette}
             setColorPaletteUI={visConfiguratorProps.setColorPaletteUI}
+          />
+
+          {/* Legend */}
+          <LegendDomainPanel 
+            config={layer.config}
+            updateLegendDomain={layerConfiguratorProps.onChange}
           />
         </StyledLayerVisualConfigurator>
       );
@@ -412,6 +408,12 @@ export default function LayerConfiguratorFactory(
               </ConfigGroupCollapsibleContent>
             </LayerConfigGroup>
           ) : null}
+          
+          {/* Legend */}
+          <LegendDomainPanel 
+            config={layer.config}
+            updateLegendDomain={layerConfiguratorProps.onChange}
+          />
         </StyledLayerVisualConfigurator>
       );
     }

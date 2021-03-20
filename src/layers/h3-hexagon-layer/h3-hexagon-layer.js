@@ -19,13 +19,13 @@
 // THE SOFTWARE.
 
 import Layer from '../base-layer';
+import {findDefaultColorField} from 'utils/dataset-utils';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import EnhancedColumnLayer from 'deckgl-layers/column-layer/enhanced-column-layer';
 import {getCentroid, idToPolygonGeo, h3IsValid, getHexFields} from './h3-utils';
 import H3HexagonLayerIcon from './h3-hexagon-layer-icon';
 import {CHANNEL_SCALES, HIGHLIGH_COLOR_3D} from 'constants/default-settings';
-import {hexToRgb} from 'utils/color-utils';
 
 const DEFAULT_LINE_SCALE_VALUE = 8;
 
@@ -69,11 +69,19 @@ export default class HexagonIdLayer extends Layer {
   }
 
   get visualChannels() {
+    const visualChannels = super.visualChannels;
     return {
-      ...super.visualChannels,
+      color: {
+        ...visualChannels.color,
+        accessor: 'getFillColor'
+      },
       size: {
-        ...super.visualChannels.size,
-        property: 'height'
+        ...visualChannels.size,
+        property: 'height',
+        accessor: 'getElevation',
+        nullValue: 0,
+        condition: config => config.visConfig.enable3d,
+        defaultValue: defaultElevation
       },
       coverage: {
         property: 'coverage',
@@ -82,9 +90,25 @@ export default class HexagonIdLayer extends Layer {
         domain: 'coverageDomain',
         range: 'coverageRange',
         key: 'coverage',
-        channelScaleType: CHANNEL_SCALES.radius
+        channelScaleType: CHANNEL_SCALES.radius,
+        accessor: 'getCoverage',
+        nullValue: 0,
+        defaultValue: defaultCoverage
       }
     };
+  }
+
+  setInitialLayerConfig(dataset) {
+    const defaultColorField = findDefaultColorField(dataset);
+
+    if (defaultColorField) {
+      this.updateLayerConfig({
+        colorField: defaultColorField
+      });
+      this.updateLayerVisualChannel(dataset, 'color');
+    }
+
+    return this;
   }
 
   static findDefaultLayerProps({fields = [], allData = []}) {
@@ -142,58 +166,16 @@ export default class HexagonIdLayer extends Layer {
   // TODO: fix complexity
   /* eslint-disable complexity */
   formatLayerData(datasets, oldLayerData, opt = {}) {
-    const {
-      colorScale,
-      colorDomain,
-      colorField,
-      color,
-      sizeField,
-      sizeScale,
-      sizeDomain,
-      coverageField,
-      coverageScale,
-      coverageDomain,
-      visConfig: {sizeRange, colorRange, coverageRange, enable3d}
-    } = this.config;
-
     const {gpuFilter} = datasets[this.config.dataId];
     const getHexId = this.getPositionAccessor();
     const {data} = this.updateData(datasets, oldLayerData);
-    // color
-    const cScale =
-      colorField &&
-      this.getVisChannelScale(
-        colorScale,
-        colorDomain,
-        colorRange.colors.map(c => hexToRgb(c))
-      );
-    // height
-    const sScale =
-      sizeField && enable3d && this.getVisChannelScale(sizeScale, sizeDomain, sizeRange, 0);
-
-    // coverage
-    const coScale =
-      coverageField && this.getVisChannelScale(coverageScale, coverageDomain, coverageRange, 0);
-
-    const getElevation = sScale
-      ? d => this.getEncodedChannelValue(sScale, d.data, sizeField, 0)
-      : defaultElevation;
-
-    const getFillColor = cScale
-      ? d => this.getEncodedChannelValue(cScale, d.data, colorField)
-      : color;
-
-    const getCoverage = coScale
-      ? d => this.getEncodedChannelValue(coScale, d.data, coverageField, 0)
-      : defaultCoverage;
+    const accessors = this.getAttributeAccessors();
 
     return {
       data,
-      getElevation,
-      getFillColor,
       getHexId,
-      getCoverage,
-      getFilterValue: gpuFilter.filterValueAccessor()
+      getFilterValue: gpuFilter.filterValueAccessor(),
+      ...accessors
     };
   }
   /* eslint-enable complexity */
@@ -221,31 +203,21 @@ export default class HexagonIdLayer extends Layer {
     const eleZoomFactor = this.getElevationZoomFactor(mapState);
     const {config} = this;
     const {visConfig} = config;
+    const updateTriggers = this.getVisualChannelUpdateTriggers();
 
     const h3HexagonLayerTriggers = {
-      getFillColor: {
-        color: config.color,
-        colorField: config.colorField,
-        colorRange: visConfig.colorRange,
-        colorScale: config.colorScale
-      },
-      getElevation: {
-        sizeField: config.sizeField,
-        sizeRange: visConfig.sizeRange,
-        sizeScale: config.sizeScale,
-        enable3d: visConfig.enable3d
-      },
+      getHexagon: this.config.columns,
+      getFillColor: updateTriggers.getFillColor,
+      getElevation: updateTriggers.getElevation,
       getFilterValue: gpuFilter.filterValueUpdateTriggers
     };
 
     const columnLayerTriggers = {
-      getCoverage: {
-        coverageField: config.coverageField,
-        coverageRange: visConfig.coverageRange
-      }
+      getCoverage: updateTriggers.getCoverage
     };
 
     const defaultLayerProps = this.getDefaultDeckLayerProps(opts);
+    const hoveredObject = this.hasHoveredObject(objectHovered);
 
     return [
       new H3HexagonLayer({
@@ -276,11 +248,11 @@ export default class HexagonIdLayer extends Layer {
           }
         }
       }),
-      ...(this.isLayerHovered(objectHovered) && !config.sizeField
+      ...(hoveredObject && !config.sizeField
         ? [
             new GeoJsonLayer({
               ...this.getDefaultHoverLayerProps(),
-              data: [idToPolygonGeo(objectHovered)],
+              data: [idToPolygonGeo(hoveredObject)],
               getLineColor: config.highlightColor,
               lineWidthScale: DEFAULT_LINE_SCALE_VALUE * zoomFactor,
               wrapLongitude: false

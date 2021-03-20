@@ -18,18 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {FormattedMessage} from 'localization';
+import { FormattedMessage } from 'localization';
 
 import {
-  Button,
+  Input,
   PanelLabel,
   SBFlexboxItem,
   SidePanelSection,
   SpaceBetweenFlexbox
 } from 'components/common/styled-components';
-import {Add} from 'components/common/icons';
+import { Add } from 'components/common/icons';
 import ColorSelector from './color-selector';
 import ItemSelector from 'components/common/item-selector/item-selector';
 import LayerConfigGroupFactory, {
@@ -44,16 +44,29 @@ LegendDomainPanelFactory.deps = [RangeSliderFactory, LayerConfigGroupFactory, Fi
 function LegendDomainPanelFactory(RangeSlider, LayerConfigGroup, FieldSelector) {
   class LegendDomainPanel extends Component {
     static propTypes = {
-      colorField: PropTypes.object.isRequired
+      config: PropTypes.object.isRequired,
+      updateLegendDomain: PropTypes.func.isRequired
     };
 
     render() {
-      const {colorField} = this.props;
+      const { config, updateLegendDomain } = this.props;
+      const { colorField } = config;
       const enabled = colorField && (colorField.type == 'real' || colorField.type == 'integer');
-      
+
       return enabled ? (
         <LayerConfigGroup label={'panel.text.legend'}>
-         
+          <PanelLabel>
+            <FormattedMessage id={'layer.legendDomain'} />
+          </PanelLabel>
+          <ItemSelector
+            selectedItems={config.legendDomain}
+            options={['all', 'filtered', 'manual']}
+            multiSelect={false}
+            searchable={false}
+            onChange={value => updateLegendDomain({
+              legendDomain: value
+            })}
+          />
         </LayerConfigGroup>
       ) : null;
     }

@@ -84,6 +84,11 @@ class KeplerTable {
 
     this.id = datasetInfo.id;
     this.label = datasetInfo.label;
+    this.enabled = datasetInfo.enabled;
+    this.loadingCompleted = datasetInfo.loadingCompleted;
+    this.query = datasetInfo.query;
+    this.sessions = datasetInfo.sessions;
+    this.timestamp = datasetInfo.timestamp;
     this.color = color;
     this.metadata = {
       ...metadata,

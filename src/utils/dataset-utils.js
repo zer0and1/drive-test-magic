@@ -20,11 +20,10 @@
 
 import {hexToRgb} from './color-utils';
 import uniq from 'lodash.uniq';
-import {TRIP_POINT_FIELDS, SORT_ORDER} from 'constants/default-settings';
-import {generateHashId} from './utils';
+import {ALL_FIELD_TYPES} from 'constants/default-settings';
 import {validateInputData} from 'processors/data-processor';
-import {getGpuFilterProps} from 'utils/gpu-filter-utils';
-import {ascending, descending} from 'd3-array';
+import KeplerTable from './table-utils/kepler-table';
+
 // apply a color for each dataset
 // to use as label colors
 const datasetColors = [
@@ -83,133 +82,38 @@ export function createNewDataEntry({info, data, metadata}, datasets = {}) {
     return {};
   }
 
-  const allData = validatedData.rows;
-  const datasetInfo = {
-    id: generateHashId(4),
-    label: 'new dataset',
-    ...(info || {})
-  };
-  const dataId = datasetInfo.id;
+  info = info || {};
+  const color = info.color || getNewDatasetColor(datasets);
 
-  // add tableFieldIndex and id to fields
-  // TODO: don't need id and name and tableFieldIndex anymore
-  // Add value accessor instead
-  const fields = validatedData.fields.map((f, i) => ({
-    ...f,
-    id: f.name,
-    tableFieldIndex: i + 1
-  }));
-
-  const allIndexes = allData.map((_, i) => i);
-  const defaultMetadata = {
-    id: datasetInfo.id,
-    format: datasetInfo.format || '',
-    label: datasetInfo.label || ''
-  };
+  const keplerTable = new KeplerTable({info, data: validatedData, color, metadata});
   return {
-    [dataId]: {
-      ...datasetInfo,
-      color: datasetInfo.color || getNewDatasetColor(datasets),
-      id: dataId,
-      allData,
-      allIndexes,
-      filteredIndex: allIndexes,
-      filteredIndexForDomain: allIndexes,
-      fieldPairs: findPointFieldPairs(fields),
-      fields,
-      gpuFilter: getGpuFilterProps([], dataId, fields),
-      metadata: {...defaultMetadata, ...metadata}
-    }
+    [keplerTable.id]: keplerTable
   };
 }
 
-export function removeSuffixAndDelimiters(layerName, suffix) {
-  return layerName
-    .replace(new RegExp(suffix, 'ig'), '')
-    .replace(/[_,.]+/g, ' ')
-    .trim();
-}
-
 /**
- * Find point fields pairs from fields
+ * Choose a field to use as the default color field of a layer.
  *
- * @param fields
- * @returns found point fields
- * @type {typeof import('./dataset-utils').findPointFieldPairs}
- */
-export function findPointFieldPairs(fields) {
-  const allNames = fields.map(f => f.name.toLowerCase());
-
-  // get list of all fields with matching suffixes
-  return allNames.reduce((carry, fieldName, idx) => {
-    // This search for pairs will early exit if found.
-    for (const suffixPair of TRIP_POINT_FIELDS) {
-      // match first suffix```
-      if (fieldName.endsWith(suffixPair[0])) {
-        // match second suffix
-        const otherPattern = new RegExp(`${suffixPair[0]}\$`);
-        const partner = fieldName.replace(otherPattern, suffixPair[1]);
-
-        const partnerIdx = allNames.findIndex(d => d === partner);
-        if (partnerIdx > -1) {
-          const defaultName = removeSuffixAndDelimiters(fieldName, suffixPair[0]);
-
-          carry.push({
-            defaultName,
-            pair: {
-              lat: {
-                fieldIdx: idx,
-                value: fields[idx].name
-              },
-              lng: {
-                fieldIdx: partnerIdx,
-                value: fields[partnerIdx].name
-              }
-            },
-            suffix: suffixPair
-          });
-          return carry;
-        }
-      }
-    }
-    return carry;
-  }, []);
-}
-
-/**
+ * Right now this implements a very simple heuristic looking
+ * for a real-type field that is not lat/lon.
+ *
+ * In the future we could consider other things:
+ * Consider integer fields
+ * look for highest dynamic range (using a sample of the data)
+ * Look for particular names to select ("value", "color", etc)
+ * Look for particular names to avoid ("" - the Pandas index column)
  *
  * @param dataset
- * @param column
- * @param mode
- * @type {typeof import('./dataset-utils').sortDatasetByColumn}
  */
-export function sortDatasetByColumn(dataset, column, mode) {
-  const {allIndexes, fields, allData} = dataset;
-  const fieldIndex = fields.findIndex(f => f.name === column);
-  if (fieldIndex < 0) {
-    return dataset;
+export function findDefaultColorField({fields, fieldPairs = []}) {
+  const defaultField = fields.find(
+    f =>
+      f.type === ALL_FIELD_TYPES.real &&
+      // Do not permit lat, lon fields
+      !fieldPairs.find(pair => pair.pair.lat.value === f.name || pair.pair.lng.value === f.name)
+  );
+  if (!defaultField) {
+    return null;
   }
-
-  const sortBy = SORT_ORDER[mode] || SORT_ORDER.ASCENDING;
-
-  if (sortBy === SORT_ORDER.UNSORT) {
-    return {
-      ...dataset,
-      sortColumn: {},
-      sortOrder: null
-    };
-  }
-
-  const sortFunction = sortBy === SORT_ORDER.ASCENDING ? ascending : descending;
-  const sortOrder = allIndexes
-    .slice()
-    .sort((a, b) => sortFunction(allData[a][fieldIndex], allData[b][fieldIndex]));
-
-  return {
-    ...dataset,
-    sortColumn: {
-      [column]: sortBy
-    },
-    sortOrder
-  };
+  return defaultField;
 }

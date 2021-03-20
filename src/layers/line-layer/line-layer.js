@@ -33,6 +33,17 @@ export default class LineLayer extends ArcLayer {
     return LineLayerIcon;
   }
 
+  get visualChannels() {
+    const visualChannels = super.visualChannels;
+    return {
+      ...visualChannels,
+      sourceColor: {
+        ...visualChannels.sourceColor,
+        accessor: 'getColor'
+      }
+    };
+  }
+
   static findDefaultLayerProps({fieldPairs = []}) {
     if (fieldPairs.length < 2) {
       return {props: []};
@@ -58,15 +69,14 @@ export default class LineLayer extends ArcLayer {
       widthScale: this.config.visConfig.thickness
     };
 
-    const colorUpdateTriggers = {
-      color: this.config.color,
-      colorField: this.config.colorField,
-      colorRange: this.config.visConfig.colorRange,
-      colorScale: this.config.colorScale,
-      targetColor: this.config.visConfig.targetColor
+    const updateTriggers = {
+      getPosition: this.config.columns,
+      getFilterValue: gpuFilter.filterValueUpdateTriggers,
+      ...this.getVisualChannelUpdateTriggers()
     };
-
     const defaultLayerProps = this.getDefaultDeckLayerProps(opts);
+    const hoveredObject = this.hasHoveredObject(objectHovered);
+
     return [
       // base layer
       new EnhancedLineLayer({
@@ -74,26 +84,16 @@ export default class LineLayer extends ArcLayer {
         ...this.getBrushingExtensionProps(interactionConfig, 'source_target'),
         ...data,
         ...layerProps,
-        getColor: data.getSourceColor,
-        updateTriggers: {
-          getFilterValue: gpuFilter.filterValueUpdateTriggers,
-          getWidth: {
-            sizeField: this.config.sizeField,
-            sizeRange: this.config.visConfig.sizeRange,
-            sizeScale: this.config.sizeScale
-          },
-          getColor: colorUpdateTriggers,
-          getTargetColor: colorUpdateTriggers
-        },
+        updateTriggers,
         extensions: [...defaultLayerProps.extensions, new BrushingExtension()]
       }),
       // hover layer
-      ...(this.isLayerHovered(objectHovered)
+      ...(hoveredObject
         ? [
             new EnhancedLineLayer({
               ...this.getDefaultHoverLayerProps(),
               ...layerProps,
-              data: [objectHovered.object],
+              data: [hoveredObject],
               getColor: this.config.highlightColor,
               getTargetColor: this.config.highlightColor,
               getWidth: data.getWidth

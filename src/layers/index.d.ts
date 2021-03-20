@@ -1,11 +1,6 @@
 import {RGBColor, RGBAColor} from '../reducers/types';
-import {Dataset, Field, Datasets} from '../reducers/vis-state-updaters';
-import {LayerTextLabel, ColorRange, ColorUI} from './layer-factory';
-
-export type LayerVisConfig = {
-  opacity: number;
-  colorRange: ColorRange;
-};
+import {Field, Datasets, KeplerTable} from '../reducers/vis-state-updaters';
+import {LayerTextLabel, ColorRange, ColorUI, LayerVisConfig} from './layer-factory';
 
 export type LayerColumns = {
   [key: string]: {value: string | null; fieldIdx: number; optional?: boolean};
@@ -45,6 +40,26 @@ export type LayerConfig = {
   };
 };
 
+export type VisualChannel = {
+  property: string;
+  field: string;
+  scale: string;
+  domain: string;
+  range: string;
+  key: string;
+  channelScaleType: string;
+  nullValue: any;
+  defaultMeasure: any;
+  accessor?: string;
+  condition?: (config: any) => boolean;
+  getAttributeValue?: (config: any) => (d: any) => any;
+};
+
+export type VisualChannelDescription = {
+  label: string;
+  measure: string;
+};
+
 export class Layer {
   constructor(
     prop?: {
@@ -55,12 +70,21 @@ export class Layer {
   type: string;
   config: LayerConfig;
   visConfigSettings: any;
+  visualChannels: {[key: string]: VisualChannel};
+  _oldDataUpdateTriggers: any;
   hasAllColumns(): boolean;
   updateLayerConfig(p: Partial<LayerConfig>): Layer;
-  updateLayerVisualChannel(dataset: Dataset, channel: string): Layer;
+  updateLayerDomain(datasets: Datasets, filter?: Filter): Layer;
+  updateLayerVisualChannel(dataset: KeplerTable, channel: string): Layer;
   shouldCalculateLayerData(props: string[]): boolean;
   formatLayerData(datasets: Datasets, oldLayerData?: any);
   updateLayerColorUI(prop: string, newConfig: Partial<ColorUI>): Layer;
+  isValidToSave(): boolean;
+  validateVisualChannel(channel: string);
+  getVisualChannelDescription(key: string): {label: string, measure: string};
+
+  static findDefaultLayerProps(dataset: KeplerTable, foundLayers?: any[]);
+  // static findDefaultColumnField(defaultFields, allFields)
 }
 
 export type LayerClassesType = {
@@ -77,8 +101,8 @@ export type LayerClassesType = {
   '3D': Layer;
   trip: Layer;
   s2: Layer;
-}
-export const LayerClasses: LayerClassesType
-export const LAYER_TYPES: {
-  [key in keyof LayerClassesType]: string;
 };
+export const LayerClasses: LayerClassesType;
+
+export type OVERLAY_TYPE = {[key: string]: string}
+export const LAYER_ID_LENGTH: number;
