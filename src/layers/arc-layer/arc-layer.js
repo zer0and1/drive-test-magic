@@ -84,6 +84,7 @@ export default class ArcLayer extends Layer {
 
   get visualChannels() {
     return {
+      ...super.visualChannels,
       sourceColor: {
         ...super.visualChannels.color,
         property: 'color',
