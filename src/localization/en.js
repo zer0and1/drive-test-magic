@@ -71,8 +71,7 @@ export default {
       fontColor: 'Font color',
       textAnchor: 'Text anchor',
       alignment: 'Alignment',
-      addMoreLabel: 'Add More Label',
-      legend: 'Legend Domain'
+      addMoreLabel: 'Add More Label'
     }
   },
   sidebar: {
@@ -420,6 +419,15 @@ export default {
   header: {
     visibleLayers: 'Visible layers',
     layerLegend: 'Layer Legend'
+  },
+  map: {
+    legend: {
+      domain: {
+        all: 'all',
+        filtered: 'filtered',
+        manual: 'manual'
+      }
+    }
   },
   interactions: {
     tooltip: 'Tooltip',

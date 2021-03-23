@@ -791,6 +791,27 @@ export const EXPORT_DATA_TYPE_OPTIONS = [
   // }
 ];
 
+export const LEGEND_DOMAINS = keyMirror({
+  ALL: null,
+  FILTERED: null,
+  MANUAL: null
+});
+
+export const LEGEND_DOMAIN_OPTIONS = [
+  {
+    id: LEGEND_DOMAINS.ALL,
+    label: 'map.legend.domain.all'
+  },
+  {
+    id: LEGEND_DOMAINS.FILTERED,
+    label: 'map.legend.domain.filtered'
+  },
+  {
+    id: LEGEND_DOMAINS.MANUAL,
+    label: 'map.legend.domain.manual'
+  },
+];
+
 // Export map types
 export const EXPORT_MAP_FORMATS = keyMirror({
   HTML: null,

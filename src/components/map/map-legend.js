@@ -22,8 +22,9 @@ import React from 'react';
 import styled from 'styled-components';
 import {rgb} from 'd3-color';
 import ColorLegend from 'components/common/color-legend';
-import {CHANNEL_SCALES, DIMENSIONS} from 'constants/default-settings';
+import {CHANNEL_SCALES, DIMENSIONS, LEGEND_DOMAIN_OPTIONS} from 'constants/default-settings';
 import {FormattedMessage} from 'localization';
+import {CheckMark} from 'components/common/styled-components';
 
 export const StyledMapControlLegend = styled.div`
   padding: 10px ${props => props.theme.mapControl.padding}px 10px
@@ -62,6 +63,36 @@ export const StyledMapControlLegend = styled.div`
 
   .legend--layer_color-legend {
     margin-top: 6px;
+  }
+`;
+
+export const StyledButtonList = styled.div`
+  display: flex;
+  flex-direction: row;
+  padding: 8px 0px;
+`;
+
+export const SelectionButton = styled.div`
+  position: relative;
+  border-radius: 2px;
+  border: 1px solid
+    ${props =>
+      props.selected
+        ? props.theme.selectionBtnBorderActColor
+        : props.theme.selectionBtnBorderColor};
+  color: ${props =>
+    props.selected ? props.theme.selectionBtnActColor : props.theme.selectionBtnColor};
+  background-color: ${props =>
+    props.selected ? props.theme.selectionBtnActBgd : props.theme.selectionBtnBgd};
+
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 6px;
+  padding: ${props => props.selected ? '1px 13px 1px 5px' : '1px 9px'};
+
+  :hover {
+    color: ${props => props.theme.selectionBtnActColor};
+    border: 1px solid ${props => props.theme.selectionBtnBorderActColor};
   }
 `;
 
@@ -168,13 +199,27 @@ const MapLegend = ({layers = [], width, options}) => (
           ) : null}
           {colorChannels.map(colorChannel =>
             !colorChannel.condition || colorChannel.condition(layer.config) ? (
-              <LayerColorLegend
-                key={colorChannel.key}
-                description={layer.getVisualChannelDescription(colorChannel.key)}
-                config={layer.config}
-                width={containerW - 2 * DIMENSIONS.mapControl.padding}
-                colorChannel={colorChannel}
-              />
+              <>
+                <LayerColorLegend
+                  key={colorChannel.key}
+                  description={layer.getVisualChannelDescription(colorChannel.key)}
+                  config={layer.config}
+                  width={containerW - 2 * DIMENSIONS.mapControl.padding}
+                  colorChannel={colorChannel}
+                />
+                <StyledButtonList>
+                  {LEGEND_DOMAIN_OPTIONS.map(op => (
+                    <SelectionButton
+                      key={op.id}
+                      selected={'ALL' === op.id}
+                      onClick={() => {}}
+                    >
+                      <FormattedMessage id={op.label} />
+                      {'ALL' === op.id && <CheckMark />}
+                    </SelectionButton>
+                  ))}
+                </StyledButtonList>
+              </>
             ) : null
           )}
           {nonColorChannels.map(visualChannel => {
