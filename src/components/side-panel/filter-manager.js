@@ -43,8 +43,6 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
     setFilter,
     removeFilter,
     deleteFilteredData,
-    moveUpFilter,
-    moveDownFilter,
     enlargeFilter,
     toggleAnimation,
     toggleFilterFeature
@@ -84,8 +82,6 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
               layers={layers}
               isAnyFilterAnimating={isAnyFilterAnimating}
               removeFilter={() => removeFilter(idx)}
-              moveUpFilter={() => moveUpFilter(filter.id)}
-              moveDownFilter={() => moveDownFilter(filter.id)}
               enlargeFilter={() => enlargeFilter(idx)}
               toggleAnimation={() => toggleAnimation(idx)}
               toggleFilterFeature={() => toggleFilterFeature(idx)}
@@ -123,8 +119,6 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
     layers: PropTypes.arrayOf(PropTypes.any).isRequired,
     addFilter: PropTypes.func.isRequired,
     removeFilter: PropTypes.func.isRequired,
-    moveUpFilter: PropTypes.func.isRequired,
-    moveDownFilter: PropTypes.func.isRequired,
     enlargeFilter: PropTypes.func.isRequired,
     toggleAnimation: PropTypes.func.isRequired,
     toggleFilterFeature: PropTypes.func.isRequired,

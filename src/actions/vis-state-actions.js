@@ -162,7 +162,7 @@ export function interactionConfigChange(config) {
  * Update filter property
  * @memberof visStateActions
  * @param idx -`idx` of filter to be updated
- * @param prop - `prop` of filter, e,g, `dataId`, `name`, `value`
+ * @param prop - `prop` of filter, e,g, `dataId`, `name`, `value`, `order`
  * @param value - new value
  * @param valueIndex - dataId index
  * @returns action
@@ -225,35 +225,6 @@ export function addFilter(dataId) {
   return {
     type: ActionTypes.ADD_FILTER,
     dataId
-  };
-}
-/**
- * Move up a filter
- * @memberof visStateActions
- * @param filterId - filter `id`
- * @returns action
- * @type {typeof import('./vis-state-actions').moveUpFilter}
- * @public
- */
-export function moveUpFilter(filterId) {
-  return {
-    type: ActionTypes.MOVE_UP_FILTER,
-    filterId
-  };
-}
-
-/**
- * Move up a filter
- * @memberof visStateActions
- * @param filterId - filter `id`
- * @returns action
- * @type {typeof import('./vis-state-actions').moveDownFilter}
- * @public
- */
-export function moveDownFilter(filterId) {
-  return {
-    type: ActionTypes.MOVE_DOWN_FILTER,
-    filterId
   };
 }
 

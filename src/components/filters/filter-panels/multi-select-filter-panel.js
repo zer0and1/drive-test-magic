@@ -26,6 +26,7 @@ import FilterStatusBarFactory from './filter-status-bar';
 MultiSelectFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, MultiSelectFilterFactory, FilterStatusBarFactory];
 
 function MultiSelectFilterPanelFactory(FieldPanelWithFieldSelect, MultiSelectFilter, FilterStatusBar) {
+  /** @type {import('./filter-panel-types').FilterPanelComponent} */
   const MultiSelectFilterPanel = React.memo(
     ({
       idx,
@@ -36,8 +37,6 @@ function MultiSelectFilterPanelFactory(FieldPanelWithFieldSelect, MultiSelectFil
       enlargeFilter,
       setFilter,
       removeFilter,
-      moveUpFilter,
-      moveDownFilter,
       toggleAnimation
     }) => {
       const onSetFilter = useCallback(value => setFilter(idx, 'value', value), [idx, setFilter]);
@@ -50,8 +49,6 @@ function MultiSelectFilterPanelFactory(FieldPanelWithFieldSelect, MultiSelectFil
             filter={filter}
             idx={idx}
             removeFilter={removeFilter}
-            moveUpFilter={moveUpFilter}
-            moveDownFilter={moveDownFilter}
             setFilter={setFilter}
           >
             {filter.type && !filter.enlarged && (

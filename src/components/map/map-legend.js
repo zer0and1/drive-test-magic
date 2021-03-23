@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {rgb} from 'd3-color';
 import ColorLegend from 'components/common/color-legend';

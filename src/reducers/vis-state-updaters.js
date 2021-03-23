@@ -80,12 +80,9 @@ import {EDITOR_MODES, SORT_ORDER} from 'constants/default-settings';
 import {pick_, merge_} from './composer-helpers';
 import {processFileContent, removeLayer} from 'actions/vis-state-actions';
 
-import KeplerGLSchema, {CURRENT_VERSION, visStateSchema} from 'schemas';
+import KeplerGLSchema from 'schemas';
 import {updateDataset, reloadDataset} from 'actions/provider-actions';
 import {applyProfile} from 'actions/map-profile-actions';
-
-import {mergeFilters} from './vis-state-merger';
-import {YAxis} from 'react-vis';
 import {onMouseMove} from '../actions';
 
 // type imports
@@ -171,10 +168,6 @@ export const INITIAL_VIS_STATE = {
     title: '',
     description: ''
   },
-
-  // minions
-  command: {},
-
   // layers
   layers: [],
   layerData: [],
@@ -572,13 +565,17 @@ export function setFilterAnimationWindowUpdater(state, {id, animationWindow}) {
  * @public
  */
 export function setFilterUpdater(state, action) {
-  const { idx, prop, value, valueIndex = 0 } = action;
-
+  const {idx, prop, value, valueIndex = 0} = action;
   const oldFilter = state.filters[idx];
+
+  if (!oldFilter) {
+    Console.error(`filters.${idx} is undefined`);
+    return state;
+  }
   let newFilter = set([prop], value, oldFilter);
   let newState = state;
 
-  const { dataId } = newFilter;
+  const {dataId} = newFilter;
 
   // Ensuring backward compatibility
   let datasetIds = toArray(dataId);
@@ -597,12 +594,12 @@ export function setFilterUpdater(state, action) {
       // TODO: Next PR for UI filter name will only update filter name but it won't have side effects
       // we are gonna use pair of datasets and fieldIdx to update the filter
       const datasetId = newFilter.dataId[valueIndex];
-      let { filter: updatedFilter, dataset: newDataset } = applyFilterFieldName(
+      const {filter: updatedFilter, dataset: newDataset} = applyFilterFieldName(
         newFilter,
         state.datasets[datasetId],
         value,
         valueIndex,
-        { mergeDomain: false }
+        {mergeDomain: false}
       );
       if (!updatedFilter) {
         return state;
@@ -616,6 +613,7 @@ export function setFilterUpdater(state, action) {
       }
 
       newState = set(['datasets', datasetId], newDataset, state);
+
       // only filter the current dataset
       break;
     case FILTER_UPDATER_PROPS.layerId:
@@ -657,6 +655,20 @@ export function setFilterUpdater(state, action) {
       };
 
       break;
+
+    case FILTER_UPDATER_PROPS.order:
+      const destIdx = value == 'down' ? idx + 1 : (value == 'up' ? idx - 1 : idx);
+
+      if (destIdx < 0 || destIdx >= state.filters.length) {
+        newFilter = oldFilter;
+      }
+      else {
+        newFilter = state.filters[destIdx];
+        newState = set(['filters', destIdx], oldFilter, newState);
+      }
+
+      break;
+
     default:
       break;
   }
@@ -678,30 +690,21 @@ export function setFilterUpdater(state, action) {
     ? [datasetIds[valueIndex]]
     : datasetIds;
 
-  if (FILTER_UPDATER_PROPS.dataId != prop) {
-    newState = updateFilters(newState, datasetIdsToFilter, idx);
-  }
+  // filter data
+  const {datasets, filters} = applyFiltersToDatasets(
+    datasetIdsToFilter,
+    newState.datasets,
+    newState.filters,
+    newState.layers
+  );
 
+  newState = set(['datasets'], datasets, newState);
+  newState = set(['filters'], filters, newState);
   // dataId is an array
   // pass only the dataset we need to update
   newState = updateAllLayerDomainData(newState, datasetIdsToFilter, newFilter);
 
   return newState;
-}
-
-export function updateFilters(state, datasetIds, filterIdx) {
-  const filters = state.filters.filter(d => d.type);
-  const datasets = datasetIds.reduce((acc, id) => ({
-    ...acc,
-    [id]: {
-      ...acc[id],
-      filteredIndexAcc: acc[id].allIndexes,
-      filteredIndex: acc[id].allIndexes,
-    }
-  }), state.datasets);
-  const merged = mergeFilters({ ...state, filters: [], datasets, filterToBeMerged: [] }, filters, filterIdx);
-
-  return merged;
 }
 
 /**
@@ -710,8 +713,8 @@ export function updateFilters(state, datasetIds, filterIdx) {
  * @type {typeof import('./vis-state-updaters').setFilterPlotUpdater}
  * @public
  */
-export const setFilterPlotUpdater = (state, { idx, newProp, valueIndex = 0 }) => {
-  let newFilter = { ...state.filters[idx], ...newProp };
+export const setFilterPlotUpdater = (state, {idx, newProp, valueIndex = 0}) => {
+  let newFilter = {...state.filters[idx], ...newProp};
   const prop = Object.keys(newProp)[0];
   if (prop === 'yAxis') {
     const plotType = getDefaultFilterPlotType(newFilter);
@@ -734,89 +737,16 @@ export const setFilterPlotUpdater = (state, { idx, newProp, valueIndex = 0 }) =>
 /**
  * Add a new filter
  * @memberof visStateUpdaters
- * @type {typeof (import'./vis-state-updaters').addFilterUpdater}
+ * @type {typeof import('./vis-state-updaters').addFilterUpdater}
  * @public
  */
-export const addFilterUpdater = (state, action) => {
-  if (!action.dataId) {
-    return state;
-  }
-
-  const newFilter = getDefaultFilter(action.dataId);
-  return {
-    ...state,
-    filters: [...state.filters, newFilter]
-  }
-};
-
-/**
- * Move up a filter
- * @memberof visStateUpdaters
- * @type {typeof import('./vis-state-updaters').moveUpFilterUpdater}
- * @public
- */
-export const moveUpFilterUpdater = (state, { filterId }) => {
-  const srcIdx = state.filters.findIndex(filter => filter.id == filterId);
-  const destIdx = srcIdx - 1;
-  const srcFilter = state.filters[srcIdx];
-  const destFilter = state.filters[destIdx];
-  const { dataId: srcDataId } = srcFilter;
-  const { dataId: destDataId } = destFilter;
-
-  if (srcIdx == 0) {
-    return state;
-  }
-
-  const newFilters = [...state.filters];
-  newFilters[srcIdx] = newFilters[destIdx];
-  newFilters[destIdx] = srcFilter;
-
-  const newState = {
-    ...state,
-    filters: newFilters
-  };
-
-  if (srcDataId.toString() == destDataId.toString()) {
-    return updateFilters(newState, toArray(destDataId), destIdx);
-  }
-
-  return newState;
-};
-
-/**
- * Move down a filter
- * @memberof visStateUpdaters
- * @type {typeof import('./vis-state-updaters').moveDownFilterUpdater}
- * @public
- */
-export const moveDownFilterUpdater = (state, { filterId }) => {
-  const srcIdx = state.filters.findIndex(filter => filter.id == filterId);
-  const destIdx = srcIdx + 1;
-  const srcFilter = state.filters[srcIdx];
-  const destFilter = state.filters[destIdx];
-  const { dataId: srcDataId } = srcFilter;
-  const { dataId: destDataId } = destFilter;
-
-  if (srcIdx == state.filters.length - 1) {
-    return state;
-  }
-
-  const newFilters = [...state.filters];
-  newFilters[srcIdx] = destFilter;
-  newFilters[destIdx] = srcFilter;
-
-  const newState = {
-    ...state,
-    filters: newFilters
-  };
-
-  if (srcDataId.toString() == destDataId.toString()) {
-    return updateFilters(newState, toArray(destDataId), srcIdx);
-  }
-
-  return newState;
-};
-
+export const addFilterUpdater = (state, action) =>
+  !action.dataId
+    ? state
+    : {
+        ...state,
+        filters: [...state.filters, getDefaultFilter(action.dataId)]
+      };
 
 /**
  * Set layer color palette ui state
@@ -956,37 +886,27 @@ export const toggleFilterFeatureUpdater = (state, action) => {
  */
 export const removeFilterUpdater = (state, action) => {
   const {idx} = action;
-  const {dataId, id, type} = state.filters[idx];
+  const {dataId, id} = state.filters[idx];
 
   const newFilters = [
     ...state.filters.slice(0, idx),
     ...state.filters.slice(idx + 1, state.filters.length)
   ];
 
+  const {datasets: filteredDatasets, filters: updatedFilters} = applyFiltersToDatasets(dataId, state.datasets, newFilters, state.layers);
   const newEditor =
     getFilterIdInFeature(state.editor.selectedFeature) === id
       ? {
-        ...state.editor,
-        selectedFeature: null
-      }
+          ...state.editor,
+          selectedFeature: null
+        }
       : state.editor;
 
-  let newState = set(['filters'], newFilters, state);
+  let newState = set(['filters'], updatedFilters, state);
+  newState = set(['datasets'], filteredDatasets, newState);
   newState = set(['editor'], newEditor, newState);
 
-  if (type) {
-    if (newFilters.length && idx < newFilters.length) {
-      newState = updateFilters(newState, toArray(dataId), idx);
-    }
-    else {
-      const filteredDatasets = applyFiltersToDatasets(dataId, newState.datasets, newFilters, newState.layers);
-      newState = set(['datasets'], filteredDatasets, newState);
-    }
-  }
-
-  return {
-    ...updateAllLayerDomainData(newState, dataId, undefined)
-  };
+  return updateAllLayerDomainData(newState, dataId, undefined);
 };
 
 /**
@@ -1013,7 +933,7 @@ export const addLayerUpdater = (state, action) => {
     newLayerData = result.layerData;
   } else {
     // create an empty layer with the first available dataset
-  const defaultDataset = Object.values(state.datasets).sort((a, b) => a.label > b.label ? 1 : -1)[0].id;
+    const defaultDataset = Object.keys(state.datasets)[0];
     newLayer = new Layer({
       isVisible: true,
       isConfigActive: true,
@@ -2163,7 +2083,7 @@ export function toggleEditorVisibilityUpdater(state) {
  * @type {typeof import('./vis-state-updaters').addMarkerUpdater}
  * @public
  */
-export function addMarkerUpdater(state, { payload }) {
+ export function addMarkerUpdater(state, { payload }) {
   let task, newState;
 
   if (Array.isArray(payload)) {

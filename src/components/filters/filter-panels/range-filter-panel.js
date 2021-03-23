@@ -58,8 +58,6 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter, FilterS
       isAnyFilterAnimating,
       enlargeFilter,
       removeFilter,
-      moveUpFilter,
-      moveDownFilter,
       setFilter,
       toggleAnimation
     }) => {
@@ -85,8 +83,6 @@ function RangeFilterPanelFactory(FieldPanelWithFieldSelect, RangeFilter, FilterS
             filter={filter}
             idx={idx}
             removeFilter={removeFilter}
-            moveUpFilter={moveUpFilter}
-            moveDownFilter={moveDownFilter}
             setFilter={setFilter}
           >
             {filter.type && !filter.enlarged && (

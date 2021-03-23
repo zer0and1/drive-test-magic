@@ -148,7 +148,6 @@ function RangeBrushFactory() {
         // width change should not trigger this._brushed
         this.moving = true;
         this.root.call(this.brush);
-        this._move(val0, val1);
       }
 
       if (!this.brushing && !this.moving) {
@@ -161,6 +160,8 @@ function RangeBrushFactory() {
       if (!this.props.isRanged) {
         this.handle.attr('display', 'none');
       }
+
+      this._move(val0, val1);
     }
 
     rootContainer = createRef();

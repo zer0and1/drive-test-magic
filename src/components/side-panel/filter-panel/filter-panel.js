@@ -73,8 +73,6 @@ function FilterPanelFactory(
       filter: PropTypes.object.isRequired,
       setFilter: PropTypes.func.isRequired,
       removeFilter: PropTypes.func.isRequired,
-      moveUpFilter: PropTypes.func.isRequired,
-      moveDownFilter: PropTypes.func.isRequired,
       enlargeFilter: PropTypes.func.isRequired,
       toggleAnimation: PropTypes.func.isRequired,
       toggleFilterFeature: PropTypes.func.isRequired,

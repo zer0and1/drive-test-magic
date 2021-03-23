@@ -26,6 +26,7 @@ import FilterStatusBarFactory from './filter-status-bar';
 SingleSelectFilterPanelFactory.deps = [FieldPanelWithFieldSelectFactory, SingleSelectFilterFactory, FilterStatusBarFactory];
 
 function SingleSelectFilterPanelFactory(FieldPanelWithFieldSelect, SingleSelectFilter, FilterStatusBar) {
+  /** @type {import('./filter-panel-types').FilterPanelComponent} */
   const SingleSelectFilterPanel = React.memo(
     ({
       idx,
@@ -36,8 +37,6 @@ function SingleSelectFilterPanelFactory(FieldPanelWithFieldSelect, SingleSelectF
       enlargeFilter,
       setFilter,
       removeFilter,
-      moveUpFilter,
-      moveDownFilter,
       toggleAnimation
     }) => {
       const onSetFilter = useCallback(value => setFilter(idx, 'value', value), [idx, setFilter]);
@@ -50,8 +49,6 @@ function SingleSelectFilterPanelFactory(FieldPanelWithFieldSelect, SingleSelectF
             filter={filter}
             idx={idx}
             removeFilter={removeFilter}
-            moveUpFilter={moveUpFilter}
-            moveDownFilter={moveDownFilter}
             setFilter={setFilter}
           >
             {filter.type && !filter.enlarged && (

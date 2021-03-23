@@ -151,10 +151,6 @@ class KeplerTable {
       return null;
     }
     const field = this.fields[fieldIdx];
-    if (field.hasOwnProperty('filterProps')) {
-      return field.filterProps;
-    }
-
     const fieldDomain = this.getColumnFilterDomain(field);
     if (!fieldDomain) {
       return null;
@@ -275,30 +271,30 @@ class KeplerTable {
    * for Filter
    */
   getColumnFilterDomain(field) {
-    const {allData} = this;
+    const {allData, filteredIndexForDomain} = this;
     const {valueAccessor} = field;
-
+    const filteredData = filteredIndexForDomain.map(i => allData[i]);
     let domain;
 
     switch (field.type) {
       case ALL_FIELD_TYPES.real:
       case ALL_FIELD_TYPES.integer:
         // calculate domain and step
-        return getNumericFieldDomain(allData, valueAccessor);
+        return getNumericFieldDomain(filteredData, valueAccessor);
 
       case ALL_FIELD_TYPES.boolean:
         return {domain: [true, false]};
 
       case ALL_FIELD_TYPES.string:
       case ALL_FIELD_TYPES.date:
-        domain = getOrdinalDomain(allData, valueAccessor);
+        domain = getOrdinalDomain(filteredData, valueAccessor);
         return {domain};
 
       case ALL_FIELD_TYPES.timestamp:
-        return getTimestampFieldDomain(allData, valueAccessor);
+        return getTimestampFieldDomain(filteredData, valueAccessor);
 
       default:
-        return {domain: getOrdinalDomain(allData, valueAccessor)};
+        return {domain: getOrdinalDomain(filteredData, valueAccessor)};
     }
   }
 

@@ -277,8 +277,6 @@ export default function SidePanelFactory(
         addFilter: visStateActions.addFilter,
         removeFilter: visStateActions.removeFilter,
         deleteFilteredData: visStateActions.deleteFilteredData,
-        moveUpFilter: visStateActions.moveUpFilter,
-        moveDownFilter: visStateActions.moveDownFilter,
         setFilter: visStateActions.setFilter,
         deleteFilteredData: this._deleteFilteredData,
         showDatasetTable: this._showDatasetTable,

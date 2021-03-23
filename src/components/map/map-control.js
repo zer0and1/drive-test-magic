@@ -324,7 +324,6 @@ export function MapDrawPanelFactory() {
                 className="edit-feature"
                 onClick={() => onSetEditorMode(EDITOR_MODES.EDIT)}
                 label="toolbar.select"
-                iconHeight="22px"
                 icon={actionIcons.cursor}
                 active={editor.mode === EDITOR_MODES.EDIT}
               />
@@ -332,7 +331,6 @@ export function MapDrawPanelFactory() {
                 className="draw-feature"
                 onClick={() => onSetEditorMode(EDITOR_MODES.DRAW_POLYGON)}
                 label="toolbar.polygon"
-                iconHeight="22px"
                 icon={actionIcons.innerPolygon}
                 active={editor.mode === EDITOR_MODES.DRAW_POLYGON}
               />
@@ -340,7 +338,6 @@ export function MapDrawPanelFactory() {
                 className="draw-rectangle"
                 onClick={() => onSetEditorMode(EDITOR_MODES.DRAW_RECTANGLE)}
                 label="toolbar.rectangle"
-                iconHeight="22px"
                 icon={actionIcons.rectangle}
                 active={editor.mode === EDITOR_MODES.DRAW_RECTANGLE}
               />
@@ -348,7 +345,6 @@ export function MapDrawPanelFactory() {
                 className="toggle-features"
                 onClick={onToggleEditorVisibility}
                 label={editor.visible ? 'toolbar.hide' : 'toolbar.show'}
-                iconHeight="22px"
                 icon={editor.visible ? actionIcons.visible : actionIcons.hidden}
               />
             </StyledToolbar>
