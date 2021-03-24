@@ -50,7 +50,7 @@ export const ACTION_PREFIX = '@@kepler.gl/';
 export const CLOUDFRONT = 'https://d1a3f4spazzrp4.cloudfront.net/kepler.gl';
 export const ICON_PREFIX = `${CLOUDFRONT}/geodude`;
 export const DEFAULT_MAPBOX_API_URL = 'https://api.mapbox.com';
-export const MQTT_BROKER_URL = 'wss://159.89.0.130:9001';
+export const MQTT_BROKER_URL = 'ws://159.89.0.130:9001';
 
 export const HASURA_SERVER_API_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
 export const AUTH_SEVER_API_URL = 'https://kminion.herokuapp.com/api/get_token';
