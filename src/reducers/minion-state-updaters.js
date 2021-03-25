@@ -152,7 +152,7 @@ export function loadMinionsUpdater(state, { firstLoading }) {
   const query = GQL_GET_MINIONS(state.selectedMinions[0]?.name);
   const loadMinionTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     result => {
-      const minions = _.orderBy(result.data.signal_db_minions, ['lastupdate', 'name'], ['desc', 'asc']);
+      const minions = _.orderBy(result.data.signal_db_minions, ['name'], ['asc']);
       const sample = result.data.signal_db_signal_samples?.[0];
       return loadMinionsSuccess(minions, sample);
     },
