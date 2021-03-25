@@ -27,6 +27,9 @@ import moment from 'moment';
 import {SCALE_TYPES, SCALE_FUNC, ALL_FIELD_TYPES} from 'constants/default-settings';
 import {getTimeWidgetHintFormatter} from 'utils/filter-utils';
 import {isObject} from 'utils/utils';
+import {LEGEND_DOMAIN_OPTIONS} from 'constants/default-settings';
+import {FormattedMessage} from 'localization';
+import {Input} from 'components/common/styled-components';
 
 const ROW_H = 10;
 const GAP = 4;
@@ -45,6 +48,46 @@ const StyledLegend = styled.div`
     }
   }
 `;
+
+const StyledButtonList = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const SelectionButton = styled.div`
+  position: relative;
+  border-radius: 2px;
+  color: white;
+  background-color: ${props =>
+    props.selected ? props.theme.activeColor : props.theme.panelBackground};
+
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 4px;
+  padding: 1px 10px;
+
+  :hover {
+    background-color: ${props => props.theme.activeColorHover};
+  }
+`;
+
+const StyledManualSection = styled.div`
+  margin-top: 4px;
+  display: flex;
+`;
+
+const StyledLabel = styled.div`
+  color: white;
+  display: inline-block;
+  margin-right: 3px;
+`;
+
+const inputStyle = {
+  float: 'left',
+  height: '20px',
+  width: '55px',
+  textAlign: 'center',
+};
 
 const defaultFormat = d => d;
 
@@ -107,7 +150,8 @@ export default class ColorLegend extends Component {
     domain: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
     fieldType: PropTypes.string,
     range: PropTypes.object,
-    labelFormat: PropTypes.func
+    labelFormat: PropTypes.func,
+    updateLayerConfig: PropTypes.func
   };
 
   domainSelector = props => props.domain;
@@ -164,11 +208,11 @@ export default class ColorLegend extends Component {
   );
 
   render() {
-    const {width, displayLabel = true} = this.props;
+    const {width, displayLabel = true, legendDomain, legendRange, updateLayerConfig} = this.props;
 
     const legends = this.legendsSelector(this.props);
     const height = legends.data.length * (ROW_H + GAP);
-
+    
     return (
       <StyledLegend>
         <svg width={width} height={height}>
@@ -182,6 +226,35 @@ export default class ColorLegend extends Component {
             />
           ))}
         </svg>
+        <StyledButtonList>
+          {LEGEND_DOMAIN_OPTIONS.map(op => (
+            <SelectionButton
+              key={op.id}
+              selected={legendDomain === op.id}
+              onClick={() => updateLayerConfig({
+                legendDomain: op.id
+              })}
+            >
+              <FormattedMessage id={op.label} />
+            </SelectionButton>
+          ))}
+        </StyledButtonList>
+        {legendDomain == 'MANUAL' && (
+          <StyledManualSection>
+            <StyledLabel>Min: </StyledLabel>
+            <Input 
+              style={inputStyle}
+              type="number"
+              value={'0'}
+            />
+            <StyledLabel>Max: </StyledLabel>
+            <Input 
+              style={inputStyle}
+              type="number"
+              value={'0'}
+            />
+          </StyledManualSection>
+        )}
       </StyledLegend>
     );
   }

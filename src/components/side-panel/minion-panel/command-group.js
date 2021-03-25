@@ -6,7 +6,6 @@ import { Button, Input } from 'components/common/styled-components';
 import JqxDropDownList from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxdropdownlist';
 import PropTypes from 'prop-types';
 import { MQTT_BROKER_URL } from 'constants/default-settings';
-import LoadingDialog from 'components/modals/loading-dialog';
 
 import mqtt from 'mqtt';
 
@@ -31,15 +30,6 @@ const StyledInterval = styled(StyledButton)`
   width: 21.25%;
   margin-right: ${props => props.last ? 0 : 5}%;
 `;
-
-const StyledLabel = styled.div`
-  float: left;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  margin-right: 5px;
-`;
-
 
 CommandGroupFactory.deps = [MinionGroupFactory];
 

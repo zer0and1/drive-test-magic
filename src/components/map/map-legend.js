@@ -24,7 +24,6 @@ import {rgb} from 'd3-color';
 import ColorLegend from 'components/common/color-legend';
 import {CHANNEL_SCALES, DIMENSIONS, LEGEND_DOMAIN_OPTIONS} from 'constants/default-settings';
 import {FormattedMessage} from 'localization';
-import {CheckMark} from 'components/common/styled-components';
 
 export const StyledMapControlLegend = styled.div`
   padding: 10px ${props => props.theme.mapControl.padding}px 10px
@@ -63,36 +62,6 @@ export const StyledMapControlLegend = styled.div`
 
   .legend--layer_color-legend {
     margin-top: 6px;
-  }
-`;
-
-export const StyledButtonList = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding: 8px 0px;
-`;
-
-export const SelectionButton = styled.div`
-  position: relative;
-  border-radius: 2px;
-  border: 1px solid
-    ${props =>
-      props.selected
-        ? props.theme.selectionBtnBorderActColor
-        : props.theme.selectionBtnBorderColor};
-  color: ${props =>
-    props.selected ? props.theme.selectionBtnActColor : props.theme.selectionBtnColor};
-  background-color: ${props =>
-    props.selected ? props.theme.selectionBtnActBgd : props.theme.selectionBtnBgd};
-
-  cursor: pointer;
-  font-weight: 500;
-  margin-right: 6px;
-  padding: ${props => props.selected ? '1px 13px 1px 5px' : '1px 9px'};
-
-  :hover {
-    color: ${props => props.theme.selectionBtnActColor};
-    border: 1px solid ${props => props.theme.selectionBtnBorderActColor};
   }
 `;
 
@@ -135,11 +104,12 @@ export const SingleColorLegend = React.memo(({width, color}) => (
 SingleColorLegend.displayName = 'SingleColorLegend';
 
 /** @type {typeof import('./map-legend').LayerColorLegend} */
-export const LayerColorLegend = React.memo(({description, config, width, colorChannel}) => {
+export const LayerColorLegend = React.memo(({description, config, width, colorChannel, updateLayerConfig}) => {
   const enableColorBy = description.measure;
   const {scale, field, domain, range, property} = colorChannel;
   const [colorScale, colorField, colorDomain] = [scale, field, domain].map(k => config[k]);
   const colorRange = config.visConfig[range];
+  const {legendDomain, legendRange} = config;
 
   return (
     <div>
@@ -155,7 +125,11 @@ export const LayerColorLegend = React.memo(({description, config, width, colorCh
                 fieldType={(colorField && colorField.type) || 'real'}
                 range={colorRange}
                 width={width}
+                legendDomain={legendDomain}
+                legendRange={legendRange}
+                updateLayerConfig={updateLayerConfig}
               />
+
             ) : (
               <SingleColorLegend
                 color={config.visConfig[property] || config[property] || config.color}
@@ -175,7 +149,7 @@ const isColorChannel = visualChannel =>
   [CHANNEL_SCALES.color, CHANNEL_SCALES.colorAggr].includes(visualChannel.channelScaleType);
 
 /** @type {typeof import('./map-legend').default }> */
-const MapLegend = ({layers = [], width, options}) => (
+const MapLegend = ({layers = [], width, options, layerConfigChange}) => (
   <div className="map-legend">
     {layers.map((layer, index) => {
       if (!layer.isValidToSave() || layer.config.hidden) {
@@ -199,27 +173,14 @@ const MapLegend = ({layers = [], width, options}) => (
           ) : null}
           {colorChannels.map(colorChannel =>
             !colorChannel.condition || colorChannel.condition(layer.config) ? (
-              <>
-                <LayerColorLegend
-                  key={colorChannel.key}
-                  description={layer.getVisualChannelDescription(colorChannel.key)}
-                  config={layer.config}
-                  width={containerW - 2 * DIMENSIONS.mapControl.padding}
-                  colorChannel={colorChannel}
-                />
-                <StyledButtonList>
-                  {LEGEND_DOMAIN_OPTIONS.map(op => (
-                    <SelectionButton
-                      key={op.id}
-                      selected={'ALL' === op.id}
-                      onClick={() => {}}
-                    >
-                      <FormattedMessage id={op.label} />
-                      {'ALL' === op.id && <CheckMark />}
-                    </SelectionButton>
-                  ))}
-                </StyledButtonList>
-              </>
+              <LayerColorLegend
+                key={colorChannel.key}
+                description={layer.getVisualChannelDescription(colorChannel.key)}
+                config={layer.config}
+                width={containerW - 2 * DIMENSIONS.mapControl.padding}
+                colorChannel={colorChannel}
+                updateLayerConfig={newprops => layerConfigChange(layer, newprops)}
+              />                
             ) : null
           )}
           {nonColorChannels.map(visualChannel => {

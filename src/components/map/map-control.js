@@ -196,6 +196,7 @@ export function MapLegendPanelFactory() {
     isExport,
     disableClose,
     logoComponent,
+    layerConfigChange,
     actionIcons = defaultActionIcons
   }) =>
     !isActive ? (
@@ -221,7 +222,7 @@ export function MapLegendPanelFactory() {
         disableClose={disableClose}
         logoComponent={logoComponent}
       >
-        <MapLegend layers={layers} />
+        <MapLegend layers={layers} layerConfigChange={layerConfigChange} />
       </MapControlPanel>)
     );
 
@@ -440,6 +441,7 @@ function MapControlFactory(MapDrawPanel, Toggle3dButton, SplitMapButton, MapLege
       onSetLocale: PropTypes.func.isRequired,
       locale: PropTypes.string.isRequired,
       logoComponent: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
+      layerConfigChange: PropTypes.func,
 
       // optional
       readOnly: PropTypes.bool,
@@ -489,7 +491,8 @@ function MapControlFactory(MapDrawPanel, Toggle3dButton, SplitMapButton, MapLege
         readOnly,
         locale,
         top,
-        logoComponent
+        logoComponent,
+        layerConfigChange
       } = this.props;
 
       const {
@@ -545,6 +548,7 @@ function MapControlFactory(MapDrawPanel, Toggle3dButton, SplitMapButton, MapLege
                 onToggleMenuPanel={() => onToggleMapControl('mapLegend')}
                 disableClose={mapLegend.disableClose}
                 logoComponent={logoComponent}
+                layerConfigChange={layerConfigChange}
               />
             </ActionPanel>
           ) : null}
