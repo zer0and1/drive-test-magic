@@ -99,8 +99,8 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
         return 'never seen';
       }
 
-      const date = moment(dateString).format('YYYY-MM-DD HH:mm:ss');
-      const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+      const date = moment.utc(dateString).format('YYYY-MM-DD HH:mm:ss');
+      const now = moment().format('YYYY-MM-DD HH:mm:ss');
       let diff = moment(now).diff(moment(date), 'seconds');
 
       if (diff < 120 && diff > 10) {

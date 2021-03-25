@@ -48,7 +48,7 @@ function SignalSampleGroupFactory(MinionGroup) {
     }
 
     const date = moment(value).format('YYYY-MM-DD HH:mm:ss');
-    const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+    const now = moment().format('YYYY-MM-DD HH:mm:ss');
     const diff = moment(now).diff(moment(date), 'seconds');
 
     if (diff > 10) {

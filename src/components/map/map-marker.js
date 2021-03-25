@@ -89,19 +89,19 @@ export default function MapMarkerFactory() {
 
       const lastFix = moment(gps_fix_lastupdate).format('YYYY-MM-DD HH:mm:ss');
       const lastUpdate = moment(lastupdate).format('YYYY-MM-DD HH:mm:ss');
-      const now = moment.tz(new Date(), 'Europe/Paris').format('YYYY-MM-DD HH:mm:ss');
+      const now = moment().format('YYYY-MM-DD HH:mm:ss');
       const fixDiff = moment(now).diff(moment(lastFix), 'seconds');
       const updateDiff = moment(now).diff(moment(lastUpdate), 'seconds');
 
       if (fixDiff > 120) {
-        if (updateDiff < 120) {
+        if (updateDiff <= 120) {
           mode = 'no fix';
         }
         else {
           mode = 'offline';
         }
       }
-      else if (!updateDiff) {
+      else if (updateDiff > 120 || !lastupdate) {
         mode = 'offline';
       }
 
