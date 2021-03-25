@@ -91,7 +91,12 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     longitude = createRef();
 
     strRenderer(row, columnproperties, value) {
-      return `<div style='text-align: center; margin-top: 5px;'>${value}</div>`
+      const color = value == 'never seen' ? 'grey' : 'white';
+      return `
+        <div style='text-align: center; margin-top: 5px; color: ${color}'>
+          ${value}
+        </div>
+      `;
     };
 
     convertToHRTime(dateString) {
