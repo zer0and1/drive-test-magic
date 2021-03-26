@@ -80,6 +80,8 @@ const StyledLabel = styled.div`
   color: white;
   display: inline-block;
   margin-right: 3px;
+  font-size: 11px;
+  font-weight: 500;
 `;
 
 const inputStyle = {
@@ -208,11 +210,19 @@ export default class ColorLegend extends Component {
   );
 
   render() {
-    const {width, displayLabel = true, legendDomain, legendRange, updateLayerConfig} = this.props;
+    const {
+      width, 
+      displayLabel = true, 
+      legendDomain, 
+      legendRange, 
+      updateLayerConfig
+    } = this.props;
 
     const legends = this.legendsSelector(this.props);
     const height = legends.data.length * (ROW_H + GAP);
-    
+    const min = legendRange?.[0] || 0;
+    const max = legendRange?.[1] || 0;
+
     return (
       <StyledLegend>
         <svg width={width} height={height}>
@@ -241,17 +251,23 @@ export default class ColorLegend extends Component {
         </StyledButtonList>
         {legendDomain == 'MANUAL' && (
           <StyledManualSection>
-            <StyledLabel>Min: </StyledLabel>
+            <StyledLabel>min: </StyledLabel>
             <Input 
               style={inputStyle}
               type="number"
-              value={'0'}
+              value={min}
+              onChange={e => updateLayerConfig({
+                legendRange: [e.target.value, max]
+              })}
             />
-            <StyledLabel>Max: </StyledLabel>
+            <StyledLabel style={{marginLeft: '3px'}}>max: </StyledLabel>
             <Input 
               style={inputStyle}
               type="number"
-              value={'0'}
+              value={max}
+              onChange={e => updateLayerConfig({
+                legendRange: [min, e.target.value]
+              })}
             />
           </StyledManualSection>
         )}

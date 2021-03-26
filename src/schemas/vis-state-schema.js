@@ -235,6 +235,8 @@ export const layerPropsV0 = {
   color: new LayerConfigSchemaV0({key: 'color'}),
   isVisible: new LayerConfigSchemaV0({key: 'isVisible'}),
   hidden: new LayerConfigSchemaV0({key: 'hidden'}),
+  legendDomain: new LayerConfigSchemaV0({key: 'legendDomain'}),
+  legendRange: new LayerConfigSchemaV0({key: 'legendRange'}),
 
   // convert visConfig
   visConfig: new LayerVisConfigSchemaV0({key: 'visConfig'}),
@@ -457,6 +459,8 @@ export const layerPropsV1 = {
       dataId: null,
       label: null,
       color: null,
+      legendDomain: null,
+      legendRange: null,
       columns: new ColumnSchemaV1({
         version: VERSIONS.v1,
         key: 'columns'

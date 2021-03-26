@@ -490,6 +490,8 @@ export function validateLayerWithData(
     label: savedLayer.config.label,
     color: savedLayer.config.color,
     isVisible: savedLayer.config.isVisible,
+    legendDomain: savedLayer.config.legendDomain,
+    legendRange: savedLayer.config.legendRange,
     hidden: savedLayer.config.hidden
   });
 

@@ -308,6 +308,10 @@ class Layer {
       colorDomain: [0, 1],
       colorScale: SCALE_TYPES.quantile,
 
+      // legend domain
+      legendDomain: props.legendDomain || 'ALL',
+      legendRange: props.legendRange || [0, 0],
+      
       // color by size, domain is set by filters, field, scale type
       sizeDomain: [0, 1],
       sizeScale: SCALE_TYPES.linear,
