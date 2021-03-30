@@ -286,7 +286,11 @@ export function layerConfigChangeUpdater(state, action) {
   // let newLayer;
   if (newLayer.shouldCalculateLayerData(props)) {
     const oldLayerData = state.layerData[idx];
-    newLayer.updateLayerDomain(state.datasets);
+
+    if (action.newConfig.hasOwnProperty('legendDomain') || action.newConfig.hasOwnProperty('legendRange')) {
+      newLayer.updateLayerDomain(state.datasets);
+    }
+    
     const updateLayerDataResult = calculateLayerData(newLayer, state, oldLayerData);
 
     layerData = updateLayerDataResult.layerData;

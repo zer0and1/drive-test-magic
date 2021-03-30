@@ -1014,21 +1014,19 @@ class Layer {
   calculateLayerDomain(dataset, visualChannel) {
     const {scale} = visualChannel;
     const scaleType = this.config[scale];
-    const {legendDomain, legendRange: [min, max]} = this.config;
+    const {legendDomain, legendRange} = this.config;
 
     const field = this.config[visualChannel.field];
     if (!field) {
       // if colorField or sizeField were set back to null
       return defaultDomain;
     }
-    
-    const domain = dataset.getColumnLayerDomain(field, scaleType, legendDomain) || defaultDomain;
 
     if (legendDomain == 'MANUAL') {
-      return [min, ...domain.filter(v => v >= min && v <= max), max];
+      return legendRange;
     }
     
-    return domain;
+    return dataset.getColumnLayerDomain(field, scaleType, legendDomain) || defaultDomain;
   }
 
   hasHoveredObject(objectInfo) {
