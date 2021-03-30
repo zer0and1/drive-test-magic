@@ -301,7 +301,7 @@ class KeplerTable {
   /**
    *  Get the domain of this column based on scale type
    */
-  getColumnLayerDomain(field, scaleType) {
+  getColumnLayerDomain(field, scaleType, legendDomain) {
     const {allData, filteredIndexForDomain} = this;
 
     if (!SCALE_TYPES[scaleType]) {
@@ -312,6 +312,7 @@ class KeplerTable {
     const {valueAccessor} = field;
     const indexValueAccessor = i => valueAccessor(allData[i]);
     const sortFunction = getSortingFunction(field.type);
+    const indexForDomain = legendDomain == 'ALL' ? allData.map((_, idx) => idx) : filteredIndexForDomain;
 
     switch (scaleType) {
       case SCALE_TYPES.ordinal:
@@ -321,16 +322,16 @@ class KeplerTable {
         return getOrdinalDomain(allData, valueAccessor);
 
       case SCALE_TYPES.quantile:
-        return getQuantileDomain(filteredIndexForDomain, indexValueAccessor, sortFunction);
+        return getQuantileDomain(indexForDomain, indexValueAccessor, sortFunction);
 
       case SCALE_TYPES.log:
-        return getLogDomain(filteredIndexForDomain, indexValueAccessor);
+        return getLogDomain(indexForDomain, indexValueAccessor);
 
       case SCALE_TYPES.quantize:
       case SCALE_TYPES.linear:
       case SCALE_TYPES.sqrt:
       default:
-        return getLinearDomain(filteredIndexForDomain, indexValueAccessor);
+        return getLinearDomain(indexForDomain, indexValueAccessor);
     }
   }
 

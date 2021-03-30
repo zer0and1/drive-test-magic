@@ -155,7 +155,7 @@ export default class ColorLegend extends Component {
     labelFormat: PropTypes.func,
     updateLayerConfig: PropTypes.func
   };
-
+  
   domainSelector = props => props.domain;
   rangeSelector = props => props.range;
   labelFormatSelector = props => props.labelFormat;
@@ -214,14 +214,47 @@ export default class ColorLegend extends Component {
       width, 
       displayLabel = true, 
       legendDomain, 
-      legendRange, 
-      updateLayerConfig
+      updateLayerConfig,
+      fieldType
     } = this.props;
 
     const legends = this.legendsSelector(this.props);
     const height = legends.data.length * (ROW_H + GAP);
-    const min = legendRange?.[0] || 0;
-    const max = legendRange?.[1] || 0;
+    let customDomain = null;
+
+    if (legendDomain == 'MANUAL') {
+      let {legendRange: [min, max], domain} = this.props;
+      
+      if (min == -Infinity && max == Infinity) {
+        min = Math.min(...domain);
+        max = Math.max(...domain);
+      }
+      
+      customDomain = (
+        <StyledManualSection>
+          <StyledLabel>min: </StyledLabel>
+          <Input 
+            style={inputStyle}
+            type="number"
+            value={min}
+            onChange={e => updateLayerConfig({
+              legendRange: [e.target.value, max]
+            })}
+            onKeyDown={e => e.key == 'Enter' && updateLayerConfig({legendRange: [min, max]})}
+          />
+          <StyledLabel style={{marginLeft: '3px'}}>max: </StyledLabel>
+          <Input 
+            style={inputStyle}
+            type="number"
+            value={max}
+            onChange={e => updateLayerConfig({
+              legendRange: [min, e.target.value]
+            })}
+            onKeyDown={e => e.key == 'Enter' && updateLayerConfig({legendRange: [min, max]})}
+          />
+        </StyledManualSection>
+      );
+    }
 
     return (
       <StyledLegend>
@@ -236,40 +269,23 @@ export default class ColorLegend extends Component {
             />
           ))}
         </svg>
-        <StyledButtonList>
-          {LEGEND_DOMAIN_OPTIONS.map(op => (
-            <SelectionButton
-              key={op.id}
-              selected={legendDomain === op.id}
-              onClick={() => updateLayerConfig({
-                legendDomain: op.id
-              })}
-            >
-              <FormattedMessage id={op.label} />
-            </SelectionButton>
-          ))}
-        </StyledButtonList>
-        {legendDomain == 'MANUAL' && (
-          <StyledManualSection>
-            <StyledLabel>min: </StyledLabel>
-            <Input 
-              style={inputStyle}
-              type="number"
-              value={min}
-              onChange={e => updateLayerConfig({
-                legendRange: [e.target.value, max]
-              })}
-            />
-            <StyledLabel style={{marginLeft: '3px'}}>max: </StyledLabel>
-            <Input 
-              style={inputStyle}
-              type="number"
-              value={max}
-              onChange={e => updateLayerConfig({
-                legendRange: [min, e.target.value]
-              })}
-            />
-          </StyledManualSection>
+        {fieldType && (
+          <div>
+            <StyledButtonList>
+              {LEGEND_DOMAIN_OPTIONS.map(op => (
+                <SelectionButton
+                  key={op.id}
+                  selected={legendDomain === op.id}
+                  onClick={() => updateLayerConfig({
+                    legendDomain: op.id
+                  })}
+                >
+                  <FormattedMessage id={op.label} />
+                </SelectionButton>
+              ))}
+            </StyledButtonList>
+            {customDomain}
+          </div>
         )}
       </StyledLegend>
     );

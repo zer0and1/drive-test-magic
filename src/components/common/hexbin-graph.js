@@ -227,7 +227,7 @@ function HexbinGraphFactory() {
             "<span style='color:" + colors[iter] + "'>#avg:</span>" + mean(yvalues[ids])?.toFixed(2) +
             "<span style='color:" + colors[iter] + "'>#max:</span>" + max(yvalues[ids]) +
             "<span style='color:" + colors[iter] + "'>#min:</span>" + min(yvalues[ids]) +
-            "<span style='color:" + colors[iter] + "'>#smp:</span>" + smps.filter(item => item.key === ids)[0].value,
+            "<span style='color:" + colors[iter] + "'>#smp:</span>" + smps.filter(item => item.key === ids)[0]?.value,
           values: yvalues[ids].map(num => num != null ? Number(num) : null)
         }
         const anno = {
