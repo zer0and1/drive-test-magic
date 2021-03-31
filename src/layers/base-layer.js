@@ -310,7 +310,7 @@ class Layer {
 
       // legend domain
       legendDomain: props.legendDomain || 'ALL',
-      legendRange: props.legendRange || [-Infinity, Infinity],
+      legendRange: props.legendRange || [0, 0],
       
       // color by size, domain is set by filters, field, scale type
       sizeDomain: [0, 1],
@@ -1012,7 +1012,7 @@ class Layer {
   }
 
   calculateLayerDomain(dataset, visualChannel) {
-    const {scale} = visualChannel;
+    const {scale, domain} = visualChannel;
     const scaleType = this.config[scale];
     const {legendDomain, legendRange} = this.config;
 
@@ -1022,11 +1022,14 @@ class Layer {
       return defaultDomain;
     }
 
-    if (legendDomain == 'MANUAL') {
+    if (domain == 'sizeDomain') {
+      return dataset.getColumnLayerDomain(field, SCALE_TYPES.ordinal, legendDomain, domain)
+    }
+    else if (legendDomain == 'MANUAL') {
       return legendRange;
     }
-    
-    return dataset.getColumnLayerDomain(field, scaleType, legendDomain) || defaultDomain;
+
+    return dataset.getColumnLayerDomain(field, scaleType, legendDomain, domain) || defaultDomain;
   }
 
   hasHoveredObject(objectInfo) {

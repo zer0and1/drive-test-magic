@@ -32,7 +32,7 @@ export function insertArguments(queryString, argsString) {
     return argWhereExists ? `${header},${argsString}${footer}` : `${header}, where: { ${argsString}${footer} }`;
   }
   else {
-    return `${header}(${argsString})${footer}`;
+    return argWhereExists ? `${header}(${argsString})${footer}` : `${header}(where: {${argsString} })${footer}`;
   }
 };
 

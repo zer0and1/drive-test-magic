@@ -162,6 +162,8 @@ export default class ColorLegend extends Component {
   scaleTypeSelector = props => props.scaleType;
   fieldTypeSelector = props => props.fieldType;
 
+  prevLegendDomain = null;
+
   legendsSelector = createSelector(
     this.domainSelector,
     this.rangeSelector,
@@ -225,7 +227,7 @@ export default class ColorLegend extends Component {
     if (legendDomain == 'MANUAL') {
       let {legendRange: [min, max], domain} = this.props;
       
-      if (min == -Infinity && max == Infinity) {
+      if (this.prevLegendDomain != 'MANUAL') {
         min = Math.min(...domain);
         max = Math.max(...domain);
       }
@@ -256,6 +258,8 @@ export default class ColorLegend extends Component {
       );
     }
 
+    this.prevLegendDomain = legendDomain;
+    
     return (
       <StyledLegend>
         <svg width={width} height={height}>
