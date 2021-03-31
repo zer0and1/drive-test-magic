@@ -99,7 +99,7 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
           <Add height="12px" />
           <FormattedMessage id={'filterManager.addFilter'} />
         </Button>
-        {userRole == USER_ROLES.ADMIN && (
+        {userRole == USER_ROLES.admin && (
           <Button
             className="delete-filtered-data"
             disabled={hadEmptyFilter}

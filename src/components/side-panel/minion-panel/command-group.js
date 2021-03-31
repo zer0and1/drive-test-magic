@@ -100,7 +100,7 @@ function CommandGroupFactory(MinionGroup) {
         selectedMinions,
         userRole
       } = this.props;
-      const hadPrivilege = userRole == USER_ROLES.ADMIN || userRole == USER_ROLES.USER;
+      const hadPrivilege = userRole == USER_ROLES.admin || userRole == USER_ROLES.user;
 
       return (
         <MinionGroup groupIcon={Gear} label={`Command - ${selectedMinions.length} selected`} toggled={true}>

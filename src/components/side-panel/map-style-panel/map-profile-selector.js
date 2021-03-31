@@ -164,7 +164,7 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
     const { profiles, isLoading, isAdding, isUpdating, selectedId } = mapProfile;
     const { isRemoving } = profiles.reduce((acc, profile) => ({ isRemoving: acc.isRemoving || profile.isRemoving }), { isRemoving: false });
     const btnDisabled = isLoading || isAdding || isUpdating || isRemoving;
-    const hadProfilePrivilege = userRole == USER_ROLES.ADMIN || userRole == USER_ROLES.USER;
+    const hadProfilePrivilege = userRole == USER_ROLES.admin || userRole == USER_ROLES.user;
 
     return (
       <div>

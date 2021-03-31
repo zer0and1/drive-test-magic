@@ -143,7 +143,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
       setLoopingEnabled(true);
 
-      if (userRole && userRole != USER_ROLES.NOT_ALLOWED) {
+      if (userRole && userRole != USER_ROLES.not_allowed) {
         loadMinions(true);
       }
     }
@@ -373,7 +373,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 ref={'minionGrid'}
                 width={'100%'}
                 height={'100%'}
-                style={{ paddingBottom: userRole == USER_ROLES.ADMIN ? '35px' : 0 }}
+                style={{ paddingBottom: userRole == USER_ROLES.admin ? '35px' : 0 }}
                 theme={'metrodark'}
                 source={new jqx.dataAdapter({
                   localdata: minions,
@@ -409,7 +409,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 }}
                 onBindingcomplete={() => this.refs.minionGrid.sortby(this.sortCol, this.sortDir)}
               />
-              {userRole == USER_ROLES.ADMIN && (<SidePanelSection style={{ height: '35px', padding: '5px', marginTop: '-35px' }}>
+              {userRole == USER_ROLES.admin && (<SidePanelSection style={{ height: '35px', padding: '5px', marginTop: '-35px' }}>
                 <Button primary style={{ padding: '5px' }} onClick={this.addButtonClick.bind(this)}>
                   <Add height="12px" />
                   Add

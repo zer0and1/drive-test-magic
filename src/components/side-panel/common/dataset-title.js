@@ -213,7 +213,7 @@ export default function DatasetTitleFactory(DatasetTag) {
         dataset,
         userRole
       } = this.props;
-      const hadDBPrivilege = userRole == USER_ROLES.ADMIN || userRole == USER_ROLES.USER;
+      const hadDBPrivilege = userRole == USER_ROLES.admin || userRole == USER_ROLES.user;
 
       return (
         <StyledDatasetTitle

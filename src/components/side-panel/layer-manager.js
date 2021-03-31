@@ -168,7 +168,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
 
     componentDidMount() {
       const { userRole } = this.props;
-      if (userRole && userRole != USER_ROLES.NOT_ALLOWED && Object.keys(this.props.datasets).length == 0) {
+      if (userRole && userRole != USER_ROLES.not_allowed && Object.keys(this.props.datasets).length == 0) {
         $('.side-panel__content').LoadingOverlay('show');
         this.props.loadDataset();
       }
@@ -211,7 +211,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
 
     render() {
       const {layers, datasets, layerOrder, openModal, intl, userRole} = this.props;
-      const hadDBPrivilege = userRole == USER_ROLES.ADMIN || userRole == USER_ROLES.USER;
+      const hadDBPrivilege = userRole == USER_ROLES.admin || userRole == USER_ROLES.user;
       const defaultDataset = Object.keys(datasets)[0];
       const layerTypeOptions = this.layerTypeOptionsSelector(this.props);
 

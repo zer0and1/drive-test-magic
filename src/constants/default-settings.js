@@ -813,10 +813,10 @@ export const LEGEND_DOMAIN_OPTIONS = [
 ];
 
 export const USER_ROLES = keyMirror({
-  ADMIN: null,
-  USER: null,
-  GUEST: null,
-  NOT_ALLOWED: null
+  admin: null,
+  user: null,
+  guest: null,
+  not_allowed: null
 });
 
 // Export map types
