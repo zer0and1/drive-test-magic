@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {console as Console} from 'global/console';
-import {TRIP_POINT_FIELDS, SORT_ORDER} from 'constants/default-settings';
+import {TRIP_POINT_FIELDS, SORT_ORDER, LEGEND_DOMAINS} from 'constants/default-settings';
 import {ascending, descending} from 'd3-array';
 
 // import {validateInputData} from 'processors/data-processor';
@@ -302,7 +302,7 @@ class KeplerTable {
    *  Get the domain of this column based on scale type
    */
   getColumnLayerDomain(field, scaleType, legendDomain) {
-    const {allData, filteredIndexForDomain} = this;
+    const {allData, filteredIndexForDomain, allIndexes} = this;
 
     if (!SCALE_TYPES[scaleType]) {
       Console.error(`scale type ${scaleType} not supported`);
@@ -312,7 +312,7 @@ class KeplerTable {
     const {valueAccessor} = field;
     const indexValueAccessor = i => valueAccessor(allData[i]);
     const sortFunction = getSortingFunction(field.type);
-    const indexForDomain = legendDomain == 'ALL' ? allData.map((_, idx) => idx) : filteredIndexForDomain;
+    const indexForDomain = legendDomain == LEGEND_DOMAINS.ALL ? allIndexes : filteredIndexForDomain;
 
     switch (scaleType) {
       case SCALE_TYPES.ordinal:

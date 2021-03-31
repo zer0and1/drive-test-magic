@@ -35,7 +35,8 @@ import {
   FIELD_OPTS,
   SCALE_FUNC,
   CHANNEL_SCALE_SUPPORTED_FIELDS,
-  MAX_GPU_FILTERS
+  MAX_GPU_FILTERS,
+  LEGEND_DOMAINS
 } from 'constants/default-settings';
 import {COLOR_RANGES} from 'constants/color-ranges';
 import {DataVizColors} from 'constants/custom-color-ranges';
@@ -309,7 +310,7 @@ class Layer {
       colorScale: SCALE_TYPES.quantile,
 
       // legend domain
-      legendDomain: props.legendDomain || 'ALL',
+      legendDomain: props.legendDomain || LEGEND_DOMAINS.ALL,
       legendRange: props.legendRange || [0, 0],
       
       // color by size, domain is set by filters, field, scale type
@@ -1023,9 +1024,9 @@ class Layer {
     }
 
     if (domain == 'sizeDomain') {
-      return dataset.getColumnLayerDomain(field, scaleType, 'ALL')
+      return dataset.getColumnLayerDomain(field, scaleType, LEGEND_DOMAINS.ALL)
     }
-    else if (legendDomain == 'MANUAL') {
+    else if (legendDomain == LEGEND_DOMAINS.MANUAL) {
       return legendRange;
     }
 

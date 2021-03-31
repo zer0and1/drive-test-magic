@@ -24,7 +24,7 @@ import styled from 'styled-components';
 import {createSelector} from 'reselect';
 import {format} from 'd3-format';
 import moment from 'moment';
-import {SCALE_TYPES, SCALE_FUNC, ALL_FIELD_TYPES} from 'constants/default-settings';
+import {SCALE_TYPES, SCALE_FUNC, ALL_FIELD_TYPES, LEGEND_DOMAINS} from 'constants/default-settings';
 import {getTimeWidgetHintFormatter} from 'utils/filter-utils';
 import {isObject} from 'utils/utils';
 import {LEGEND_DOMAIN_OPTIONS} from 'constants/default-settings';
@@ -224,10 +224,10 @@ export default class ColorLegend extends Component {
     const height = legends.data.length * (ROW_H + GAP);
     let customDomain = null;
 
-    if (legendDomain == 'MANUAL') {
+    if (legendDomain == LEGEND_DOMAINS.MANUAL) {
       let {legendRange: [min, max], domain} = this.props;
       
-      if (this.prevLegendDomain != 'MANUAL') {
+      if (this.prevLegendDomain != LEGEND_DOMAINS.MANUAL) {
         min = Math.min(...domain);
         max = Math.max(...domain);
       }
