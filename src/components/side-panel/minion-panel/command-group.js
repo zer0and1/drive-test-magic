@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import MinionGroupFactory from './minion-group';
-import { Gear, Spinner } from 'components/common/icons';
+import {Gear} from 'components/common/icons';
 import styled from 'styled-components';
-import { Button, Input } from 'components/common/styled-components';
+import {Button, Input} from 'components/common/styled-components';
 import JqxDropDownList from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxdropdownlist';
 import PropTypes from 'prop-types';
-import { MQTT_BROKER_URL } from 'constants/default-settings';
+import {MQTT_BROKER_URL, USER_ROLES} from 'constants/default-settings';
 
 import mqtt from 'mqtt';
 
@@ -100,7 +100,7 @@ function CommandGroupFactory(MinionGroup) {
         selectedMinions,
         userRole
       } = this.props;
-      const hadPrivilege = userRole == 'admin' || userRole == 'user';
+      const hadPrivilege = userRole == USER_ROLES.ADMIN || userRole == USER_ROLES.USER;
 
       return (
         <MinionGroup groupIcon={Gear} label={`Command - ${selectedMinions.length} selected`} toggled={true}>

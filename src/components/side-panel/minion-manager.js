@@ -39,6 +39,7 @@ import WebMercatorViewport from 'viewport-mercator-project';
 import GPSGroupFactory from './minion-panel/gps-group';
 import SignalSampleGroupFactory from './minion-panel/signal-sample-group';
 import CommandGroupFactory from './minion-panel/command-group';
+import { USER_ROLES } from 'constants/default-settings';
 
 const StyledMinionGroup = styled.div`
   ${props => props.theme.sidePanelScrollBar};
@@ -138,10 +139,12 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
 
     componentDidMount() {
       this._mounted = true;
-      this.props.setLoopingEnabled(true);
+      const {userRole, setLoopingEnabled, loadMinions} = this.props;
 
-      if (this.props.userRole && this.props.userRole != 'not-allowed') {
-        this.props.loadMinions(true);
+      setLoopingEnabled(true);
+
+      if (userRole && userRole != USER_ROLES.NOT_ALLOWED) {
+        loadMinions(true);
       }
     }
 
@@ -318,7 +321,14 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
     }
 
     render() {
-      const { width, height, selectedMinions, minions, details } = this.props;
+      const { 
+        width, 
+        height, 
+        selectedMinions, 
+        minions, 
+        details,
+        userRole 
+      } = this.props;
 
       const commandGroupFields = {
         sleepInterval: this.props.sleepInterval,
@@ -363,7 +373,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 ref={'minionGrid'}
                 width={'100%'}
                 height={'100%'}
-                style={{ paddingBottom: '35px' }}
+                style={{ paddingBottom: userRole == USER_ROLES.ADMIN ? '35px' : 0 }}
                 theme={'metrodark'}
                 source={new jqx.dataAdapter({
                   localdata: minions,
@@ -399,7 +409,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 }}
                 onBindingcomplete={() => this.refs.minionGrid.sortby(this.sortCol, this.sortDir)}
               />
-              <SidePanelSection style={{ height: '35px', padding: '5px', marginTop: '-35px' }}>
+              {userRole == USER_ROLES.ADMIN && (<SidePanelSection style={{ height: '35px', padding: '5px', marginTop: '-35px' }}>
                 <Button primary style={{ padding: '5px' }} onClick={this.addButtonClick.bind(this)}>
                   <Add height="12px" />
                   Add
@@ -421,7 +431,7 @@ function MinionManagerFactory(GPSGroup, MinionSignalSampleGroup, CommandGroup) {
                 >
                   <Trash height="15px" />
                 </Button>
-              </SidePanelSection>
+              </SidePanelSection>)}
             </div>
             <StyledMinionGroup className={"splitter-panel"} id="minion-group">
               <GPSGroup data={details} disabled={selectedMinions.length > 1} />

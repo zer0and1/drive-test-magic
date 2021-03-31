@@ -41,7 +41,7 @@ mutation($token: String!) {
 const generateJWT = ({ role, user_token }) => {
   return jsonWebToken.sign({
       "https://hasura.io/jwt/claims": {
-          "x-hasura-allowed-roles": ["admin", "user", "guest", 'not-allowed'],
+          "x-hasura-allowed-roles": ["ADMIN", "USER", "GUEST", 'NOT_ALLOWED'],
           "x-hasura-default-role": role,
           "x-hasura-user-id": user_token
       }

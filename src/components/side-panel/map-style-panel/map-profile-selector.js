@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 
-import { Save2, Add, Play, Spinner } from 'components/common/icons';
-import { FormattedMessage } from 'localization';
+import {Save2, Add, Play, Spinner, Trash} from 'components/common/icons';
+import {FormattedMessage} from 'localization';
 import {
   Button,
   PanelLabel,
@@ -12,7 +12,7 @@ import {
   TextArea,
 } from 'components/common/styled-components';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
-import { Trash } from 'components/common/icons';
+import {USER_ROLES} from '../../../constants/default-settings';
 
 const PanelWrapper = styled.div`
   font-size: 12px;
@@ -164,7 +164,7 @@ function MapProfileSelectorFactory(ProfileTitleSection, PanelHeaderAction) {
     const { profiles, isLoading, isAdding, isUpdating, selectedId } = mapProfile;
     const { isRemoving } = profiles.reduce((acc, profile) => ({ isRemoving: acc.isRemoving || profile.isRemoving }), { isRemoving: false });
     const btnDisabled = isLoading || isAdding || isUpdating || isRemoving;
-    const hadProfilePrivilege = userRole == 'admin' || userRole == 'user';
+    const hadProfilePrivilege = userRole == USER_ROLES.ADMIN || userRole == USER_ROLES.USER;
 
     return (
       <div>

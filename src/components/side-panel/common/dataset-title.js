@@ -23,11 +23,12 @@ import styled from 'styled-components';
 import {FormattedMessage} from 'localization';
 
 import {CenterFlexbox, Tooltip} from 'components/common/styled-components';
-import { ArrowRight, Table, Trash, Reload, Spinner, EyeSeen, EyeUnseen, Gear } from 'components/common/icons';
+import {ArrowRight, Table, Trash, Reload, Spinner, EyeSeen, EyeUnseen, Gear} from 'components/common/icons';
 import DatasetTagFactory from 'components/side-panel/common/dataset-tag';
 
 import $ from 'jquery';
 import 'gasparesganga-jquery-loading-overlay';
+import {USER_ROLES} from '../../../constants/default-settings';
 
 function nop() { }
 
@@ -212,7 +213,7 @@ export default function DatasetTitleFactory(DatasetTag) {
         dataset,
         userRole
       } = this.props;
-      const hadDBPrivilege = userRole == 'admin' || userRole == 'user';
+      const hadDBPrivilege = userRole == USER_ROLES.ADMIN || userRole == USER_ROLES.USER;
 
       return (
         <StyledDatasetTitle

@@ -40,14 +40,10 @@ import {
   SidePanelSection
 } from 'components/common/styled-components';
 
-import {LAYER_BLENDINGS} from 'constants/default-settings';
+import {LAYER_BLENDINGS, USER_ROLES} from 'constants/default-settings';
 
 import $ from 'jquery';
 import 'gasparesganga-jquery-loading-overlay';
-
-import { GQL_GET_SIGNAL_SAMPLES } from 'graphqls';
-import { getFieldsFromData } from 'processors';
-import { addDataToMap } from 'actions/index.js';
 
 const LayerBlendingSelector = ({layerBlending, updateLayerBlending, intl}) => {
   const labeledLayerBlendings = Object.keys(LAYER_BLENDINGS).reduce(
@@ -172,7 +168,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
 
     componentDidMount() {
       const { userRole } = this.props;
-      if (userRole && userRole != 'not-allowed' && Object.keys(this.props.datasets).length == 0) {
+      if (userRole && userRole != USER_ROLES.NOT_ALLOWED && Object.keys(this.props.datasets).length == 0) {
         $('.side-panel__content').LoadingOverlay('show');
         this.props.loadDataset();
       }
@@ -215,7 +211,7 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
 
     render() {
       const {layers, datasets, layerOrder, openModal, intl, userRole} = this.props;
-      const hadDBPrivilege = userRole == 'admin' || userRole == 'user';
+      const hadDBPrivilege = userRole == USER_ROLES.ADMIN || userRole == USER_ROLES.USER;
       const defaultDataset = Object.keys(datasets)[0];
       const layerTypeOptions = this.layerTypeOptionsSelector(this.props);
 

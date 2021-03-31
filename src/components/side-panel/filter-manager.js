@@ -25,6 +25,7 @@ import {Button, SidePanelDivider, SidePanelSection} from 'components/common/styl
 import {Add, Trash} from 'components/common/icons';
 import SourceDataCatalogFactory from './common/source-data-catalog';
 import FilterPanelFactory from './filter-panel/filter-panel';
+import {USER_ROLES} from '../../constants/default-settings';
 
 FilterManagerFactory.deps = [SourceDataCatalogFactory, FilterPanelFactory];
 
@@ -98,7 +99,7 @@ function FilterManagerFactory(SourceDataCatalog, FilterPanel) {
           <Add height="12px" />
           <FormattedMessage id={'filterManager.addFilter'} />
         </Button>
-        {userRole == 'admin' && (
+        {userRole == USER_ROLES.ADMIN && (
           <Button
             className="delete-filtered-data"
             disabled={hadEmptyFilter}
