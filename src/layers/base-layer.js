@@ -1023,13 +1023,13 @@ class Layer {
     }
 
     if (domain == 'sizeDomain') {
-      return dataset.getColumnLayerDomain(field, SCALE_TYPES.ordinal, legendDomain, domain)
+      return dataset.getColumnLayerDomain(field, scaleType, 'ALL')
     }
     else if (legendDomain == 'MANUAL') {
       return legendRange;
     }
 
-    return dataset.getColumnLayerDomain(field, scaleType, legendDomain, domain) || defaultDomain;
+    return dataset.getColumnLayerDomain(field, scaleType, legendDomain) || defaultDomain;
   }
 
   hasHoveredObject(objectInfo) {
