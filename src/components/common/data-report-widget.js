@@ -127,9 +127,9 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
                 <PanelLabel>Aggregation</PanelLabel>
                 <div id="bottom-widget__aggregation-select">
                   <ItemSelector
-                    options={['A', 'B', 'C']}
+                    options={['Average', 'Sum', 'Min', 'Max']}
                     placement="top"
-                    value={null}
+                    value={'Average'}
                     placeholder="placeholder.yAxis"
                     inputTheme="secondary"
                     erasable
@@ -141,9 +141,9 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
                 <PanelLabel>Interval</PanelLabel>
                 <div id="bottom-widget__interval-select">
                   <ItemSelector
-                    options={['A', 'B', 'C']}
+                    options={['10s', '1min', '5min']}
                     placement="top"
-                    value={null}
+                    value={'10s'}
                     placeholder="placeholder.yAxis"
                     inputTheme="secondary"
                     erasable
