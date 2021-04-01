@@ -41,7 +41,8 @@ import {
   Legend,
   Polygon,
   Rectangle,
-  Split
+  Split,
+  LineChart
 } from 'components/common/icons';
 import VerticalToolbar from 'components/common/vertical-toolbar';
 import ToolbarItem from 'components/common/toolbar-item';
@@ -292,6 +293,36 @@ export function Toggle3dButtonFactory() {
   Toggle3dButton.displayName = 'Toggle3dButton';
   return Toggle3dButton;
 }
+
+DataReportButtonFactory.deps = [];
+export function DataReportButtonFactory() {
+  const defaultActionIcons = {
+    graph: LineChart
+  };
+  /** @type {import('./map-control').DataReportButtonComponent} */
+  const DataReportButton = React.memo(
+    ({dataReportToggled, onToggleDataReport, actionIcons = defaultActionIcons}) => (
+      <MapControlButton
+        onClick={e => {
+          e.preventDefault();
+          onToggleDataReport();
+        }}
+        active={dataReportToggled}
+        data-tip
+        data-for="data-report"
+      >
+        <actionIcons.graph height="22px" />
+        <MapControlTooltip
+          id="data-report"
+          message={dataReportToggled ? 'tooltip.hideDataReport' : 'tooltip.dataReport'}
+        />
+      </MapControlButton>
+    )
+  );
+
+  DataReportButton.displayName = 'DataReportButton';
+  return DataReportButton;
+}
 const StyledToolbar = styled(VerticalToolbar)`
   position: absolute;
   right: 32px;
@@ -420,13 +451,15 @@ MapControlFactory.deps = [
   MapDrawPanelFactory,
   Toggle3dButtonFactory,
   SplitMapButtonFactory,
-  MapLegendPanelFactory
+  MapLegendPanelFactory,
+  DataReportButtonFactory
 ];
-function MapControlFactory(MapDrawPanel, Toggle3dButton, SplitMapButton, MapLegendPanel) {
+function MapControlFactory(MapDrawPanel, Toggle3dButton, SplitMapButton, MapLegendPanel, DataReportButton) {
   class MapControl extends Component {
     static propTypes = {
       datasets: PropTypes.object.isRequired,
       dragRotate: PropTypes.bool.isRequired,
+      dataReportToggled: PropTypes.bool.isRequired,
       isSplit: PropTypes.bool.isRequired,
       layers: PropTypes.arrayOf(PropTypes.object),
       layersToRender: PropTypes.object.isRequired,
@@ -492,7 +525,9 @@ function MapControlFactory(MapDrawPanel, Toggle3dButton, SplitMapButton, MapLege
         locale,
         top,
         logoComponent,
-        layerConfigChange
+        layerConfigChange,
+        onToggleDataReport,
+        dataReportToggled
       } = this.props;
 
       const {
@@ -501,7 +536,8 @@ function MapControlFactory(MapDrawPanel, Toggle3dButton, SplitMapButton, MapLege
         toggle3d = {},
         splitMap = {},
         mapDraw = {},
-        mapLocale = {}
+        mapLocale = {},
+        dataReport = {}
       } = mapControls;
 
       return (
@@ -575,6 +611,13 @@ function MapControlFactory(MapDrawPanel, Toggle3dButton, SplitMapButton, MapLege
                 onToggleMenuPanel={() => onToggleMapControl('mapLocale')}
                 disableClose={mapLocale.disableClose}
               />
+            </ActionPanel>
+          ) : null}
+
+          {/* Data Report */}
+          {dataReport.show ? (
+            <ActionPanel className="data-report" key={6}>
+              <DataReportButton onToggleDataReport={onToggleDataReport} dataReportToggled={dataReportToggled} />
             </ActionPanel>
           ) : null}
         </StyledMapControl>

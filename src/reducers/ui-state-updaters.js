@@ -97,6 +97,7 @@ const DEFAULT_MAP_CONTROLS_FEATURES = {
  * @property splitMap Default: `{show: true}`
  * @property mapDraw Default: `{show: true, active: false}`
  * @property mapLocale Default: `{show: false, active: false}`
+ * @property dataReport Default: `{show: true}`
  * @type {import('./ui-state-updaters').MapControls}
  * @public
  */
@@ -106,7 +107,8 @@ export const DEFAULT_MAP_CONTROLS = [
   'toggle3d',
   'splitMap',
   'mapDraw',
-  'mapLocale'
+  'mapLocale',
+  'dataReport'
 ].reduce(
   (final, current) => ({
     ...final,
@@ -240,6 +242,7 @@ export const DEFAULT_EXPORT_MAP = {
  */
 export const INITIAL_UI_STATE = {
   readOnly: false,
+  dataReportToggled: false,
   activeSidePanel: DEFAULT_ACTIVE_SIDE_PANEL,
   currentModal: DEFAULT_MODAL,
   datasetKeyToRemove: null,
@@ -259,7 +262,7 @@ export const INITIAL_UI_STATE = {
   // Locale of the UI
   locale: LOCALE_CODES.en,
   // Graph for Hexbin
-  isGraphShow: false
+  isGraphShow: false,
 };
 
 /* Updaters */
@@ -805,4 +808,17 @@ export const showDatasetTableUpdater = state => toggleModalUpdater(state, {paylo
 export const setLocaleUpdater = (state, {payload: {locale}}) => ({
   ...state,
   locale
+});
+
+/**
+ * Toggle data report
+ * @memberof uiStateUpdaters
+ * @param state `uiState`
+ * @returns nextState
+ * @type {typeof import('./ui-state-updaters').toggleDataReportUpdater}
+ * @public
+ */
+export const toggleDataReportUpdater = (state) => ({
+  ...state,
+  dataReportToggled: !state.dataReportToggled
 });

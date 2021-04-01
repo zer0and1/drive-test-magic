@@ -232,7 +232,9 @@ export default {
     centerToSelected: 'Center to Selected',
     largeMarker: 'Large',
     mediumMarker: 'Medium',
-    smallMarker: 'Small'
+    smallMarker: 'Small',
+    hideDataReport: 'Hide Report',
+    dataReport: 'Data Report'
   },
   toolbar: {
     exportImage: 'Export Image',

@@ -23,6 +23,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import TimeWidgetFactory from './filters/time-widget';
 import GraphWidgetFactory from './common/graph-widget';
+import DataReportWidgetFactory from './common/data-report-widget';
 import AnimationControlFactory from './common/animation-control/animation-control';
 import AnimationControllerFactory from './common/animation-control/animation-controller';
 import {ANIMATION_WINDOW, FILTER_TYPES} from 'constants/default-settings';
@@ -122,6 +123,7 @@ export function LayerAnimationControllerFactory(AnimationController) {
 BottomWidgetFactory.deps = [
   GraphWidgetFactory,
   TimeWidgetFactory,
+  DataReportWidgetFactory,
   AnimationControlFactory,
   FilterAnimationControllerFactory,
   LayerAnimationControllerFactory
@@ -129,6 +131,7 @@ BottomWidgetFactory.deps = [
 export default function BottomWidgetFactory(
   GraphWidget,
   TimeWidget,
+  DataReportWidget,
   AnimationControl,
   FilterAnimationController,
   LayerAnimationController
@@ -147,7 +150,7 @@ export default function BottomWidgetFactory(
       layers
     } = props;
 
-    const {activeSidePanel, readOnly, isGraphShow} = uiState;
+    const {activeSidePanel, readOnly, isGraphShow, dataReportToggled} = uiState;
     const isOpen = Boolean(activeSidePanel);
 
     const enlargedFilterIdx = useMemo(
@@ -172,6 +175,7 @@ export default function BottomWidgetFactory(
     const showFloatingTimeDisplay = !animatableLayer.length;
     const showAnimationControl = animatableLayer.length && readyToAnimation;
     const showTimeWidget = enlargedFilterIdx > -1 && Object.keys(datasets).length > 0;
+    const showDataReport = dataReportToggled && Object.keys(datasets).length > 0;
     const selectedField = visState?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
 
     const layerId = visState?.layer?.id;
@@ -187,7 +191,7 @@ export default function BottomWidgetFactory(
       <BottomWidgetContainer
         width={Math.min(maxWidth, enlargedFilterWidth)}
         className="bottom-widget--container"
-        hasPadding={showAnimationControl || showTimeWidget || isGraphShow}
+        hasPadding={showAnimationControl || showTimeWidget || showDataReport || isGraphShow}
       >
         <LayerAnimationController
           animationConfig={animationConfig}
@@ -216,6 +220,12 @@ export default function BottomWidgetFactory(
           />
           ) : null
         }
+        {showDataReport ? (
+          <DataReportWidget
+            datasets={datasets}
+            toggleDataReport={uiStateActions.toggleDataReport}
+          />
+        ) : null}
         <FilterAnimationController
           filter={filter}
           filterIdx={animatedFilterIdx > -1 ? animatedFilterIdx : enlargedFilterIdx}

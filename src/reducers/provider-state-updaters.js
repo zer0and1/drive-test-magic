@@ -766,9 +766,10 @@ export const addDatasetUpdater = (state, { payload: { selectedSessions, updating
 };
 
 export const registerDatasetUpdater = (state, { payload: info }) => {
+  const {id, type, label, enabled, query, sessions} = info;
   const mutation = GQL_INSERT_DATASET();
   const insertDatasetTask = GRAPHQL_MUTATION_TASK({
-    variables: info,
+    variables: {id, type, label, enabled, query, sessions},
     mutation
   }).bimap(
     res => registerDatasetSuccess(info),

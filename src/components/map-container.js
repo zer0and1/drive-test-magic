@@ -506,6 +506,7 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
         mapboxApiUrl,
         mapControls,
         locale,
+        dataReportToggled,
         uiStateActions,
         visStateActions,
         interactionConfig,
@@ -539,6 +540,7 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
           <MapControl
             datasets={datasets}
             dragRotate={mapState.dragRotate}
+            dataReportToggled={dataReportToggled}
             isSplit={Boolean(mapLayers)}
             isExport={isExport}
             layers={layers}
@@ -557,6 +559,7 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
             onSetEditorMode={visStateActions.setEditorMode}
             onSetLocale={uiStateActions.setLocale}
             onToggleEditorVisibility={visStateActions.toggleEditorVisibility}
+            onToggleDataReport={uiStateActions.toggleDataReport}
             layerConfigChange={visStateActions.layerConfigChange}
           />
           <MapComponent

@@ -276,6 +276,14 @@ export const setLocale = createAction(ActionTypes.SET_LOCALE, locale => ({
 export const toggleGraphShow = createAction(ActionTypes.TOGGLE_GRAPHSHOW_CONTROL);
 
 /**
+ * Toggle data report
+ * @memberof uiStateActions
+ * @type {typeof import('./ui-state-actions').toggleDataReport}
+ * @public
+ */
+ export const toggleDataReport = createAction(ActionTypes.TOGGLE_DATA_REPORT);
+
+/**
  * This declaration is needed to group actions in docs
  */
 /**
