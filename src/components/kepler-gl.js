@@ -365,9 +365,7 @@ function KeplerGlFactory(
         deckGlProps,
         markerScale: minionState.markerScale
       };
-
-      const graphInfo = visState.clicked;
-
+      
       const isSplit = splitMaps && splitMaps.length > 1;
       const containerW = mapState.width * (Number(isSplit) + 1);
 
@@ -434,7 +432,7 @@ function KeplerGlFactory(
                   uiState={uiState}
                   layers={layers}
                   animationConfig={animationConfig}
-                  visState={graphInfo}
+                  visState={visState}
                   visStateActions={visStateActions}
                   uiStateActions={uiStateActions}
                   sidePanelWidth={

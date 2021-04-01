@@ -262,7 +262,7 @@ export const INITIAL_UI_STATE = {
   // Locale of the UI
   locale: LOCALE_CODES.en,
   // Graph for Hexbin
-  isGraphShow: false,
+  isGraphShow: false
 };
 
 /* Updaters */

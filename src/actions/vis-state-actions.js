@@ -895,6 +895,58 @@ export function startReloadingDataset(datasetKey) {
 };
 
 /**
+ * Set the data report data source
+ * @memberOf uiStateActions
+ * @param payload - dataId
+ * @type {typeof import('./vis-state-actions').setReportDataSource}
+ */
+export function setReportDataSource(payload) {
+    return {
+    type: ActionTypes.SET_REPORT_DATA_SOURCE,
+    payload
+  }
+};
+
+  /**
+ * Set the data report field
+ * @memberOf uiStateActions
+ * @param payload - field object
+ * @type {typeof import('./vis-state-actions').setReportField}
+ */
+export function setReportField(payload) {
+    return {
+    type: ActionTypes.SET_REPORT_FIELD,
+    payload
+  }
+};
+
+    /**
+ * Set the data report aggregation
+ * @memberOf uiStateActions
+ * @param payload - dataId
+ * @type {typeof import('./vis-state-actions').setReportAggregation}
+ */
+export function setReportAggregation(payload) {
+  return {
+    type: ActionTypes.SET_REPORT_AGGREGATION,
+    payload
+  }
+};
+
+  /**
+ * Set the data report interval
+ * @memberOf uiStateActions
+ * @param payload - dataId
+ * @type {typeof import('./vis-state-actions').setReportInterval}
+ */
+export function setReportInterval(payload) {
+  return {
+    type: ActionTypes.SET_REPORT_INTERVAL,
+    payload
+  }
+};
+
+/**
  * This declaration is needed to group actions in docs
  */
 /**

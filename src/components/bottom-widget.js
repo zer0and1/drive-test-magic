@@ -176,9 +176,9 @@ export default function BottomWidgetFactory(
     const showAnimationControl = animatableLayer.length && readyToAnimation;
     const showTimeWidget = enlargedFilterIdx > -1 && Object.keys(datasets).length > 0;
     const showDataReport = dataReportToggled && Object.keys(datasets).length > 0;
-    const selectedField = visState?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
+    const selectedField = visState.clicked?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
 
-    const layerId = visState?.layer?.id;
+    const layerId = visState.clicked?.layer?.id;
     const datasetName = layers.find(item => item.id === layerId)?.config?.dataId;
     const allData = datasets[datasetName]?.allData
     const fields = datasets[datasetName]?.fields;
@@ -213,7 +213,7 @@ export default function BottomWidgetFactory(
         {isGraphShow && selectedField != undefined && selectedField != 'count' ? (
           <GraphWidget
             showGraphState={uiStateActions.toggleGraphShow}
-            visState={visState}
+            visState={visState.clicked}
             layers={layers}
             allData={allData}
             fields={fields}
@@ -223,7 +223,12 @@ export default function BottomWidgetFactory(
         {showDataReport ? (
           <DataReportWidget
             datasets={datasets}
+            {...visState.dataReport}
             toggleDataReport={uiStateActions.toggleDataReport}
+            setReportDataSource={visStateActions.setReportDataSource}
+            setReportField={visStateActions.setReportField}
+            setReportAggregation={visStateActions.setReportAggregation}
+            setReportInterval={visStateActions.setReportInterval}
           />
         ) : null}
         <FilterAnimationController

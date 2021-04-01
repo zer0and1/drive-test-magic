@@ -63,7 +63,6 @@ let chartConfig = {
     }
   },
   scaleX: {
-    values: [1563778800000, 1563782400000, 1563786000000, 1563789600000, 1563793200000, 1563796800000, 1563800400000, 1563804000000, 1563807600000, 1563811200000, 1563814800000, 1563818400000, 1563822000000],
     guide: {
       visible: false
     },
@@ -112,41 +111,52 @@ let chartConfig = {
   },
   tooltip: {
     visible: false
-  },
-  series: [
-    {
-      text: 'All Sites',
-      values: [2596, 2626, 4480, 6394, 7488, 14510, 7012, 3389, 20281, 48597, 53309, 52385, 47097, 50813, 13510],
-      backgroundColor1: '#E84F28',
-      backgroundColor2: '#E84F28',
-      lineColor: '#E84F28'
-    },
-    {
-      text: 'www.zingchart.com',
-      values: [479, 199, 583, 1624, 2772, 7899, 3467, 2227, 12885, 27873, 34420, 32569, 27721, 31569, 7362],
-      backgroundColor1: '#45C392',
-      backgroundColor2: '#45C392',
-      lineColor: '#45C392'
-    },
-    {
-      text: 'blog.zingchart.com',
-      values: [408, 343, 410, 840, 1614, 3274, 2092, 914, 5709, 15317, 15633, 16720, 15504, 15821, 4565],
-      backgroundColor1: '#28C2D1',
-      backgroundColor2: '#28C2D1',
-      lineColor: '#28C2D1'
-    },
-    {
-      text: 'help.zingchart.com',
-      values: [989, 1364, 2161, 2644, 1754, 2015, 818, 77, 1260, 3912, 1671, 1836, 2589, 1706, 1161],
-      backgroundColor1: '#FBA645',
-      backgroundColor2: '#FBA645',
-      lineColor: '#FBA645'
-    }
-  ]
+  }
 };
+
+const series = [
+  {
+    text: 'All Sites',
+    values: [2596, 2626, 4480, 6394, 7488, 14510, 7012, 3389, 20281, 48597, 53309, 52385, 47097, 50813, 13510]
+  },
+  {
+    text: 'www.zingchart.com',
+    values: [479, 199, 583, 1624, 2772, 7899, 3467, 2227, 12885, 27873, 34420, 32569, 27721, 31569, 7362]
+  },
+  {
+    text: 'blog.zingchart.com',
+    values: [408, 343, 410, 840, 1614, 3274, 2092, 914, 5709, 15317, 15633, 16720, 15504, 15821, 4565]
+  },
+  {
+    text: 'help.zingchart.com',
+    values: [989, 1364, 2161, 2644, 1754, 2015, 818, 77, 1260, 3912, 1671, 1836, 2589, 1706, 1161]
+  }
+];
 
 function DataReportChartFactory() {
   class DataReportChart extends Component {
+
+    shouldComponentUpdate(nextProps) {
+      const {dataset, field, aggregation, interval} = nextProps;
+
+      if (dataset && field && aggregation && interval) {
+        const propsChanged = dataset.id != this.props.dataset?.id 
+          || field.name != this.props.field?.name 
+          || aggregation != this.props.aggregation 
+          || interval != this.props.interval;
+          
+        if (propsChanged) {
+          console.log(nextProps.chartData)
+          zingchart.exec('data-report-chart', 'modify', {
+            data: nextProps.chartData
+          });
+          return true;
+        }
+      }
+
+      return false;
+    }
+
     render() {
       return (
         <ZingChart

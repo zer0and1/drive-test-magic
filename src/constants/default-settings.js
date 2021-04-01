@@ -486,6 +486,19 @@ export const AGGREGATION_TYPES = {
   countUnique: 'count unique'
 };
 
+export const REPORT_AGGREGATION_OPTIONS = [
+  {value: AGGREGATION_TYPES.sum, label: 'Sum'},
+  {value: AGGREGATION_TYPES.average, label: 'Average'},
+  {value: AGGREGATION_TYPES.minimum, label: 'Min'},
+  {value: AGGREGATION_TYPES.maximum, label: 'Max'},
+];
+
+export const REPORT_INTERVAL_OPTIONS = [
+  {value: 10, label: '10s'},
+  {value: 60, label: '1min'},
+  {value: 300, label: '5min'}
+];
+
 export const linearFieldScaleFunctions = {
   [CHANNEL_SCALES.color]: [SCALE_TYPES.quantize, SCALE_TYPES.quantile],
   [CHANNEL_SCALES.radius]: [SCALE_TYPES.sqrt],

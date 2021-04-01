@@ -550,5 +550,11 @@ export default {
   'Bug Report': 'Bug Report',
   'User Guide': 'User Guide',
   Save: 'Save',
-  Share: 'Share'
+  Share: 'Share',
+  dataReport: {
+    dataSource: 'Data Source',
+    field: 'Field',
+    aggregation: 'Aggregation',
+    interval: 'Interval'
+  }
 };

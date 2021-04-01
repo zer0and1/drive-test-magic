@@ -76,7 +76,7 @@ import {
 
 import {Layer, LayerClasses, LAYER_ID_LENGTH} from 'layers';
 import {DEFAULT_TEXT_LABEL} from 'layers/layer-factory';
-import {EDITOR_MODES, SORT_ORDER} from 'constants/default-settings';
+import {EDITOR_MODES, SORT_ORDER, AGGREGATION_TYPES} from 'constants/default-settings';
 import {pick_, merge_} from './composer-helpers';
 import {processFileContent, removeLayer} from 'actions/vis-state-actions';
 
@@ -85,6 +85,8 @@ import {updateDataset, reloadDataset} from 'actions/provider-actions';
 import {applyProfile} from 'actions/map-profile-actions';
 import {onMouseMove} from '../actions';
 
+import {aggregate} from 'utils/aggregate-utils';
+import {notNullorUndefined} from 'utils/data-utils';
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
 /** @typedef {import('./vis-state-updaters').Filter} Filter */
@@ -221,7 +223,15 @@ export const INITIAL_VIS_STATE = {
   // visStateMergers
   mergers: VIS_STATE_MERGERS,
 
-  schema: KeplerGLSchema
+  schema: KeplerGLSchema,
+  
+  dataReport: {
+    dataId: null,
+    field: null,
+    aggregation: AGGREGATION_TYPES.average,
+    interval: 10,
+    chartData: []
+  }
 };
 
 /**
@@ -2184,4 +2194,161 @@ export function startReloadingDatasetUpdater(state, { datasetKey }) {
   };
 
   return withTask(newState, task);
+};
+
+
+/**
+ * Set the data source of the data reporting
+ * @memberof uiStateUpdaters
+ * @param state `uiState`
+ * @param action
+ * @param action.payload
+ * @param action.payload.dataId dataId
+ * @returns nextState
+ * @type {typeof import('./vis-state-updaters').setReportDataSourceUpdater}
+ * @public
+ */
+ export const setReportDataSourceUpdater = (state, {payload: dataId}) => ({
+  ...state,
+  dataReport: {
+    ...state.dataReport,
+    dataId,
+    field: dataId != state.dataReport.dataId ? null : state.dataReport.field
+  }
+});
+
+/**
+ * Set the field of the data reporting
+ * @memberof uiStateUpdaters
+ * @param state `uiState`
+ * @param action
+ * @param action.payload
+ * @param action.payload.field field
+ * @returns nextState
+ * @type {typeof import('./vis-state-updaters').setReportFieldUpdater}
+ * @public
+ */
+ export function setReportFieldUpdater(state, {payload: field}) {
+   const {datasets, dataReport: {dataId, aggregation, interval}} = state;
+
+   return {
+    ...state,
+    dataReport: {
+      ...state.dataReport,
+      field,
+      chartData: generateDataReport(datasets[dataId], field, aggregation, interval)
+    }
+   }
+};
+
+/**
+ * Set the aggregation of the data reporting
+ * @memberof uiStateUpdaters
+ * @param state `uiState`
+ * @param action
+ * @param action.payload
+ * @param action.payload.field field
+ * @returns nextState
+ * @type {typeof import('./vis-state-updaters').setReportAggregationUpdater}
+ * @public
+ */
+ export function setReportAggregationUpdater(state, {payload: aggregation}) {
+  const {datasets, dataReport: {dataId, field, interval}} = state;
+
+  return {
+   ...state,
+   dataReport: {
+     ...state.dataReport,
+     aggregation,
+     chartData: generateDataReport(datasets[dataId], field, aggregation, interval)
+   }
+  }
+};
+
+/**
+ * Set the aggregation of the data reporting
+ * @memberof uiStateUpdaters
+ * @param state `uiState`
+ * @param action
+ * @param action.payload
+ * @param action.payload.interval interval
+ * @returns nextState
+ * @type {typeof import('./vis-state-updaters').setReportIntervalUpdater}
+ * @public
+ */
+ export function setReportIntervalUpdater(state, {payload: interval}) {
+  const {datasets, dataReport: {dataId, field, aggregation}} = state;
+
+  return {
+   ...state,
+   dataReport: {
+     ...state.dataReport,
+     interval,
+     chartData: generateDataReport(datasets[dataId], field, aggregation, interval)
+   }
+  }
+};
+
+export function generateDataReport(dataset, field, aggregation, interval) {
+  const {allData, filteredIndexForDomain} = dataset;
+  const {valueAccessor: fieldAccessor} = field;
+  const filtered = filteredIndexForDomain.map(i => allData[i]);
+  const minionColumnIdx = dataset.getColumnFieldIdx('minion_id');
+  const dateField = dataset.getColumnField('date');
+  
+  if (minionColumnIdx < 0 || !dateField) {
+    return null;
+  }
+
+  const dates = filtered.map(dateField.valueAccessor);
+  const startDate = Math.min(...dates);
+  const endDate = Math.max(...dates);
+  interval *= 1000; // convert interval time to ms
+  const newDates = [];
+  
+  for(let pointer = startDate; pointer <= endDate; pointer += interval) {
+    newDates.push(pointer);
+  }
+
+  const groups = _.groupBy(filtered, minionColumnIdx);
+  const series = Object.keys(groups).reduce((acc, key) => {
+    const values = groups[key].map(fieldAccessor);
+    const dates = groups[key].map(dateField.valueAccessor);
+    let idx = 0;
+    const newValues = [];
+    
+    for(let pointer = startDate; pointer <= endDate; pointer += interval) {
+      const spanValues = [];
+      
+      while(dates[idx] >= pointer && dates[idx] < pointer + interval) {
+        if (notNullorUndefined(values[idx])) {
+          spanValues.push(values[idx]);
+        }
+        idx++;
+      }
+
+      if (spanValues.length == 0) {
+        newValues.push(0);
+      }
+      else {
+        newValues.push(aggregate(spanValues, aggregation));
+      }
+    }
+
+    return [
+      ...acc,
+      {
+        text: key,
+        values: newValues,
+      }
+    ];
+  }, []);
+  
+  
+  return {
+    series,
+    scaleX: {
+      values: newDates
+    }
+  };
 };

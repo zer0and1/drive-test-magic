@@ -283,6 +283,7 @@ export const toggleGraphShow = createAction(ActionTypes.TOGGLE_GRAPHSHOW_CONTROL
  */
  export const toggleDataReport = createAction(ActionTypes.TOGGLE_DATA_REPORT);
 
+
 /**
  * This declaration is needed to group actions in docs
  */

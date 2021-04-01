@@ -33,6 +33,8 @@ import DatasetSelectorFactory from './dataset-selector';
 import FieldSelectorFactory from './field-selector';
 import DataReportChartFactory from 'components/charts/data-report-chart';
 import ItemSelector from 'components/common/item-selector/item-selector';
+import { FormattedMessage } from 'react-intl';
+import {REPORT_AGGREGATION_OPTIONS, REPORT_INTERVAL_OPTIONS} from 'constants/default-settings';
 
 const TimeBottomWidgetInner = styled(BottomWidgetInner)`
   padding: 6px 32px 24px 32px;
@@ -93,61 +95,87 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
     render() {
       const {
         datasets,
+        dataId,
+        field,
+        aggregation,
+        interval,
+        chartData
       } = this.props;
 
       return (
         <TimeBottomWidgetInner className="bottom-widget--inner">
           <TopSectionWrapper>
             <SettingSectionWrapper>
+
+              {Object.values(datasets).length > 1 ? (
+                <StyledSection>
+                  <PanelLabel>
+                    <FormattedMessage id="dataReport.dataSource" />
+                  </PanelLabel>
+                  <div id="bottom-widget__field-select">
+                    <DatasetSelector
+                      datasets={datasets}
+                      inputTheme="secondary"
+                      placement="top"
+                      onSelect={this.props.setReportDataSource}
+                      dataId={dataId}
+                    />
+                  </div>
+                </StyledSection>
+              ) : null}
+
               <StyledSection>
-                <PanelLabel>Dataset</PanelLabel>
-                <div id="bottom-widget__field-select">
-                  <DatasetSelector
-                    datasets={datasets}
-                    inputTheme="secondary"
-                    placement="top"
-                  />
-                </div>
-              </StyledSection>
-              <StyledSection>
-                <PanelLabel>Y Axis</PanelLabel>
+                <PanelLabel>
+                  <FormattedMessage id="dataReport.field" />
+                </PanelLabel>
                 <div id="bottom-widget__field-select">
                   <FieldSelector
-                    fields={this.yAxisFieldsSelector(Object.values(datasets)?.[0])}
+                    fields={datasets[dataId] ? this.yAxisFieldsSelector(datasets[dataId]) : []}
                     placement="top"
-                    value={null}
+                    value={field || ''}
                     placeholder="placeholder.yAxis"
                     inputTheme="secondary"
-                    erasable
                     showToken={true}
+                    erasable={false}
+                    onSelect={this.props.setReportField}
                   />
                 </div>
               </StyledSection>
               <StyledSection>
-                <PanelLabel>Aggregation</PanelLabel>
+                <PanelLabel>
+                  <FormattedMessage id="dataReport.aggregation" />
+                </PanelLabel>
                 <div id="bottom-widget__aggregation-select">
                   <ItemSelector
-                    options={['Average', 'Sum', 'Min', 'Max']}
+                    options={REPORT_AGGREGATION_OPTIONS}
+                    selectedItems={REPORT_AGGREGATION_OPTIONS.find(op => op.value == aggregation)}
                     placement="top"
-                    value={'Average'}
-                    placeholder="placeholder.yAxis"
                     inputTheme="secondary"
-                    erasable
-                    showToken={true}
+                    displayOption={'label'}
+                    filterOption={'label'}
+                    getOptionValue={'value'}
+                    multiSelect={false}
+                    searchable={false}
+                    onChange={this.props.setReportAggregation}
                   />
                 </div>
               </StyledSection>
               <StyledSection>
-                <PanelLabel>Interval</PanelLabel>
+                <PanelLabel>
+                  <FormattedMessage id="dataReport.interval" />
+                </PanelLabel>
                 <div id="bottom-widget__interval-select">
                   <ItemSelector
-                    options={['10s', '1min', '5min']}
+                    options={REPORT_INTERVAL_OPTIONS}
+                    selectedItems={REPORT_INTERVAL_OPTIONS.find(op => op.value == interval)}
                     placement="top"
-                    value={'10s'}
-                    placeholder="placeholder.yAxis"
                     inputTheme="secondary"
-                    erasable
-                    showToken={true}
+                    displayOption={'label'}
+                    filterOption={'label'}
+                    getOptionValue={'value'}
+                    multiSelect={false}
+                    searchable={false}
+                    onChange={this.props.setReportInterval}
                   />
                 </div>
               </StyledSection>
@@ -160,9 +188,13 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
               </StyledButtonWrapper>
             </StyledSection>
           </TopSectionWrapper>
-          
-          <DataReportChart 
 
+          <DataReportChart
+            dataset={datasets[dataId]}
+            field={field}
+            aggregation={aggregation}
+            interval={interval}
+            chartData={chartData}
           />
         </TimeBottomWidgetInner>
       );
