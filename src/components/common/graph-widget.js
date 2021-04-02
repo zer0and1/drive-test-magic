@@ -28,7 +28,7 @@ import {
   BottomWidgetInner
 } from './styled-components';
 import { Delete, LineChart } from './icons';
-import HexbinGraphFactory from './hexbin-graph';
+import HexbinGraphFactory from 'components/charts/hexbin-graph';
 import { min, max } from 'd3-array';
 
 const TOP_SECTION_HEIGHT = '36px';

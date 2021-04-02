@@ -494,8 +494,12 @@ export const REPORT_AGGREGATION_OPTIONS = [
 ];
 
 export const REPORT_INTERVAL_OPTIONS = [
+  {value: 5, label: '5s'},
   {value: 10, label: '10s'},
+  {value: 15, label: '15s'},
+  {value: 30, label: '30s'},
   {value: 60, label: '1min'},
+  {value: 120, label: '2min'},
   {value: 300, label: '5min'}
 ];
 
