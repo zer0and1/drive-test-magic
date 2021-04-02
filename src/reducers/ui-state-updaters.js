@@ -242,7 +242,6 @@ export const DEFAULT_EXPORT_MAP = {
  */
 export const INITIAL_UI_STATE = {
   readOnly: false,
-  dataReportToggled: false,
   activeSidePanel: DEFAULT_ACTIVE_SIDE_PANEL,
   currentModal: DEFAULT_MODAL,
   datasetKeyToRemove: null,
@@ -808,17 +807,4 @@ export const showDatasetTableUpdater = state => toggleModalUpdater(state, {paylo
 export const setLocaleUpdater = (state, {payload: {locale}}) => ({
   ...state,
   locale
-});
-
-/**
- * Toggle data report
- * @memberof uiStateUpdaters
- * @param state `uiState`
- * @returns nextState
- * @type {typeof import('./ui-state-updaters').toggleDataReportUpdater}
- * @public
- */
-export const toggleDataReportUpdater = (state) => ({
-  ...state,
-  dataReportToggled: !state.dataReportToggled
 });

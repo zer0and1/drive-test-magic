@@ -85,6 +85,7 @@ const actionHandler = {
   [ActionTypes.REMOVE_MARKER]: visStateUpdaters.removeMarkerUpdater,
   [ActionTypes.ENABLE_DATASET]: visStateUpdaters.enableDatasetUpdater,
   [ActionTypes.START_RELOADING_DATASET]: visStateUpdaters.startReloadingDatasetUpdater,
+  [ActionTypes.TOGGLE_DATA_REPORT]: visStateUpdaters.toggleDataReportUpdater,
   [ActionTypes.SET_REPORT_DATA_SOURCE]: visStateUpdaters.setReportDataSourceUpdater,
   [ActionTypes.SET_REPORT_FIELD]: visStateUpdaters.setReportFieldUpdater,
   [ActionTypes.SET_REPORT_AGGREGATION]: visStateUpdaters.setReportAggregationUpdater,

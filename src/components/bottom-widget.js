@@ -150,7 +150,7 @@ export default function BottomWidgetFactory(
       layers
     } = props;
 
-    const {activeSidePanel, readOnly, isGraphShow, dataReportToggled} = uiState;
+    const {activeSidePanel, readOnly, isGraphShow} = uiState;
     const isOpen = Boolean(activeSidePanel);
 
     const enlargedFilterIdx = useMemo(
@@ -175,7 +175,7 @@ export default function BottomWidgetFactory(
     const showFloatingTimeDisplay = !animatableLayer.length;
     const showAnimationControl = animatableLayer.length && readyToAnimation;
     const showTimeWidget = enlargedFilterIdx > -1 && Object.keys(datasets).length > 0;
-    const showDataReport = dataReportToggled && Object.keys(datasets).length > 0;
+    const showDataReport = visState.dataReport.toggled && Object.keys(datasets).length > 0;
     const selectedField = visState.clicked?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
 
     const layerId = visState.clicked?.layer?.id;
@@ -224,7 +224,7 @@ export default function BottomWidgetFactory(
           <DataReportWidget
             datasets={datasets}
             {...visState.dataReport}
-            toggleDataReport={uiStateActions.toggleDataReport}
+            toggleDataReport={visStateActions.toggleDataReport}
             setReportDataSource={visStateActions.setReportDataSource}
             setReportField={visStateActions.setReportField}
             setReportAggregation={visStateActions.setReportAggregation}

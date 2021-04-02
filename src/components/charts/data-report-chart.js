@@ -21,30 +21,22 @@
 import React, {Component} from 'react';
 import zingchart from 'zingchart/es6';
 import ZingChart from 'zingchart-react';
-import _ from 'lodash';
-import { mean, min, max, sum } from 'd3-array';
 
-let chartConfig = {
+const chartConfig = {
   type: 'area',
   globals: {
     fontFamily: 'Helvetica',
     shadow: false
   },
+  theme: 'dark',
   backgroundColor: "#29323c",
-  // title: {
-  //   text: 'Bandwidth for All Sites',
-  //   padding: '15px 15px',
-  //   backgroundColor: 'transparent',
-  //   fontColor: '#5f5f5f',
-  //   fontSize: '20px',
-  //   textAlign: 'left'
-  // },
   legend: {
     marginTop: '30px',
+    marginRight: '40px',
     backgroundColor: 'transparent',
     borderColor: 'transparent',
     item: {
-      fontColor: '#5f5f5f'
+      fontColor: '#ffffff'
     },
     layout: 'float',
     marker: {
@@ -67,13 +59,13 @@ let chartConfig = {
       visible: false
     },
     item: {
-      fontColor: '#5f5f5f'
+      fontColor: '#ffffff'
     },
-    lineColor: '#5f5f5f',
+    lineColor: '#ffffff',
     lineWidth: '1px',
     maxItems: 8,
     tick: {
-      lineColor: '#5f5f5f',
+      lineColor: '#ffffff',
       lineWidth: '1px'
     },
     transform: {
@@ -87,12 +79,12 @@ let chartConfig = {
       lineStyle: 'solid'
     },
     item: {
-      fontColor: '#5f5f5f'
+      fontColor: '#ffffff'
     },
-    lineColor: '#5f5f5f',
+    lineColor: '#ffffff',
     lineWidth: '1px',
     tick: {
-      lineColor: '#5f5f5f',
+      lineColor: '#ffffff',
       lineWidth: '1px'
     }
   },
@@ -114,44 +106,24 @@ let chartConfig = {
   }
 };
 
-const series = [
-  {
-    text: 'All Sites',
-    values: [2596, 2626, 4480, 6394, 7488, 14510, 7012, 3389, 20281, 48597, 53309, 52385, 47097, 50813, 13510]
-  },
-  {
-    text: 'www.zingchart.com',
-    values: [479, 199, 583, 1624, 2772, 7899, 3467, 2227, 12885, 27873, 34420, 32569, 27721, 31569, 7362]
-  },
-  {
-    text: 'blog.zingchart.com',
-    values: [408, 343, 410, 840, 1614, 3274, 2092, 914, 5709, 15317, 15633, 16720, 15504, 15821, 4565]
-  },
-  {
-    text: 'help.zingchart.com',
-    values: [989, 1364, 2161, 2644, 1754, 2015, 818, 77, 1260, 3912, 1671, 1836, 2589, 1706, 1161]
-  }
-];
-
 function DataReportChartFactory() {
   class DataReportChart extends Component {
+    componentDidMount() {
+      if (this.props.chartData) {
+        zingchart.exec('data-report-chart', 'modify', {
+          data: this.props.chartData
+        });
+      }
+    }
 
     shouldComponentUpdate(nextProps) {
-      const {dataset, field, aggregation, interval} = nextProps;
+      const {chartData} = nextProps;
 
-      if (dataset && field && aggregation && interval) {
-        const propsChanged = dataset.id != this.props.dataset?.id 
-          || field.name != this.props.field?.name 
-          || aggregation != this.props.aggregation 
-          || interval != this.props.interval;
-          
-        if (propsChanged) {
-          console.log(nextProps.chartData)
-          zingchart.exec('data-report-chart', 'modify', {
-            data: nextProps.chartData
-          });
-          return true;
-        }
+      if (chartData && JSON.stringify(chartData) != JSON.stringify(this.props.chartData)) {
+        zingchart.exec('data-report-chart', 'modify', {
+          data: chartData
+        });
+        return true;
       }
 
       return false;
@@ -161,7 +133,7 @@ function DataReportChartFactory() {
       return (
         <ZingChart
           id='data-report-chart'
-          height={300}
+          height={360}
           data={chartConfig}
         />
       );

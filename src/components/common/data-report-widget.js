@@ -92,6 +92,14 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
 
     _close = () => this.props.toggleDataReport();
 
+    componentDidMount() {
+      const dataIds = Object.keys(this.props.datasets);
+     
+      if (dataIds.length == 1 && this.props.dataId == null) {
+        this.props.setReportDataSource(dataIds[0]);
+      }
+    }
+
     render() {
       const {
         datasets,
@@ -189,13 +197,7 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
             </StyledSection>
           </TopSectionWrapper>
 
-          <DataReportChart
-            dataset={datasets[dataId]}
-            field={field}
-            aggregation={aggregation}
-            interval={interval}
-            chartData={chartData}
-          />
+          <DataReportChart chartData={chartData} />
         </TimeBottomWidgetInner>
       );
     }

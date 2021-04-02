@@ -27,7 +27,7 @@ import {
   CenterFlexbox,
   BottomWidgetInner
 } from './styled-components';
-import { Close, LineChart } from './icons';
+import { Delete, LineChart } from './icons';
 import HexbinGraphFactory from './hexbin-graph';
 import { min, max } from 'd3-array';
 
@@ -123,7 +123,7 @@ function GraphWidgetFactory(HexbinGraph) {
             </StyledTitle>
             <CenterFlexbox>
               <IconRoundSmall>
-                <Close height="12px" onClick={showGraphState} />
+                <Delete height="12px" onClick={showGraphState} />
               </IconRoundSmall>
             </CenterFlexbox>
           </TopSectionWrapper>

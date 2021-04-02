@@ -559,7 +559,7 @@ export default function MapContainerFactory(MapPopover, MapControl, MapMarker, E
             onSetEditorMode={visStateActions.setEditorMode}
             onSetLocale={uiStateActions.setLocale}
             onToggleEditorVisibility={visStateActions.toggleEditorVisibility}
-            onToggleDataReport={uiStateActions.toggleDataReport}
+            onToggleDataReport={visStateActions.toggleDataReport}
             layerConfigChange={visStateActions.layerConfigChange}
           />
           <MapComponent

@@ -341,7 +341,7 @@ function KeplerGlFactory(
         mapState,
         locale: uiState.locale,
         isGraphShow: uiState.isGraphShow,
-        dataReportToggled: uiState.dataReportToggled,
+        dataReportToggled: visState.dataReport.toggled,
         editor: visState.editor,
         mapStyle,
         mapControls: uiState.mapControls,

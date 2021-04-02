@@ -226,11 +226,12 @@ export const INITIAL_VIS_STATE = {
   schema: KeplerGLSchema,
   
   dataReport: {
+    toggled: false,
     dataId: null,
     field: null,
     aggregation: AGGREGATION_TYPES.average,
     interval: 10,
-    chartData: []
+    chartData: null
   }
 };
 
@@ -718,7 +719,15 @@ export function setFilterUpdater(state, action) {
   // dataId is an array
   // pass only the dataset we need to update
   newState = updateAllLayerDomainData(newState, datasetIdsToFilter, newFilter);
-
+  
+  // update the report data
+  const {toggled, dataId: reportId, field, aggregation, interval} = newState.dataReport;
+  
+  if (toggled && reportId && field && aggregation && interval) {
+    const chartData = generateDataReport(datasets[reportId], field, aggregation, interval);
+    newState = set(['dataReport', 'chartData'], chartData, newState);
+  }
+  
   return newState;
 }
 
@@ -1888,7 +1897,7 @@ export function setFeaturesUpdater(state, {features = []}) {
 
 /**
  * Set the current selected feature
- * @memberof uiStateUpdaters
+ * @memberof visStateUpdaters
  * @type {typeof import('./vis-state-updaters').setSelectedFeatureUpdater}
  */
 export const setSelectedFeatureUpdater = (state, {feature}) => ({
@@ -2196,11 +2205,26 @@ export function startReloadingDatasetUpdater(state, { datasetKey }) {
   return withTask(newState, task);
 };
 
+/**
+ * Toggle data report
+ * @memberof visStateUpdaters
+ * @param state `visState`
+ * @returns nextState
+ * @type {typeof import('./ui-state-updaters').toggleDataReportUpdater}
+ * @public
+ */
+ export const toggleDataReportUpdater = (state) => ({
+  ...state,
+  dataReport: {
+    ...state.dataReport,
+    toggled: !state.dataReport.toggled
+  }
+});
 
 /**
  * Set the data source of the data reporting
- * @memberof uiStateUpdaters
- * @param state `uiState`
+ * @memberof visStateUpdaters
+ * @param state `visState`
  * @param action
  * @param action.payload
  * @param action.payload.dataId dataId
@@ -2219,8 +2243,8 @@ export function startReloadingDatasetUpdater(state, { datasetKey }) {
 
 /**
  * Set the field of the data reporting
- * @memberof uiStateUpdaters
- * @param state `uiState`
+ * @memberof visStateUpdaters
+ * @param state `visState`
  * @param action
  * @param action.payload
  * @param action.payload.field field
@@ -2243,8 +2267,8 @@ export function startReloadingDatasetUpdater(state, { datasetKey }) {
 
 /**
  * Set the aggregation of the data reporting
- * @memberof uiStateUpdaters
- * @param state `uiState`
+ * @memberof visStateUpdaters
+ * @param state `visState`
  * @param action
  * @param action.payload
  * @param action.payload.field field
@@ -2267,8 +2291,8 @@ export function startReloadingDatasetUpdater(state, { datasetKey }) {
 
 /**
  * Set the aggregation of the data reporting
- * @memberof uiStateUpdaters
- * @param state `uiState`
+ * @memberof visStateUpdaters
+ * @param state `visState`
  * @param action
  * @param action.payload
  * @param action.payload.interval interval
@@ -2313,14 +2337,14 @@ export function generateDataReport(dataset, field, aggregation, interval) {
   const groups = _.groupBy(filtered, minionColumnIdx);
   const series = Object.keys(groups).reduce((acc, key) => {
     const values = groups[key].map(fieldAccessor);
-    const dates = groups[key].map(dateField.valueAccessor);
+    const minionDates = groups[key].map(dateField.valueAccessor).sort((a, b) => a - b);
     let idx = 0;
     const newValues = [];
     
-    for(let pointer = startDate; pointer <= endDate; pointer += interval) {
+    newDates.forEach(dt => {
       const spanValues = [];
       
-      while(dates[idx] >= pointer && dates[idx] < pointer + interval) {
+      while(minionDates[idx] <= dt + interval) {
         if (notNullorUndefined(values[idx])) {
           spanValues.push(values[idx]);
         }
@@ -2333,7 +2357,7 @@ export function generateDataReport(dataset, field, aggregation, interval) {
       else {
         newValues.push(aggregate(spanValues, aggregation));
       }
-    }
+    });
 
     return [
       ...acc,

@@ -895,6 +895,18 @@ export function startReloadingDataset(datasetKey) {
 };
 
 /**
+ * Toggle data report
+ * @memberof uiStateActions
+ * @type {typeof import('./ui-state-actions').toggleDataReport}
+ * @public
+ */
+ export function toggleDataReport() {
+   return {
+     type: ActionTypes.TOGGLE_DATA_REPORT
+   }
+};
+
+/**
  * Set the data report data source
  * @memberOf uiStateActions
  * @param payload - dataId

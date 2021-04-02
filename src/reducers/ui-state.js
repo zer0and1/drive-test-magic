@@ -61,8 +61,7 @@ const actionHandler = {
 
   [ActionTypes.TOGGLE_SPLIT_MAP]: uiStateUpdaters.toggleSplitMapUpdater,
   [ActionTypes.SHOW_DATASET_TABLE]: uiStateUpdaters.showDatasetTableUpdater,
-  [ActionTypes.SET_LOCALE]: uiStateUpdaters.setLocaleUpdater,
-  [ActionTypes.TOGGLE_DATA_REPORT]: uiStateUpdaters.toggleDataReportUpdater,
+  [ActionTypes.SET_LOCALE]: uiStateUpdaters.setLocaleUpdater
 };
 
 /* Reducer */
