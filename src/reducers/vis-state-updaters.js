@@ -2366,7 +2366,7 @@ export function generateDataReport(dataset, field, aggregation, interval) {
         values: newValues,
       }
     ];
-  }, []);
+  }, []).sort((a, b) => a.text > b.text ? 1 : -1);
   
   
   return {

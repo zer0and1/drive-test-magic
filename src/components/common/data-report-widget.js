@@ -26,6 +26,7 @@ import {
   CenterFlexbox,
   BottomWidgetInner,
   PanelLabel,
+  IconRoundSmall,
   Button
 } from 'components/common/styled-components';
 import { Delete } from 'components/common/icons';
@@ -74,8 +75,9 @@ const SettingSectionWrapper = styled.div`
   display: flex;
 `;
 
-const StyledButtonWrapper = styled.div`
-  margin-right: -40px;
+const StyledCloseSection = styled(StyledSection)`
+  margin-right: -15px;
+  margin-top: 10px;
 `;
 
 DataReportWidgetFactory.deps = [
@@ -188,13 +190,13 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
                 </div>
               </StyledSection>
             </SettingSectionWrapper>
-            <StyledSection>
-              <StyledButtonWrapper>
-                <Button link>
+            <StyledCloseSection>
+              <CenterFlexbox>
+                <IconRoundSmall>
                   <Delete height="12px" onClick={this._close} />
-                </Button>
-              </StyledButtonWrapper>
-            </StyledSection>
+                </IconRoundSmall>
+              </CenterFlexbox>
+            </StyledCloseSection>
           </TopSectionWrapper>
 
           <DataReportChart chartData={chartData} />

@@ -210,27 +210,6 @@ export default function BottomWidgetFactory(
             ) : null
           }
         </LayerAnimationController>
-        {isGraphShow && selectedField != undefined && selectedField != 'count' ? (
-          <GraphWidget
-            showGraphState={uiStateActions.toggleGraphShow}
-            visState={visState.clicked}
-            layers={layers}
-            allData={allData}
-            fields={fields}
-          />
-          ) : null
-        }
-        {showDataReport ? (
-          <DataReportWidget
-            datasets={datasets}
-            {...visState.dataReport}
-            toggleDataReport={visStateActions.toggleDataReport}
-            setReportDataSource={visStateActions.setReportDataSource}
-            setReportField={visStateActions.setReportField}
-            setReportAggregation={visStateActions.setReportAggregation}
-            setReportInterval={visStateActions.setReportInterval}
-          />
-        ) : null}
         <FilterAnimationController
           filter={filter}
           filterIdx={animatedFilterIdx > -1 ? animatedFilterIdx : enlargedFilterIdx}
@@ -258,6 +237,27 @@ export default function BottomWidgetFactory(
             ) : null
           }
         </FilterAnimationController>
+        {showDataReport ? (
+          <DataReportWidget
+            datasets={datasets}
+            {...visState.dataReport}
+            toggleDataReport={visStateActions.toggleDataReport}
+            setReportDataSource={visStateActions.setReportDataSource}
+            setReportField={visStateActions.setReportField}
+            setReportAggregation={visStateActions.setReportAggregation}
+            setReportInterval={visStateActions.setReportInterval}
+          />
+        ) : null}
+        {isGraphShow && selectedField != undefined && selectedField != 'count' ? (
+          <GraphWidget
+            showGraphState={uiStateActions.toggleGraphShow}
+            visState={visState.clicked}
+            layers={layers}
+            allData={allData}
+            fields={fields}
+          />
+          ) : null
+        }
       </BottomWidgetContainer>
     );
   };

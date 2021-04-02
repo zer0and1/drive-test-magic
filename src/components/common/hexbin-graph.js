@@ -25,7 +25,7 @@ import _ from 'lodash';
 import { mean, min, max, median, deviation, variance, sum } from 'd3-array';
 
 const colors = [
-  '#2E93fA',
+  '#1FBAD6',
   '#66DA26',
   '#FF9800',
   '#7E36AF',
