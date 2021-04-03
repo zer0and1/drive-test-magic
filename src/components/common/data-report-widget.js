@@ -185,6 +185,7 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
                     getOptionValue={'value'}
                     multiSelect={false}
                     searchable={false}
+                    disabled={aggregation == null}
                     onChange={this.props.setReportInterval}
                   />
                 </div>

@@ -487,6 +487,7 @@ export const AGGREGATION_TYPES = {
 };
 
 export const REPORT_AGGREGATION_OPTIONS = [
+  {value: null, label: 'None'},
   {value: AGGREGATION_TYPES.sum, label: 'Sum'},
   {value: AGGREGATION_TYPES.average, label: 'Average'},
   {value: AGGREGATION_TYPES.minimum, label: 'Min'},
