@@ -2401,7 +2401,7 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
   
   if (type == REPORT_TYPES.stacked_sum) {
     const stackedSum = series.reduce((acc, {values}) => (
-      acc.length ? acc.map((av, idx) => av + values[idx])  : [...values]
+      acc.length ? acc.map((av, idx) => round(av + values[idx], 4))  : [...values]
     ), []);
     series.push({
       type: 'line',
