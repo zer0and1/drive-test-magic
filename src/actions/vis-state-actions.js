@@ -919,7 +919,7 @@ export function setReportDataSource(payload) {
   }
 };
 
-  /**
+/**
  * Set the data report field
  * @memberOf uiStateActions
  * @param payload - field object
@@ -932,10 +932,10 @@ export function setReportField(payload) {
   }
 };
 
-    /**
+/**
  * Set the data report aggregation
  * @memberOf uiStateActions
- * @param payload - dataId
+ * @param payload - aggregation
  * @type {typeof import('./vis-state-actions').setReportAggregation}
  */
 export function setReportAggregation(payload) {
@@ -948,12 +948,25 @@ export function setReportAggregation(payload) {
   /**
  * Set the data report interval
  * @memberOf uiStateActions
- * @param payload - dataId
+ * @param payload - interval
  * @type {typeof import('./vis-state-actions').setReportInterval}
  */
 export function setReportInterval(payload) {
   return {
     type: ActionTypes.SET_REPORT_INTERVAL,
+    payload
+  }
+};
+
+/**
+ * Set the data report type
+ * @memberOf uiStateActions
+ * @param payload - type
+ * @type {typeof import('./vis-state-actions').setReportType}
+ */
+export function setReportType(payload) {
+  return {
+    type: ActionTypes.SET_REPORT_TYPE,
     payload
   }
 };

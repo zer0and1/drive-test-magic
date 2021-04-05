@@ -23,7 +23,7 @@ import zingchart from 'zingchart/es6';
 import ZingChart from 'zingchart-react';
 
 const chartConfig = {
-  type: 'area',
+  type: 'mixed',
   globals: {
     fontFamily: 'Helvetica',
     shadow: false
@@ -31,22 +31,22 @@ const chartConfig = {
   theme: 'dark',
   backgroundColor: "#29323c",
   legend: {
-    marginTop: '30px',
-    marginRight: '40px',
+    marginTop: '200px',
+    // marginRight: '40px',
     backgroundColor: 'transparent',
     borderColor: 'transparent',
     item: {
       fontColor: '#ffffff'
     },
-    layout: 'float',
+    // layout: 'float',
+    adjustLayout: true,
     marker: {
       borderColor: 'transparent',
       borderRadius: '50px'
     }
   },
   plot: {
-    alphaArea: 1,
-
+    alphaArea: 0.4,
     aspect: 'none',
     contourOnTop: true,
     lineWidth: '2px',
@@ -103,7 +103,8 @@ const chartConfig = {
   },
   tooltip: {
     visible: false
-  }
+  },
+  series: []
 };
 
 function DataReportChartFactory() {

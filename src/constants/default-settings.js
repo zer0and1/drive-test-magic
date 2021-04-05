@@ -487,11 +487,11 @@ export const AGGREGATION_TYPES = {
 };
 
 export const REPORT_AGGREGATION_OPTIONS = [
-  {value: null, label: 'None'},
-  {value: AGGREGATION_TYPES.sum, label: 'Sum'},
-  {value: AGGREGATION_TYPES.average, label: 'Average'},
-  {value: AGGREGATION_TYPES.minimum, label: 'Min'},
-  {value: AGGREGATION_TYPES.maximum, label: 'Max'},
+  {value: null, label: 'none'},
+  {value: AGGREGATION_TYPES.sum, label: 'sum'},
+  {value: AGGREGATION_TYPES.average, label: 'average'},
+  {value: AGGREGATION_TYPES.minimum, label: 'min'},
+  {value: AGGREGATION_TYPES.maximum, label: 'max'},
 ];
 
 export const REPORT_INTERVAL_OPTIONS = [
@@ -502,6 +502,16 @@ export const REPORT_INTERVAL_OPTIONS = [
   {value: 60, label: '1min'},
   {value: 120, label: '2min'},
   {value: 300, label: '5min'}
+];
+
+export const REPORT_TYPES = keyMirror({
+  normal: null,
+  stacked_sum: null
+});
+
+export const REPORT_TYPE_OPTIONS = [
+  {value: REPORT_TYPES.normal, label: 'normal'},
+  {value: REPORT_TYPES.stacked_sum, label: 'stacked sum'}
 ];
 
 export const linearFieldScaleFunctions = {

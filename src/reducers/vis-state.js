@@ -89,7 +89,8 @@ const actionHandler = {
   [ActionTypes.SET_REPORT_DATA_SOURCE]: visStateUpdaters.setReportDataSourceUpdater,
   [ActionTypes.SET_REPORT_FIELD]: visStateUpdaters.setReportFieldUpdater,
   [ActionTypes.SET_REPORT_AGGREGATION]: visStateUpdaters.setReportAggregationUpdater,
-  [ActionTypes.SET_REPORT_INTERVAL]: visStateUpdaters.setReportIntervalUpdater
+  [ActionTypes.SET_REPORT_INTERVAL]: visStateUpdaters.setReportIntervalUpdater,
+  [ActionTypes.SET_REPORT_TYPE]: visStateUpdaters.setReportTypeUpdater
 }
 
 // construct vis-state reducer

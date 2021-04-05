@@ -246,6 +246,7 @@ export default function BottomWidgetFactory(
             setReportField={visStateActions.setReportField}
             setReportAggregation={visStateActions.setReportAggregation}
             setReportInterval={visStateActions.setReportInterval}
+            setReportType={visStateActions.setReportType}
           />
         ) : null}
         {isGraphShow && selectedField != undefined && selectedField != 'count' ? (

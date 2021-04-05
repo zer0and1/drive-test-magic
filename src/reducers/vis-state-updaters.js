@@ -76,7 +76,7 @@ import {
 
 import {Layer, LayerClasses, LAYER_ID_LENGTH} from 'layers';
 import {DEFAULT_TEXT_LABEL} from 'layers/layer-factory';
-import {EDITOR_MODES, SORT_ORDER, AGGREGATION_TYPES} from 'constants/default-settings';
+import {EDITOR_MODES, SORT_ORDER, AGGREGATION_TYPES, REPORT_TYPES} from 'constants/default-settings';
 import {pick_, merge_} from './composer-helpers';
 import {processFileContent, removeLayer} from 'actions/vis-state-actions';
 
@@ -87,6 +87,8 @@ import {onMouseMove} from '../actions';
 
 import {aggregate} from 'utils/aggregate-utils';
 import {notNullorUndefined} from 'utils/data-utils';
+import _ from 'lodash';
+
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
 /** @typedef {import('./vis-state-updaters').Filter} Filter */
@@ -231,6 +233,7 @@ export const INITIAL_VIS_STATE = {
     field: null,
     aggregation: AGGREGATION_TYPES.average,
     interval: 10,
+    type: REPORT_TYPES.normal,
     chartData: null
   }
 };
@@ -721,10 +724,10 @@ export function setFilterUpdater(state, action) {
   newState = updateAllLayerDomainData(newState, datasetIdsToFilter, newFilter);
   
   // update the report data
-  const {toggled, dataId: reportId, field, aggregation, interval} = newState.dataReport;
+  const {toggled, dataId: reportId, field, aggregation, interval, type} = newState.dataReport;
   
   if (toggled && reportId && field && aggregation && interval) {
-    const chartData = generateDataReport(datasets[reportId], field, aggregation, interval);
+    const chartData = generateDataReport(datasets[reportId], field, aggregation, interval, type);
     newState = set(['dataReport', 'chartData'], chartData, newState);
   }
   
@@ -2253,14 +2256,14 @@ export function startReloadingDatasetUpdater(state, { datasetKey }) {
  * @public
  */
  export function setReportFieldUpdater(state, {payload: field}) {
-   const {datasets, dataReport: {dataId, aggregation, interval}} = state;
+   const {datasets, dataReport: {dataId, aggregation, interval, type}} = state;
 
    return {
     ...state,
     dataReport: {
       ...state.dataReport,
       field,
-      chartData: generateDataReport(datasets[dataId], field, aggregation, interval)
+      chartData: generateDataReport(datasets[dataId], field, aggregation, interval, type)
     }
    }
 };
@@ -2277,14 +2280,14 @@ export function startReloadingDatasetUpdater(state, { datasetKey }) {
  * @public
  */
  export function setReportAggregationUpdater(state, {payload: aggregation}) {
-  const {datasets, dataReport: {dataId, field, interval}} = state;
+  const {datasets, dataReport: {dataId, field, interval, type}} = state;
 
   return {
    ...state,
    dataReport: {
      ...state.dataReport,
      aggregation,
-     chartData: generateDataReport(datasets[dataId], field, aggregation, interval)
+     chartData: generateDataReport(datasets[dataId], field, aggregation, interval, type)
    }
   }
 };
@@ -2301,19 +2304,43 @@ export function startReloadingDatasetUpdater(state, { datasetKey }) {
  * @public
  */
  export function setReportIntervalUpdater(state, {payload: interval}) {
-  const {datasets, dataReport: {dataId, field, aggregation}} = state;
+  const {datasets, dataReport: {dataId, field, aggregation, type}} = state;
 
   return {
    ...state,
    dataReport: {
      ...state.dataReport,
      interval,
-     chartData: generateDataReport(datasets[dataId], field, aggregation, interval)
+     chartData: generateDataReport(datasets[dataId], field, aggregation, interval, type)
    }
   }
 };
 
-export function generateDataReport(dataset, field, aggregation, interval) {
+/**
+ * Set the type of the data reporting
+ * @memberof visStateUpdaters
+ * @param state `visState`
+ * @param action
+ * @param action.payload
+ * @param action.payload.type type
+ * @returns nextState
+ * @type {typeof import('./vis-state-updaters').setReportTypeUpdater}
+ * @public
+ */
+ export function setReportTypeUpdater(state, {payload: type}) {
+  const {datasets, dataReport: {dataId, field, aggregation, interval}} = state;
+
+  return {
+   ...state,
+   dataReport: {
+     ...state.dataReport,
+     type,
+     chartData: generateDataReport(datasets[dataId], field, aggregation, interval, type)
+   }
+  }
+};
+
+export function generateDataReport(dataset, field, aggregation, interval, type) {
   const {allData, filteredIndexForDomain} = dataset;
   const {valueAccessor: fieldAccessor} = field;
   const filtered = filteredIndexForDomain.map(i => allData[i]);
@@ -2355,20 +2382,34 @@ export function generateDataReport(dataset, field, aggregation, interval) {
         newValues.push(0);
       }
       else {
-        newValues.push(aggregate(spanValues, aggregation));
+        const aggr = aggregate(spanValues, aggregation);
+        newValues.push(_.round(aggr, 4));
       }
     });
+    const avg = _.round(aggregate(values, AGGREGATION_TYPES.average), 2);
 
     return [
       ...acc,
       {
+        type: type == REPORT_TYPES.normal ? 'line' : 'area',
         text: key,
+        'legend-text': `${key}: ${avg}`,
         values: newValues,
       }
     ];
   }, []).sort((a, b) => a.text > b.text ? 1 : -1);
   
-  
+  if (type == REPORT_TYPES.stacked_sum) {
+    const stackedSum = series.reduce((acc, {values}) => (
+      acc.length ? acc.map((av, idx) => av + values[idx])  : [...values]
+    ), []);
+    series.push({
+      type: 'line',
+      text: 'Stacked Sum', 
+      values: stackedSum
+    });
+  }
+
   return {
     series,
     scaleX: {

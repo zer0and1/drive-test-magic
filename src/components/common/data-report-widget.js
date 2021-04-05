@@ -35,7 +35,11 @@ import FieldSelectorFactory from './field-selector';
 import DataReportChartFactory from 'components/charts/data-report-chart';
 import ItemSelector from 'components/common/item-selector/item-selector';
 import { FormattedMessage } from 'react-intl';
-import {REPORT_AGGREGATION_OPTIONS, REPORT_INTERVAL_OPTIONS} from 'constants/default-settings';
+import {
+  REPORT_AGGREGATION_OPTIONS, 
+  REPORT_INTERVAL_OPTIONS, 
+  REPORT_TYPE_OPTIONS
+} from 'constants/default-settings';
 
 const TimeBottomWidgetInner = styled(BottomWidgetInner)`
   padding: 6px 32px 24px 32px;
@@ -55,6 +59,10 @@ const TopSectionWrapper = styled.div`
   }
 
   #bottom-widget__interval-select {
+    width: 100px;
+  }
+
+  #bottom-widget__type-select {
     width: 140px;
   }
 `;
@@ -109,6 +117,7 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
         field,
         aggregation,
         interval,
+        type,
         chartData
       } = this.props;
 
@@ -187,6 +196,25 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
                     searchable={false}
                     disabled={aggregation == null}
                     onChange={this.props.setReportInterval}
+                  />
+                </div>
+              </StyledSection>
+              <StyledSection>
+                <PanelLabel>
+                  <FormattedMessage id="dataReport.type" />
+                </PanelLabel>
+                <div id="bottom-widget__type-select">
+                  <ItemSelector
+                    options={REPORT_TYPE_OPTIONS}
+                    selectedItems={REPORT_TYPE_OPTIONS.find(op => op.value == type)}
+                    placement="top"
+                    inputTheme="secondary"
+                    displayOption={'label'}
+                    filterOption={'label'}
+                    getOptionValue={'value'}
+                    multiSelect={false}
+                    searchable={false}
+                    onChange={this.props.setReportType}
                   />
                 </div>
               </StyledSection>
