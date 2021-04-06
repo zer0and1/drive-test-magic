@@ -510,7 +510,7 @@ export const REPORT_TYPES = keyMirror({
 });
 
 export const REPORT_TYPE_OPTIONS = [
-  {value: REPORT_TYPES.normal, label: 'normal'},
+  {value: REPORT_TYPES.normal, label: 'independent'},
   {value: REPORT_TYPES.stacked_sum, label: 'stacked sum'}
 ];
 

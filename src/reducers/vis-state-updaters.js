@@ -2356,16 +2356,21 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
   const endDate = Math.max(...dates);
   interval *= 1000; // convert interval time to ms
   const newDates = [];
-  
+  const avgs = [];
+  let stackedValues = [];
+   
   for(let pointer = startDate; pointer <= endDate; pointer += interval) {
     newDates.push(pointer);
+    stackedValues.push(0);
   }
 
   const groups = _.groupBy(filtered, minionColumnIdx);
-  const series = Object.keys(groups).reduce((acc, key) => {
+  const series = Object.keys(groups).sort((a, b) => a > b ? 1 : -1).reduce((acc, key) => {
     const values = groups[key].map(fieldAccessor);
     const minionDates = groups[key].map(dateField.valueAccessor).sort((a, b) => a - b);
-    
+    const avg = _.round(aggregate(values, AGGREGATION_TYPES.average), 4);
+    avgs.push(avg);
+
     if (aggregation == null) {
       return [
         ...acc,
@@ -2378,7 +2383,7 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
     }
     else {
       let idx = 0;
-      const newValues = [];
+      let newValues = [];
       
       newDates.forEach(dt => {
         const spanValues = [];
@@ -2398,8 +2403,12 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
           newValues.push(_.round(aggr, 4));
         }
       });
-      const avg = _.round(aggregate(values, AGGREGATION_TYPES.average), 2);
-  
+
+      if (type == REPORT_TYPES.stacked_sum) {
+        newValues = newValues.map((nv, idx) => _.round(stackedValues[idx] + nv, 4));
+        stackedValues = [...newValues];
+      }
+      
       return [
         ...acc,
         {
@@ -2410,24 +2419,32 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
         }
       ];
     }
-  }, []).sort((a, b) => a.text > b.text ? 1 : -1);
+  }, []).reverse();
   
-  if (aggregation && type == REPORT_TYPES.stacked_sum) {
-    const stackedSum = series.reduce((acc, {values}) => (
-      acc.length ? acc.map((av, idx) => _.round(av + values[idx], 4))  : [...values]
-    ), []);
-    series.push({
-      type: 'line',
-      text: 'Stacked Sum', 
-      values: stackedSum
-    });
-  }
-
   return {
     series,
-    scaleX: aggregation ? {
-      values: newDates
-    } : {},
-    timestamp: new Date()
+    timestamp: new Date(),
+    title: {
+      text: aggregation ? type == REPORT_TYPES.normal ? 'AVG' : 'SUM AVG' : '',
+      paddingTop: '50px',
+      paddingRight: type == REPORT_TYPES.normal ? '135px' : '100px',
+      backgroundColor: 'transparent',
+      fontColor: 'white',
+      fontSize: '15px',
+      textAlign: 'right'
+    },
+    subtitle: {
+      text: aggregation ? aggregate(avgs, type == REPORT_TYPES.normal ? AGGREGATION_TYPES.average : AGGREGATION_TYPES.sum) : '',
+      paddingTop: '50px',
+      backgroundColor: 'transparent',
+      fontSize: '40px',
+      fontColor: 'white',
+      textAlign: 'right'
+    },
+    ...(aggregation ? {
+      scaleX: {
+        values: newDates
+      }
+    } : null)
   };
 };

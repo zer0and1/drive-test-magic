@@ -47,7 +47,7 @@ const chartConfig = {
     }
   },
   plot: {
-    alphaArea: 0.4,
+    alphaArea: 1,
     aspect: 'none',
     contourOnTop: true,
     lineWidth: '2px',
@@ -115,6 +115,7 @@ function DataReportChartFactory() {
         zingchart.exec('data-report-chart', 'modify', {
           data: this.props.chartData
         });
+        zingchart.exec('data-report-chart', 'viewall');
       }
     }
 
@@ -126,11 +127,12 @@ function DataReportChartFactory() {
       }
 
       const ago = moment().diff(moment(chartData.timestamp), 'milliseconds');
-      
+
       if (ago < 100) {
         zingchart.exec('data-report-chart', 'modify', {
           data: chartData
         });
+        zingchart.exec('data-report-chart', 'viewall');
         return true;
       }
 
