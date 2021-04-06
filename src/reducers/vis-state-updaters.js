@@ -726,7 +726,7 @@ export function setFilterUpdater(state, action) {
   // update the report data
   const {toggled, dataId: reportId, field, aggregation, interval, type} = newState.dataReport;
   
-  if (toggled && reportId && field && aggregation && interval) {
+  if (toggled && reportId && field && aggregation && interval && type) {
     const chartData = generateDataReport(datasets[reportId], field, aggregation, interval, type);
     newState = set(['dataReport', 'chartData'], chartData, newState);
   }
@@ -2365,43 +2365,56 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
   const series = Object.keys(groups).reduce((acc, key) => {
     const values = groups[key].map(fieldAccessor);
     const minionDates = groups[key].map(dateField.valueAccessor).sort((a, b) => a - b);
-    let idx = 0;
-    const newValues = [];
     
-    newDates.forEach(dt => {
-      const spanValues = [];
-      
-      while(minionDates[idx] <= dt + interval) {
-        if (notNullorUndefined(values[idx])) {
-          spanValues.push(values[idx]);
+    if (aggregation == null) {
+      return [
+        ...acc,
+        {
+          type: 'line',
+          text: key,
+          values: values.map((v, idx) => [minionDates[idx], v])
         }
-        idx++;
-      }
-
-      if (spanValues.length == 0) {
-        newValues.push(0);
-      }
-      else {
-        const aggr = aggregate(spanValues, aggregation);
-        newValues.push(_.round(aggr, 4));
-      }
-    });
-    const avg = _.round(aggregate(values, AGGREGATION_TYPES.average), 2);
-
-    return [
-      ...acc,
-      {
-        type: type == REPORT_TYPES.normal ? 'line' : 'area',
-        text: key,
-        'legend-text': `${key}: ${avg}`,
-        values: newValues,
-      }
-    ];
+      ];
+    }
+    else {
+      let idx = 0;
+      const newValues = [];
+      
+      newDates.forEach(dt => {
+        const spanValues = [];
+        
+        while(minionDates[idx] <= dt + interval) {
+          if (notNullorUndefined(values[idx])) {
+            spanValues.push(values[idx]);
+          }
+          idx++;
+        }
+  
+        if (spanValues.length == 0) {
+          newValues.push(0);
+        }
+        else {
+          const aggr = aggregate(spanValues, aggregation);
+          newValues.push(_.round(aggr, 4));
+        }
+      });
+      const avg = _.round(aggregate(values, AGGREGATION_TYPES.average), 2);
+  
+      return [
+        ...acc,
+        {
+          type: type == REPORT_TYPES.normal ? 'line' : 'area',
+          text: key,
+          'legend-text': `${key}: ${avg}`,
+          values: newValues,
+        }
+      ];
+    }
   }, []).sort((a, b) => a.text > b.text ? 1 : -1);
   
-  if (type == REPORT_TYPES.stacked_sum) {
+  if (aggregation && type == REPORT_TYPES.stacked_sum) {
     const stackedSum = series.reduce((acc, {values}) => (
-      acc.length ? acc.map((av, idx) => round(av + values[idx], 4))  : [...values]
+      acc.length ? acc.map((av, idx) => _.round(av + values[idx], 4))  : [...values]
     ), []);
     series.push({
       type: 'line',
@@ -2412,8 +2425,9 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
 
   return {
     series,
-    scaleX: {
+    scaleX: aggregation ? {
       values: newDates
-    }
+    } : {},
+    timestamp: new Date()
   };
 };

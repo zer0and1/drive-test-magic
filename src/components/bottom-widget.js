@@ -240,6 +240,7 @@ export default function BottomWidgetFactory(
         {showDataReport ? (
           <DataReportWidget
             datasets={datasets}
+            layers={layers}
             {...visState.dataReport}
             toggleDataReport={visStateActions.toggleDataReport}
             setReportDataSource={visStateActions.setReportDataSource}

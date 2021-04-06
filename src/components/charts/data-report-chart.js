@@ -21,6 +21,7 @@
 import React, {Component} from 'react';
 import zingchart from 'zingchart/es6';
 import ZingChart from 'zingchart-react';
+import moment from 'moment';
 
 const chartConfig = {
   type: 'mixed',
@@ -120,7 +121,13 @@ function DataReportChartFactory() {
     shouldComponentUpdate(nextProps) {
       const {chartData} = nextProps;
 
-      if (chartData && JSON.stringify(chartData) != JSON.stringify(this.props.chartData)) {
+      if (!chartData) {
+        return false;
+      }
+
+      const ago = moment().diff(moment(chartData.timestamp), 'milliseconds');
+      
+      if (ago < 100) {
         zingchart.exec('data-report-chart', 'modify', {
           data: chartData
         });

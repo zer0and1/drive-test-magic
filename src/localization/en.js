@@ -555,6 +555,7 @@ export default {
     dataSource: 'Data Source',
     field: 'Field',
     aggregation: 'Aggregation',
-    interval: 'Interval'
+    interval: 'Interval',
+    type: 'Type'
   }
 };

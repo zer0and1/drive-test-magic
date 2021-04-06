@@ -103,10 +103,18 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
     _close = () => this.props.toggleDataReport();
 
     componentDidMount() {
-      const dataIds = Object.keys(this.props.datasets);
+      const {datasets, layers} = this.props;
+      const dataIds = Object.keys(datasets);
      
       if (dataIds.length == 1 && this.props.dataId == null) {
         this.props.setReportDataSource(dataIds[0]);
+        const colorLayers = layers.filter(l => l.config.colorField);
+        const fieldName = colorLayers && colorLayers[0].config.colorField.name;
+        const fieldObj = this.yAxisFieldsSelector(Object.values(datasets)[0]).find(f => f.name == fieldName);
+
+        if (fieldObj) {
+          this.props.setReportField(fieldObj);
+        }
       }
     }
 
@@ -214,6 +222,7 @@ function DataReportWidgetFactory(DatasetSelector, FieldSelector, DataReportChart
                     getOptionValue={'value'}
                     multiSelect={false}
                     searchable={false}
+                    disabled={aggregation == null}
                     onChange={this.props.setReportType}
                   />
                 </div>
