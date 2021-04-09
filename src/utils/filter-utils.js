@@ -421,10 +421,7 @@ export function getFilterFunction(field, dataId, filter, layers) {
       if (!field) {
         return defaultFunc;
       }
-      const mappedValue = get(field, ['filterProps', 'mappedValue']);
-      const accessor = Array.isArray(mappedValue)
-        ? (data, index) => mappedValue[index]
-        : data => timeToUnixMilli(valueAccessor(data), field.format);
+      const accessor = data => timeToUnixMilli(valueAccessor(data), field.format);
       return (data, index) => isInRange(accessor(data, index), filter.value);
     case FILTER_TYPES.polygon:
       if (!layers || !layers.length) {
@@ -861,14 +858,14 @@ export function applyFiltersToDatasets(datasetIds, datasets, filters, layers) {
     const stacked = [];
     const validatedFilters = [];
     
-    table.filteredIndexForDomain = table.allIndexes;
+    table.filteredIndexForDomain = [...table.allIndexes];
 
     appliedFilters.forEach(filter => {
       const {filter: validatedFilter} = validateFilterWithData(table, filter, layersToFilter);
       stacked.push(filter);
       const {filteredIndexForDomain: filterInputIndex} = table;
       const {filteredIndexForDomain: filteredResultIndex} = table.filterTable(stacked, layersToFilter, {});
-
+      
       validatedFilters.push({
         ...validatedFilter,
         filteredResultIndex,

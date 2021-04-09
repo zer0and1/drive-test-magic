@@ -32,14 +32,13 @@ const chartConfig = {
   theme: 'dark',
   backgroundColor: "#29323c",
   legend: {
-    marginTop: '200px',
-    // marginRight: '40px',
+    marginTop: '150px',
+    marginLeft: '800px',
     backgroundColor: 'transparent',
     borderColor: 'transparent',
     item: {
       fontColor: '#ffffff'
     },
-    // layout: 'float',
     adjustLayout: true,
     marker: {
       borderColor: 'transparent',
@@ -129,9 +128,7 @@ function DataReportChartFactory() {
       const ago = moment().diff(moment(chartData.timestamp), 'milliseconds');
 
       if (ago < 100) {
-        zingchart.exec('data-report-chart', 'modify', {
-          data: chartData
-        });
+        zingchart.exec('data-report-chart', 'modify', {data: chartData});
         zingchart.exec('data-report-chart', 'viewall');
         return true;
       }

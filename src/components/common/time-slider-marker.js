@@ -20,9 +20,19 @@
 
 import React, {useRef, useEffect, useMemo} from 'react';
 import PropTypes from 'prop-types';
-import {scaleUtc} from 'd3-scale';
+import {scaleTime} from 'd3-scale';
 import {select} from 'd3-selection';
 import {axisBottom} from 'd3-axis';
+import {
+  timeSecond,
+  timeMinute,
+  timeHour,
+  timeDay,
+  timeWeek,
+  timeMonth,
+  timeYear
+} from 'd3-time';
+import {timeFormat} from 'd3-time-format';
 import styled from 'styled-components';
 
 const MIN_TICK_WIDTH_LARGE = 80;
@@ -74,9 +84,28 @@ function TimeSliderMarkerFactory() {
 
     // TODO: pass in ticks if interval is defined
     const ticks = Math.floor(width / (isEnlarged ? MIN_TICK_WIDTH_LARGE : MIN_TICK_WIDTH_SMALL));
+    const formatMillisecond = timeFormat(".%L"),
+      formatSecond = timeFormat(":%S"),
+      formatMinute = timeFormat("%H:%M"),
+      formatHour = timeFormat("%H %p"),
+      formatDay = timeFormat("%a %d"),
+      formatWeek = timeFormat("%b %d"),
+      formatMonth = timeFormat("%B"),
+      formatYear = timeFormat("%Y");
 
+    const axisTimeFormat = (date) => {
+      return (timeSecond(date) < date ? formatMillisecond
+          : timeMinute(date) < date ? formatSecond
+          : timeHour(date) < date ? formatMinute
+          : timeDay(date) < date ? formatHour
+          : timeMonth(date) < date ? (timeWeek(date) < date ? formatDay : formatWeek)
+          : timeYear(date) < date ? formatMonth
+          : formatYear)(date);
+    }
+  
     const xAxis = axisBottom(scale)
       .ticks(ticks)
+      .tickFormat(axisTimeFormat)
       .tickSize(0)
       .tickPadding(12);
 
@@ -88,7 +117,7 @@ function TimeSliderMarkerFactory() {
     const scale = useMemo(
       () =>
         Array.isArray(domain)
-          ? scaleUtc()
+          ? scaleTime()
               .domain(domain)
               .range([0, width])
           : null,

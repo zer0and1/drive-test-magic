@@ -721,7 +721,7 @@ export function setFilterUpdater(state, action) {
   newState = set(['filters'], filters, newState);
   // dataId is an array
   // pass only the dataset we need to update
-  newState = updateAllLayerDomainData(newState, datasetIdsToFilter, newFilter);
+  newState = updateAllLayerDomainData(newState, datasetIdsToFilter, undefined);
   
   // update the report data
   const {toggled, dataId: reportId, field, aggregation, interval, type} = newState.dataReport;
@@ -2420,6 +2420,7 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
       ];
     }
   }, []).reverse();
+  const aggrOfAvgs = aggregate(avgs, type == REPORT_TYPES.normal ? AGGREGATION_TYPES.average : AGGREGATION_TYPES.sum);
   
   return {
     series,
@@ -2427,19 +2428,20 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
     title: {
       text: aggregation ? type == REPORT_TYPES.normal ? 'AVG' : 'SUM AVG' : '',
       paddingTop: '50px',
-      paddingRight: type == REPORT_TYPES.normal ? '135px' : '100px',
+      paddingLeft: '800px',
       backgroundColor: 'transparent',
       fontColor: 'white',
       fontSize: '15px',
-      textAlign: 'right'
+      textAlign: 'left'
     },
     subtitle: {
-      text: aggregation ? aggregate(avgs, type == REPORT_TYPES.normal ? AGGREGATION_TYPES.average : AGGREGATION_TYPES.sum) : '',
+      text: aggregation ? _.round(aggrOfAvgs, 2) : '',
       paddingTop: '50px',
+      paddingLeft: '800px',
       backgroundColor: 'transparent',
       fontSize: '40px',
       fontColor: 'white',
-      textAlign: 'right'
+      textAlign: 'left'
     },
     ...(aggregation ? {
       scaleX: {
