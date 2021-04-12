@@ -43,6 +43,7 @@ query MyQuery {
     cqi
     minion_module_firmware
     minion_module_type
+    minion_antenna_type
     minion_state
     minion_target_ping_ms
     minion_target_ping_sucess
