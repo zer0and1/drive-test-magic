@@ -1026,7 +1026,7 @@ class Layer {
     if (domain == 'sizeDomain') {
       return dataset.getColumnLayerDomain(field, scaleType, LEGEND_DOMAINS.ALL)
     }
-    else if (legendDomain == LEGEND_DOMAINS.MANUAL) {
+    else if (domain == 'colorDomain' && legendDomain == LEGEND_DOMAINS.MANUAL) {
       return legendRange;
     }
 

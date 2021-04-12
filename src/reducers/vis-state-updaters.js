@@ -2405,8 +2405,7 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
       });
 
       if (type == REPORT_TYPES.stacked_sum) {
-        newValues = newValues.map((nv, idx) => _.round(stackedValues[idx] + nv, 4));
-        stackedValues = [...newValues];
+        stackedValues = newValues.map((nv, idx) => _.round(stackedValues[idx] + nv, 4));
       }
       
       return [
@@ -2420,9 +2419,21 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
       ];
     }
   }, []).reverse();
+
   const aggrOfAvgs = aggregate(avgs, type == REPORT_TYPES.normal ? AGGREGATION_TYPES.average : AGGREGATION_TYPES.sum);
   
+  if (type == REPORT_TYPES.stacked_sum) {
+    series.push({
+      text: 'SUM',
+      'alpha-area': 0,
+      values: stackedValues,
+      stack: 2,
+      'line-width': 0
+    });  
+  }
+
   return {
+    stacked: type == REPORT_TYPES.stacked_sum,
     series,
     timestamp: new Date(),
     title: {

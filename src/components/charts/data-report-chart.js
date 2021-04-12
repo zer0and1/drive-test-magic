@@ -26,7 +26,7 @@ import moment from 'moment';
 const chartConfig = {
   type: 'mixed',
   globals: {
-    fontFamily: 'Helvetica',
+    fontFamily: "ff-clan-web-pro,'Helvetica Neue',Helvetica,sans-serif",
     shadow: false
   },
   theme: 'dark',
@@ -37,7 +37,7 @@ const chartConfig = {
     backgroundColor: 'transparent',
     borderColor: 'transparent',
     item: {
-      fontColor: '#ffffff'
+      fontColor: '#A0A7B4'
     },
     adjustLayout: true,
     marker: {
@@ -59,13 +59,13 @@ const chartConfig = {
       visible: false
     },
     item: {
-      fontColor: '#ffffff'
+      fontColor: '#A0A7B4'
     },
-    lineColor: '#ffffff',
+    lineColor: '#A0A7B4',
     lineWidth: '1px',
     maxItems: 8,
     tick: {
-      lineColor: '#ffffff',
+      lineColor: '#A0A7B4',
       lineWidth: '1px'
     },
     transform: {
@@ -79,12 +79,12 @@ const chartConfig = {
       lineStyle: 'solid'
     },
     item: {
-      fontColor: '#ffffff'
+      fontColor: '#A0A7B4'
     },
-    lineColor: '#ffffff',
+    lineColor: '#A0A7B4',
     lineWidth: '1px',
     tick: {
-      lineColor: '#ffffff',
+      lineColor: '#A0A7B4',
       lineWidth: '1px'
     }
   },
