@@ -726,7 +726,7 @@ export function setFilterUpdater(state, action) {
   // update the report data
   const {toggled, dataId: reportId, field, aggregation, interval, type} = newState.dataReport;
   
-  if (toggled && reportId && field && aggregation && interval && type) {
+  if (toggled && reportId && field && interval && type) {
     const chartData = generateDataReport(datasets[reportId], field, aggregation, interval, type);
     newState = set(['dataReport', 'chartData'], chartData, newState);
   }
@@ -2368,7 +2368,7 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
   const series = Object.keys(groups).sort((a, b) => a > b ? 1 : -1).reduce((acc, key) => {
     const values = groups[key].map(fieldAccessor);
     const minionDates = groups[key].map(dateField.valueAccessor).sort((a, b) => a - b);
-    const avg = _.round(aggregate(values, AGGREGATION_TYPES.average), 4);
+    const avg = _.round(aggregate(values, AGGREGATION_TYPES.average), 2);
     avgs.push(avg);
 
     if (aggregation == null) {
@@ -2400,12 +2400,12 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
         }
         else {
           const aggr = aggregate(spanValues, aggregation);
-          newValues.push(_.round(aggr, 4));
+          newValues.push(_.round(aggr, 2));
         }
       });
 
       if (type == REPORT_TYPES.stacked_sum) {
-        stackedValues = newValues.map((nv, idx) => _.round(stackedValues[idx] + nv, 4));
+        stackedValues = newValues.map((nv, idx) => _.round(stackedValues[idx] + nv, 2));
       }
       
       return [
