@@ -724,9 +724,9 @@ export function setFilterUpdater(state, action) {
   newState = updateAllLayerDomainData(newState, datasetIdsToFilter, undefined);
   
   // update the report data
-  const {toggled, dataId: reportId, field, aggregation, interval, type} = newState.dataReport;
+  const {dataId: reportId, field, aggregation, interval, type} = newState.dataReport;
   
-  if (toggled && reportId && field && interval && type) {
+  if (reportId && field && interval && type) {
     const chartData = generateDataReport(datasets[reportId], field, aggregation, interval, type);
     newState = set(['dataReport', 'chartData'], chartData, newState);
   }
