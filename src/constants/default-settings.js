@@ -167,7 +167,7 @@ export const DIMENSIONS = {
       default: 400,
       minion: 400,
       layer: 300,
-      filter: 300,
+      filter: 330,
       interaction: 300,
       map: 300
     },
