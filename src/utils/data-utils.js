@@ -118,7 +118,7 @@ export function getSampleData(data, sampleSize = 500, getValue = d => d) {
 export function timeToUnixMilli(value, format) {
   if (notNullorUndefined(value)) {
     return typeof value === 'string'
-      ? moment(value, format).valueOf()
+      ? new Date(value).getTime()
       : format === 'x'
       ? value * 1000
       : value;
