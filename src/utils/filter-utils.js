@@ -319,7 +319,7 @@ export function getFilterProps(field, fieldDomain) {
         value: fieldDomain.domain,
         type: FILTER_TYPES.range,
         typeOptions: [FILTER_TYPES.range],
-        gpu: true
+        gpu: false
       };
 
     case ALL_FIELD_TYPES.boolean:
@@ -346,7 +346,7 @@ export function getFilterProps(field, fieldDomain) {
         enlarged: true,
         fixedDomain: false,
         value: filterProps.domain,
-        gpu: true
+        gpu: false
       };
 
     default:
@@ -859,7 +859,8 @@ export function applyFiltersToDatasets(datasetIds, datasets, filters, layers) {
     const validatedFilters = [];
     
     table.filteredIndexForDomain = [...table.allIndexes];
-
+    table.filteredIndex = [...table.allIndexes];
+    
     appliedFilters.forEach(filter => {
       const {filter: validatedFilter} = validateFilterWithData(table, filter, layersToFilter);
       stacked.push(filter);
