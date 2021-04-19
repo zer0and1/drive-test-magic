@@ -5,6 +5,8 @@ const cors = require('cors');
 const jsonWebToken = require('jsonwebtoken');
 const { GraphQLClient, gql } = require('graphql-request');
 
+const HASURA_JWT_SECRETE_KEY = 'Qk9kQ037bFtsa1E0kOUgzU2akr78N59V';
+const HASURA_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
 
 const generateJWT = ({ role, user_token }) => {
   return jsonWebToken.sign({
@@ -16,9 +18,7 @@ const generateJWT = ({ role, user_token }) => {
   }, HASURA_JWT_SECRETE_KEY, { algorithm: 'HS256', noTimestamp: true });
 };
 
-const HASURA_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
 const HASURA_GHOST_TOKEN = generateJWT({ role: 'ghost', user_token: 'ghost' });
-const HASURA_JWT_SECRETE_KEY = 'Qk9kQ037bFtsa1E0kOUgzU2akr78N59V';
 const PORT = process.env.PORT || 8080
 
 const client = new GraphQLClient(HASURA_ENDPOINT, {
