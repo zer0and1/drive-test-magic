@@ -7,7 +7,7 @@ const { GraphQLClient, gql } = require('graphql-request');
 
 const HASURA_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
 const HASURA_GHOST_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwczovL2hhc3VyYS5pby9qd3QvY2xhaW1zIjp7IngtaGFzdXJhLWFsbG93ZWQtcm9sZXMiOlsiYWRtaW4iLCJ1c2VyIiwiZ3Vlc3QiLCJnaG9zdCJdLCJ4LWhhc3VyYS1kZWZhdWx0LXJvbGUiOiJnaG9zdCIsIngtaGFzdXJhLXVzZXItaWQiOiJnaG9zdCJ9fQ.GE38lWgvsKPOaHZS7Dcj89-E0YGugF6je3nXvxjYKkU';
-const HASURA_JWT_SECRETE_KEY = 'sD9DQ0t7bptsa1E0kOUgzU2adr78N59V';
+const HASURA_JWT_SECRETE_KEY = 'Qk9kQ037bFtsa1E0kOUgzU2akr78N59V';
 const PORT = process.env.PORT || 8080
 
 const client = new GraphQLClient(HASURA_ENDPOINT, {
