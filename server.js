@@ -5,21 +5,16 @@ const cors = require('cors');
 const jsonWebToken = require('jsonwebtoken');
 const { GraphQLClient, gql } = require('graphql-request');
 
+const PORT = process.env.PORT || 8080
 const HASURA_JWT_SECRETE_KEY = 'Qk9kQ037bFtsa1E0kOUgzU2akr78N59V';
 const HASURA_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
-
-const generateJWT = ({ role, user_token }) => {
-  return jsonWebToken.sign({
-      "https://hasura.io/jwt/claims": {
-          "x-hasura-allowed-roles": ["admin", "user", "guest"],
-          "x-hasura-default-role": role,
-          "x-hasura-user-id": user_token
-      }
-  }, HASURA_JWT_SECRETE_KEY, { algorithm: 'HS256', noTimestamp: true });
-};
-
-const HASURA_GHOST_TOKEN = generateJWT({ role: 'ghost', user_token: 'ghost' });
-const PORT = process.env.PORT || 8080
+const HASURA_GHOST_TOKEN = jsonWebToken.sign({
+  "https://hasura.io/jwt/claims": {
+      "x-hasura-allowed-roles": ["admin", "user", "guest", "ghost"],
+      "x-hasura-default-role": "ghost",
+      "x-hasura-user-id": "ghost"
+  }
+}, HASURA_JWT_SECRETE_KEY, { algorithm: 'HS256', noTimestamp: true });
 
 const client = new GraphQLClient(HASURA_ENDPOINT, {
   headers: {
@@ -48,6 +43,16 @@ mutation($token: String!) {
   }
 }
 `;
+
+const generateJWT = ({ role, user_token }) => {
+  return jsonWebToken.sign({
+      "https://hasura.io/jwt/claims": {
+          "x-hasura-allowed-roles": ["admin", "user", "guest"],
+          "x-hasura-default-role": role,
+          "x-hasura-user-id": user_token
+      }
+  }, HASURA_JWT_SECRETE_KEY, { algorithm: 'HS256', noTimestamp: true });
+};
 
 const app = express();
 
