@@ -117,6 +117,8 @@ export const INITIAL_PROVIDER_STATE = {
   successInfo: {},
   mapSaved: null,
   visualizations: [],
+  datasetKey: null,
+  collections: {},
   ...INITIAL_SESSION_STATE
 };
 
@@ -578,8 +580,19 @@ export const setSessionExpandedUpdater = (state, { payload: expanded }) => {
     isExpandedSession: expanded,
     isExpandedQuery: expanded ? false : state.isExpandedQuery
   };
+  const {collections} = state;
 
   if (expanded && !state.queryTestResult) {
+    for(let key in state.collections) {
+      if (collections[key].query == state.query && collections[key].queryTestResult) {
+        return loadSessionUpdater({
+          ...newState,
+          queryTestResult: collections[key].queryTestResult,
+          queryTestTime: collections[key].queryTestTime
+        });
+      }
+    }
+
     return withTask(newState, createActionTask(testQuery, { nextAction: loadSession }));
   }
 
@@ -757,12 +770,8 @@ export const addDatasetUpdater = (state, { payload: { selectedSessions, updating
     createActionTask(addDataToMap, map),
     createActionTask(updating ? updateDataset : registerDataset, map.datasets.info)
   ];
-  const newState = {
-    ...state,
-    ...INITIAL_SESSION_STATE
-  };
 
-  return withTask(newState, tasks);
+  return withTask(state, tasks);
 };
 
 export const registerDatasetUpdater = (state, { payload: info }) => {
@@ -932,7 +941,6 @@ export const initDatasetUpdater = (state, { payload: oldDataset }) => {
 
   return {
     ...state,
-    ...INITIAL_SESSION_STATE,
     query,
     datasetLabel: label,
     selectedSessions: sessions,
@@ -969,3 +977,21 @@ export const reloadDatasetUpdater = (state, { dataset, visState }) => {
 
   return withTask(state, tasks);
 };
+
+export const setDatasetUpdater = (state, {datasetKey}) => ({
+  ...state,
+  datasetKey,
+  collections: {
+    ...state.collections,
+    ...(state.datasetKey ? {
+      [state.datasetKey]: Object.keys(INITIAL_SESSION_STATE).reduce((acc, key) => ({
+        ...acc,
+        [key]: state[key]
+      }), {})
+    } : {})
+  },
+  ...(state.collections[datasetKey] ? Object.keys(INITIAL_SESSION_STATE).reduce((acc, key) => ({
+    ...acc,
+    [key]: state.collections[datasetKey][key]
+  }), {}) : {})
+});

@@ -120,6 +120,7 @@ export default function SidePanelFactory(
       visStateActions: PropTypes.object.isRequired,
       mapStyleActions: PropTypes.object.isRequired,
       mapProfileActions: PropTypes.object.isRequired,
+      providerActions: PropTypes.object.isRequired,
       availableProviders: PropTypes.object,
       mapSaved: PropTypes.string,
       panels: PropTypes.arrayOf(PropTypes.object)
@@ -134,6 +135,7 @@ export default function SidePanelFactory(
       mapStyleActions: {},
       mapProfileActions: {},
       uiStateActions: {},
+      providerActions: {},
       availableProviders: {}
     };
 
@@ -170,6 +172,7 @@ export default function SidePanelFactory(
     };
 
     _setupDataset = key => {
+      this.props.providerActions.setDataset(key);
       this.props.uiStateActions.openDatasetModal(key);
     };
 

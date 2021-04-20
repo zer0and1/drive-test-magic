@@ -65,6 +65,7 @@ const actionHandler = {
   [ActionTypes.LOAD_DATASET_ERROR]: providerStateUpdaters.loadDatasetErrorUpdater,
   [ActionTypes.INIT_DATASET]: providerStateUpdaters.initDatasetUpdater,
   [ActionTypes.RELOAD_DATASET]: providerStateUpdaters.reloadDatasetUpdater,
+  [ActionTypes.SET_DATASET]: providerStateUpdaters.setDatasetUpdater,
 };
 
 // construct provider-state reducer

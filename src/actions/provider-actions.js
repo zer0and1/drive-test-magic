@@ -61,6 +61,7 @@ export const ActionTypes = {
   LOAD_DATASET_ERROR: `${ACTION_PREFIX}LOAD_DATASET_ERROR`,
   INIT_DATASET: `${ACTION_PREFIX}INIT_DATASET`,
   RELOAD_DATASET: `${ACTION_PREFIX}RELOAD_DATASET`,
+  SET_DATASET: `${ACTION_PREFIX}SET_DATASET`,
 };
 
 /**
@@ -201,4 +202,8 @@ export const reloadDataset = (dataset, visState) => ({
   visState
 });
 
-
+/** @type {typeof import('./provider-actions').setDataset} */
+export const setDataset = (datasetKey) => ({
+  type: ActionTypes.SET_DATASET,
+  datasetKey
+});
