@@ -295,3 +295,14 @@ mutation {
   }
 }
 `;
+
+export const GQL_GET_SESSIONS = () => gql`
+query {
+  signal_db_sessions_view {
+    id
+    start_date
+    end_date
+    count
+  }
+}
+`;

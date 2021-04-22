@@ -380,10 +380,7 @@ export default function ModalContainerFactory(
                 getSavedMaps={this.props.providerActions.getSavedMaps}
                 setDatasetLabel={this.props.providerActions.setDatasetLabel}
                 setQuery={this.props.providerActions.setQuery}
-                setSessionChecked={this.props.providerActions.setSessionChecked}
-                setQueryExpanded={this.props.providerActions.setQueryExpanded}
-                setSessionExpanded={this.props.providerActions.setSessionExpanded}
-                reloadSession={this.props.providerActions.reloadSession}
+                loadSession={this.props.providerActions.loadSession}
                 selectSession={this.props.providerActions.selectSession}
                 addDataset={this.props.providerActions.addDataset}
                 testQuery={this.props.providerActions.testQuery}
@@ -410,10 +407,7 @@ export default function ModalContainerFactory(
                 onClose={this._closeModal}
                 setDatasetLabel={this.props.providerActions.setDatasetLabel}
                 setQuery={this.props.providerActions.setQuery}
-                setSessionChecked={this.props.providerActions.setSessionChecked}
-                setQueryExpanded={this.props.providerActions.setQueryExpanded}
-                setSessionExpanded={this.props.providerActions.setSessionExpanded}
-                reloadSession={this.props.providerActions.reloadSession}
+                loadSession={this.props.providerActions.loadSession}
                 selectSession={this.props.providerActions.selectSession}
                 addDataset={this.props.providerActions.addDataset}
                 initDataset={this.props.providerActions.initDataset}

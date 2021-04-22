@@ -41,6 +41,8 @@ export const ActionTypes = {
   SET_QUERY_EXPANDED: `${ACTION_PREFIX}SET_QUERY_EXPANDED`,
   SET_SESSION_EXPANDED: `${ACTION_PREFIX}SET_SESSION_EXPANDED`,
   LOAD_SESSION: `${ACTION_PREFIX}LOAD_SESSION`,
+  LOAD_SESSION_SUCCESS: `${ACTION_PREFIX}LOAD_SESSION_SUCCESS`,
+  LOAD_SESSION_ERROR: `${ACTION_PREFIX}LOAD_SESSION_ERROR`,
   RELOAD_SESSION: `${ACTION_PREFIX}RELOAD_SESSION`,
   SELECT_SESSION: `${ACTION_PREFIX}SELECT_SESSION`,
   TEST_QUERY: `${ACTION_PREFIX}TEST_QUERY`,
@@ -138,9 +140,6 @@ export const setSessionExpanded = createAction(ActionTypes.SET_SESSION_EXPANDED,
 /** @type {typeof import('./provider-actions').loadSession} */
 export const loadSession = createAction(ActionTypes.LOAD_SESSION);
 
-/** @type {typeof import('./provider-actions').reloadSession} */
-export const reloadSession = createAction(ActionTypes.RELOAD_SESSION);
-
 /** @type {typeof import('./provider-actions').selectSession} */
 export const selectSession = createAction(ActionTypes.SELECT_SESSION, id => id);
 
@@ -206,4 +205,16 @@ export const reloadDataset = (dataset, visState) => ({
 export const setDataset = (datasetKey) => ({
   type: ActionTypes.SET_DATASET,
   datasetKey
+});
+
+/** @type {typeof import('./provider-actions').loadSessionSuccess} */
+export const loadSessionSuccess = (sessions) => ({
+  type: ActionTypes.LOAD_SESSION_SUCCESS,
+  sessions
+});
+
+/** @type {typeof import('./provider-actions').loadSessionError} */
+export const loadSessionError = (error) => ({
+  type: ActionTypes.LOAD_SESSION_SUCCESS,
+  error
 });

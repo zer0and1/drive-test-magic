@@ -18,22 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import {
-  StyledExportSection,
-} from 'components/common/styled-components';
-import Switch from 'components/common/switch';
-import JqxGrid, { jqx } from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxgrid';
-import JqxExpander from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxexpander';
+import {StyledExportSection} from 'components/common/styled-components';
+import JqxGrid, {jqx} from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxgrid';
 
 import LoadingDialog from './loading-dialog';
-import { Button } from 'components/common/styled-components';
-import { FormattedMessage } from 'localization';
+import {Button} from 'components/common/styled-components';
+import {FormattedMessage} from 'localization';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
-import { Reload, Play } from 'components/common/icons';
-import { media } from 'styles/media-breakpoints';
+import {Reload, Play} from 'components/common/icons';
+import {media} from 'styles/media-breakpoints';
+
+const StyledDBSection = styled(StyledExportSection)`
+  margin: 32px 0px;
+`;
 
 const StyledInput = styled.input`
   width: 100%;
@@ -109,24 +109,16 @@ function LoadDatabaseFactory(PanelHeaderAction) {
     static propTypes = {
       setDatasetLabel: PropTypes.func.isRequired,
       setQuery: PropTypes.func.isRequired,
-      setSessionChecked: PropTypes.func.isRequired,
-      setQueryExpanded: PropTypes.func.isRequired,
-      setSessionExpanded: PropTypes.func.isRequired,
-      reloadSession: PropTypes.func.isRequired,
+      loadSession: PropTypes.func.isRequired,
       selectSession: PropTypes.func.isRequired,
       datasetLabel: PropTypes.string.isRequired,
       labelError: PropTypes.string,
       query: PropTypes.string.isRequired,
       queryError: PropTypes.string,
-      isCheckedSession: PropTypes.bool.isRequired,
-      isExpandedQuery: PropTypes.bool.isRequired,
-      isExpandedSession: PropTypes.bool.isRequired,
       isLoadingSession: PropTypes.bool.isRequired,
+      isTestingQuery: PropTypes.bool.isRequired,
       isAvailableSessionId: PropTypes.bool.isRequired,
       sessions: PropTypes.array.isRequired,
-      
-      updating: PropTypes.bool,
-      oldDataset: PropTypes.object
     };
 
     static defaultProps = {
@@ -143,20 +135,18 @@ function LoadDatabaseFactory(PanelHeaderAction) {
     _addDataset() {
       let selectedSessions = [];
       const { updating, oldDataset } = this.props;
-      if (this.props.isCheckedSession && this.refs?.sessionGrid) {
+      if (this.refs?.sessionGrid) {
         const rows = this.refs.sessionGrid.getrows();
         selectedSessions = rows.filter(row => row.selected).map(row => row.id);
       }
 
-      this.props.addDataset({ selectedSessions, updating, oldDataset });
+      this.props.addDataset({selectedSessions, updating, oldDataset});
     }
 
     render() {
       const {
-        isExpandedQuery,
-        isExpandedSession,
-        isCheckedSession,
         isLoadingSession,
+        isTestingQuery,
         isAvailableSessionId,
         datasetLabel,
         labelError,
@@ -166,13 +156,14 @@ function LoadDatabaseFactory(PanelHeaderAction) {
         queryTestResult,
         queryTestTime,
         sessions,
+        selectedSessions,
         updating
       } = this.props;
 
 
       return (
         <div style={{ marginTop: updating ? '0px' : '-50px' }}>
-          <StyledExportSection>
+          <StyledDBSection>
             <div className="description">
               <div className="title">
                 <FormattedMessage id={'modal.loadDatabase.datasetTitle'} />
@@ -189,8 +180,8 @@ function LoadDatabaseFactory(PanelHeaderAction) {
                 </StyledErrorMessage>
               )}
             </div>
-          </StyledExportSection>
-          <StyledExportSection>
+          </StyledDBSection>
+          <StyledDBSection>
             <div className="description">
               <div className="title">
                 <StyledSection width="50%">
@@ -231,56 +222,32 @@ function LoadDatabaseFactory(PanelHeaderAction) {
               </div>
             </div>
             <div className="selection">
-              <JqxExpander
-                width='100%'
-                theme="material"
-                expanded={isExpandedQuery}
-                animationType="none"
-                onExpanding={() => this.props.setQueryExpanded(true)}
-                onCollapsing={() => this.props.setQueryExpanded(false)}
-              >
-                <div>Query Editor</div>
-                <div style={{ padding: '0px', border: 'none' }}>
-                  {isLoadingSession ? <LoadingDialog size="64" height="25vh" /> : (
-                    <>
-                      <StyledTextArea rows="10" height="25vh" onChange={e => this.props.setQuery(e.target.value)} value={query} />
-                      {queryError && (
-                        <StyledErrorMessage>
-                          {queryError}
-                        </StyledErrorMessage>
-                      )}
-                    </>
-                  )}
-                </div>
-              </JqxExpander>
+              {isTestingQuery ? <LoadingDialog size="64" height="25vh" /> : (
+                <StyledTextArea rows="10" height="25vh" onChange={e => this.props.setQuery(e.target.value)} value={query} />
+              )}
+              {queryError && (
+                <StyledErrorMessage>
+                  {queryError}
+                </StyledErrorMessage>
+              )}
             </div>
-          </StyledExportSection>
+          </StyledDBSection>
           {
             isAvailableSessionId && !queryError && !queryTestError && (
-              <StyledExportSection>
+              <StyledDBSection>
                 <div className="description">
                   <div className="title">
-                    <StyledSection width="12%" height="15px" style={{ marginTop: '1px' }}>
-                      <Switch
-                        id="load-database-session"
-                        type="checkbox"
-                        checked={isCheckedSession}
-                        onChange={() => {
-                          this.props.setSessionChecked(!isCheckedSession)
-                        }}
-                      />
-                    </StyledSection>
                     <StyledSection width="50%">
                       <FormattedMessage id={'modal.loadDatabase.sessionTitle'} />
                     </StyledSection>
-                    <StyledSection width="38%" height="20px" style={{ marginTop: '2px' }}>
-                      {isCheckedSession && !isLoadingSession && (
+                    <StyledSection width="50%" height="20px" style={{ marginTop: '2px' }}>
+                      {isLoadingSession == false ? (
                         <PanelHeaderAction
                           tooltip={'tooltip.reloadSession'}
                           IconComponent={Reload}
-                          onClick={() => this.props.reloadSession()}
+                          onClick={() => this.props.loadSession()}
                         />
-                      )}
+                      ) : null}
                     </StyledSection>
                   </div>
                   <div className="subtitle">
@@ -288,57 +255,42 @@ function LoadDatabaseFactory(PanelHeaderAction) {
                   </div>
                 </div>
                 <div className="selection">
-                  {isCheckedSession && (
-                    <JqxExpander
-                      width='100%'
-                      theme="material"
-                      animationType="none"
-                      expanded={isExpandedSession}
-                      onExpanding={() => this.props.setSessionExpanded(true)}
-                      onCollapsing={() => this.props.setSessionExpanded(false)}
-                    >
-                      <div>
-                        Session Selector
+                  {isLoadingSession ? <LoadingDialog size="64" height="25vh" /> : (
+                    <div style={{ height: '25vh', width: '100%' }}>
+                      <JqxGrid
+                        ref={'sessionGrid'}
+                        width={'100%'}
+                        height={'100%'}
+                        theme={'material'}
+                        source={new jqx.dataAdapter({
+                          localdata: sessions.map(s => selectedSessions.findIndex(id => id == s.id) >= 0 ? { ...s, selected: true } : s),
+                          datatype: 'array',
+                          datafields: [
+                            { name: 'id', type: 'int' },
+                            { name: 'start_date', type: 'string' },
+                            { name: 'end_date', type: 'string' },
+                            { name: 'count', type: 'int' },
+                            { name: 'selected', type: 'boolean' }
+                          ]
+                        })}
+                        columns={[
+                          { text: 'ID', datafield: 'id', cellsalign: 'center', align: 'center', editable: false, width: '10%' },
+                          { text: 'Start Date', datafield: 'start_date', cellsalign: 'center', align: 'center', editable: false, width: '35%' },
+                          { text: 'End Date', datafield: 'end_date', align: 'center', cellsalign: 'center', editable: false, width: '35%' },
+                          { text: 'Count', datafield: 'count', cellsalign: 'center', align: 'center', editable: false, width: '15%' },
+                          { text: '✔', datafield: 'selected', columntype: 'checkbox', cellsalign: 'center', align: 'center', editable: true, width: '5%' },
+                        ]}
+                        rowsheight={30}
+                        columnsheight={25}
+                        pageable={false}
+                        sortable={true}
+                        altrows={true}
+                        editable={true}
+                      />
                     </div>
-                      <div style={{ padding: '0px', border: 'none' }}>
-                        {isLoadingSession ? <LoadingDialog size="64" height="25vh" /> : (<div style={{ height: '25vh' }}>
-                          <JqxGrid
-                            ref={'sessionGrid'}
-                            width={'100%'}
-                            height={'100%'}
-                            theme={'material'}
-                            source={new jqx.dataAdapter({
-                              localdata: sessions.map(s => this.props.selectedSessions.findIndex(id => id == s.id) >= 0 ? { ...s, selected: true } : s),
-                              datatype: 'array',
-                              datafields: [
-                                { name: 'id', type: 'int' },
-                                { name: 'startDate', type: 'string' },
-                                { name: 'endDate', type: 'string' },
-                                { name: 'count', type: 'int' },
-                                { name: 'selected', type: 'boolean' }
-                              ]
-                            })}
-                            columns={[
-                              { text: 'ID', datafield: 'id', cellsalign: 'center', align: 'center', editable: false, width: '10%' },
-                              { text: 'Start Date', datafield: 'startDate', cellsalign: 'center', align: 'center', editable: false, width: '35%' },
-                              { text: 'End Date', datafield: 'endDate', align: 'center', cellsalign: 'center', editable: false, width: '35%' },
-                              { text: 'Count', datafield: 'count', cellsalign: 'center', align: 'center', editable: false, width: '15%' },
-                              { text: '✔', datafield: 'selected', columntype: 'checkbox', cellsalign: 'center', align: 'center', editable: true, width: '5%' },
-                            ]}
-                            rowsheight={30}
-                            columnsheight={25}
-                            pageable={false}
-                            sortable={true}
-                            altrows={true}
-                            editable={true}
-                          />
-                        </div>
-                        )}
-                      </div>
-                    </JqxExpander>
                   )}
                 </div>
-              </StyledExportSection>
+              </StyledDBSection>
             )
           }
           <StyledModalFooter>

@@ -48,7 +48,8 @@ import {
   GQL_INSERT_DATASET,
   GQL_GET_DATASETS,
   GQL_UPDATE_DATASET,
-  GQL_DELETE_DATASET
+  GQL_DELETE_DATASET,
+  GQL_GET_SESSIONS
 } from 'graphqls';
 
 import {
@@ -65,6 +66,8 @@ import {
   testQuerySuccess,
   testQueryError,
   loadSession,
+  loadSessionSuccess,
+  loadSessionError,
   registerDataset,
   registerDatasetSuccess,
   registerDatasetError,
@@ -73,9 +76,12 @@ import {
   updateDataset,
   updateDatasetSuccess,
   updateDatasetError,
+  reloadDataset,
   loadDatasetSuccess,
   loadDatasetError,
-} from '../actions/provider-actions';
+} from 'actions/provider-actions';
+import {startReloadingDataset} from 'actions/vis-state-actions';
+
 import _ from 'lodash';
 import moment from 'moment';
 import {
@@ -98,9 +104,7 @@ export const INITIAL_SESSION_STATE = {
   datasetId: '',
   isCheckedSession: false,
   isLoadingSession: false,
-  isTestedQuery: false,
-  isExpandedQuery: true,
-  isExpandedSession: false,
+  isTestingQuery: false,
   isAvailableSessionId: false,
   isRegistering: false,
   isUnregistering: false,
@@ -531,74 +535,6 @@ export const setQueryUpdater = (state, { payload: query }) => {
   };
 };
 
-export const setSessionCheckedUpdater = (state, { payload: checked }) => {
-  const newState = {
-    ...state,
-    isCheckedSession: checked,
-    isExpandedQuery: !checked,
-    isExpandedSession: checked,
-  };
-
-  if (checked) {
-    if (state.queryError || state.query == '') {
-      return {
-        ...state,
-        queryError: 'Please complete query without errors.'
-      };
-    }
-    else if (!state.isAvailableSessionId) {
-      return {
-        ...state,
-        queryError: "Current query doesn't contain session_id field. In order to choose sessions, please insert session_id field if exists."
-      };
-    }
-    else if (!state.queryTestResult) {
-      return withTask(newState, createActionTask(testQuery, { nextAction: loadSession }));
-    }
-    else {
-      return withTask(newState, createActionTask(loadSession, null));
-    }
-  }
-  else if (!state.queryTestResult) {
-    return withTask(newState, createActionTask(testQuery));
-  }
-
-  return newState;
-};
-
-export const setQueryExpandedUpdater = (state, { payload: expanded }) => {
-  return {
-    ...state,
-    isExpandedQuery: expanded,
-    isExpandedSession: expanded ? false : state.isExpandedSession
-  };
-};
-
-export const setSessionExpandedUpdater = (state, { payload: expanded }) => {
-  const newState = {
-    ...state,
-    isExpandedSession: expanded,
-    isExpandedQuery: expanded ? false : state.isExpandedQuery
-  };
-  const {collections} = state;
-
-  if (expanded && !state.queryTestResult) {
-    for(let key in state.collections) {
-      if (collections[key].query == state.query && collections[key].queryTestResult) {
-        return loadSessionUpdater({
-          ...newState,
-          queryTestResult: collections[key].queryTestResult,
-          queryTestTime: collections[key].queryTestTime
-        });
-      }
-    }
-
-    return withTask(newState, createActionTask(testQuery, { nextAction: loadSession }));
-  }
-
-  return newState;
-};
-
 export const selectSessionUpdater = (state, { payload: id }) => {
   return {
     ...state,
@@ -607,38 +543,30 @@ export const selectSessionUpdater = (state, { payload: id }) => {
 };
 
 export const loadSessionUpdater = (state) => {
-  let sessions = [];
-  const groups = _.groupBy(state.queryTestResult, 'session_id');
-
-  for (let id in groups) {
-    const group = groups[id];
-    const startDate = moment(_.minBy(group, o => moment(o.date).valueOf()).date).format('YYYY-MM-DD HH:mm:ss');
-    const endDate = moment(_.maxBy(group, o => moment(o.date).valueOf()).date).format('YYYY-MM-DD HH:mm:ss');
-    const count = group.length;
-    sessions.push({ id, startDate, endDate, count, selected: false });
-  }
-
-  sessions = _.orderBy(sessions, o => parseInt(o.id), 'desc');
-
-  return {
-    ...state,
-    sessions
-  };
-};
-
-export const reloadSessionUpdater = (state) => {
+  const query = GQL_GET_SESSIONS();
+  const task = GRAPHQL_QUERY_TASK({query}).bimap(
+    res => loadSessionSuccess(res.data.signal_db_sessions_view),
+    err => loadSessionError(err)
+  );
   const newState = {
     ...state,
-    isExpandedSession: true,
-    isExpandedQuery: false
+    isLoadingSession: true
   };
 
-  if (state.queryTestResult) {
-    return loadSessionUpdater(state);
-  }
-
-  return withTask(newState, createActionTask(testQuery, { nextAction: loadSession }));
+  return withTask(newState, task);
 };
+
+export const loadSessionSuccessUpdater = (state, {sessions}) => ({
+  ...state,
+  isLoadingSession: false,
+  sessions
+});
+
+export const loadSessionErrorUpdater = (state, {error}) => ({
+  ...state,
+  isLoadingSession: false,
+  error
+});
 
 export const testQueryUpdater = (state, { payload: { nextAction, payload } }) => {
   const query = gql(state.query);
@@ -651,7 +579,10 @@ export const testQueryUpdater = (state, { payload: { nextAction, payload } }) =>
     },
     err => testQueryError(err)
   );
-  const newState = { ...state, isLoadingSession: true };
+  const newState = {
+    ...state,
+    isTestingQuery: true
+  };
 
   return withTask(newState, queryTask);
 };
@@ -659,45 +590,51 @@ export const testQueryUpdater = (state, { payload: { nextAction, payload } }) =>
 export const testQuerySuccessUpdater = (state, { payload: { data, nextAction, payload, queryTestTime } }) => {
   const newState = {
     ...state,
-    isLoadingSession: false,
+    isTestingQuery: false,
     queryTestResult: data,
     queryTestTime,
     queryTestError: null
   };
 
-  const tasks = [
-    nextAction && createActionTask(nextAction, payload),
-    createActionTask(loadSession, null)
+  const task = [
+    nextAction && createActionTask(nextAction, payload)
   ].filter(d => d);
 
-  return withTask(newState, tasks);
+  return withTask(newState, task);
 };
 
 export const testQueryErrorUpdater = (state, { payload: error }) => {
   return {
     ...state,
-    isLoadingSession: false,
+    isTestingQuery: false,
     queryTestError: error.message,
     queryTestResult: null
   };
 };
 
 export const addDatasetUpdater = (state, { payload: { selectedSessions, updating, oldDataset } }) => {
-  if (state.datasetLabel == '') {
+  const {
+    query, 
+    queryTestResult,
+    queryError,
+    datasetLabel,
+  } = state;
+
+  if (datasetLabel == '') {
     return {
       ...state,
       labelError: 'Please fill the dataset label'
     };
   }
 
-  if (state.queryError || !state.query) {
+  if (queryError || !query) {
     return {
       ...state,
       queryError: 'Please complete query without errors'
     }
   }
 
-  if (!state.queryTestResult && (!updating || updating && (oldDataset.query != state.query))) {
+  if (!queryTestResult && (!updating || updating && (oldDataset.query != query))) {
     return {
       ...state,
       queryTestError: 'Please run the query successfully'
@@ -715,17 +652,18 @@ export const addDatasetUpdater = (state, { payload: { selectedSessions, updating
       ...map,
       datasets: {
         info: {
-          id: oldDataset.id,
           label: state.datasetLabel,
           query: state.query,
-          type: oldDataset.type,
-          color: oldDataset.color,
+          sessions: selectedSessions,
+          id: oldDataset.id,
           enabled: oldDataset.enabled,
-          timestamp: oldDataset.timestamp
+          timestamp: oldDataset.timestamp,
+          type: oldDataset.type
         }
       }
     };
   }
+  // when creating a new dataset
   else {
     map = {
       ...map,
@@ -737,39 +675,28 @@ export const addDatasetUpdater = (state, { payload: { selectedSessions, updating
           query: state.query,
           sessions: selectedSessions,
           enabled: true,
-          timestamp: moment().valueOf()
+          timestamp: moment().valueOf(),
+          sessions: selectedSessions
         }
       }
     };
   }
 
-  const { query, queryTestResult, isCheckedSession } = state;
-
-  if (updating && oldDataset.query == query) {
-    const sessions = isCheckedSession ? (selectedSessions ? selectedSessions : oldDataset.sessions) : [];
-
+  if (updating) {
     if (queryTestResult) {
       map.datasets.data = makeDataset(query, queryTestResult, selectedSessions);
       map.datasets.info.timestamp = moment().valueOf();
     }
-    else {
-      const fields = oldDataset.fields;
-      const sessionIdx = oldDataset.fields.findIndex(f => f.name == 'session_id');
-      const rows = filterWithList(oldDataset.allData, sessionIdx, sessions);
-      map.datasets.data = { fields, rows };
-    }
-
-    map.datasets.info.sessions = sessions;
   }
   else {
-    map.datasets.info.sessions = selectedSessions;
     map.datasets.data = makeDataset(query, queryTestResult, selectedSessions);
   }
 
   const tasks = [
     createActionTask(addDataToMap, map),
+    updating && !queryTestResult && createActionTask(reloadDataset, {...oldDataset, ...map.datasets.info}),
     createActionTask(updating ? updateDataset : registerDataset, map.datasets.info)
-  ];
+  ].filter(d => d);
 
   return withTask(state, tasks);
 };
@@ -863,16 +790,19 @@ export const updateDatasetErrorUpdater = (state, { payload: info }) => {
 
 export const loadDatasetUpdater = (state) => {
   const query = GQL_GET_DATASETS();
-  const loadDatasetTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
-    result => loadDatasetSuccess(result.data.signal_db_datasets),
-    error => loadDatasetError(error)
-  );
+  const tasks = [
+    ACTION_TASK().map(_ => loadSession()),
+    GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
+      result => loadDatasetSuccess(result.data.signal_db_datasets),
+      error => loadDatasetError(error)
+    )
+  ];
   const newState = {
     ...state,
     isLoadingDataset: true
   };
 
-  return withTask(newState, loadDatasetTask);
+  return withTask(newState, tasks);
 };
 
 export const loadDatasetSuccessUpdater = (state, { payload: datasets }) => {
