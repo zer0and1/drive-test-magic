@@ -202,9 +202,9 @@ export const reloadDataset = (dataset, visState) => ({
 });
 
 /** @type {typeof import('./provider-actions').setDataset} */
-export const setDataset = (datasetKey) => ({
+export const setDataset = (dataset) => ({
   type: ActionTypes.SET_DATASET,
-  datasetKey
+  dataset
 });
 
 /** @type {typeof import('./provider-actions').loadSessionSuccess} */

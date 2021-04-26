@@ -27,7 +27,15 @@ import xor from 'lodash.xor';
 import copy from 'copy-to-clipboard';
 import {parseFieldValue} from 'utils/data-utils';
 // Tasks
-import {LOAD_FILE_TASK, UNWRAP_TASK, PROCESS_FILE_DATA, DELAY_TASK, ACTION_TASK} from 'tasks/tasks';
+import {
+  LOAD_FILE_TASK, 
+  UNWRAP_TASK, 
+  PROCESS_FILE_DATA, 
+  DELAY_TASK, 
+  ACTION_TASK,
+  GRAPHQL_QUERY_TASK,
+  GRAPHQL_MUTATION_TASK
+} from 'tasks/tasks';
 // Actions
 import {
   loadFilesErr,
@@ -78,16 +86,24 @@ import {Layer, LayerClasses, LAYER_ID_LENGTH} from 'layers';
 import {DEFAULT_TEXT_LABEL} from 'layers/layer-factory';
 import {EDITOR_MODES, SORT_ORDER, AGGREGATION_TYPES, REPORT_TYPES} from 'constants/default-settings';
 import {pick_, merge_} from './composer-helpers';
-import {processFileContent, removeLayer} from 'actions/vis-state-actions';
+import {processFileContent, removeLayer, onMouseMove, startReloadingDataset} from 'actions/vis-state-actions';
 
 import KeplerGLSchema from 'schemas';
-import {updateDataset, reloadDataset} from 'actions/provider-actions';
 import {applyProfile} from 'actions/map-profile-actions';
-import {onMouseMove} from '../actions';
+import {toggleModal} from 'actions/ui-state-actions';
 
 import {aggregate} from 'utils/aggregate-utils';
 import {notNullorUndefined} from 'utils/data-utils';
 import _ from 'lodash';
+import {addDataToMap} from 'actions/actions';
+import {
+  extractOperation,
+  restrictSession,
+  makeDataset
+} from 'utils/gql-utils';
+import moment from 'moment';
+import {gql} from '@apollo/client';
+import {GQL_UPDATE_DATASET} from 'graphqls';
 
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
@@ -2150,18 +2166,24 @@ export function removeMarkerUpdater(state, { id }) {
 export function enableDatasetUpdater(state, { datasetKey }) {
   const dataset = state.datasets[datasetKey];
   dataset.enabled = !dataset.enabled;
-  const { enabled, id, allData } = dataset;
-  const shouldReloadDataset = enabled && allData.length == 0;
-  const shouldApplyProfile = enabled && allData.length;
-  const shouldRemoveLayers = !enabled;
+  const {enabled, id, allData, label, sessions, query, type} = dataset;
+  const mutation = GQL_UPDATE_DATASET();
+  const updateTask = GRAPHQL_MUTATION_TASK({
+    variables: {id, label, query, sessions, type, enabled},
+    mutation
+  });
+  let tasks = [updateTask];
 
-  let tasks = [
-    shouldReloadDataset && ACTION_TASK().map(_ => reloadDataset(dataset)),
-    shouldApplyProfile && ACTION_TASK().map(_ => applyProfile(localStorage.getItem('default_profile_id'), { visState: state }, { centerMap: false })),
-    ACTION_TASK().map(_ => updateDataset({ ...dataset, reloading: shouldReloadDataset })),
-  ].filter(d => d);
-
-  if (shouldRemoveLayers) {
+  if (enabled) {
+    if (allData.length) {
+      const profileId = localStorage.getItem('default_profile_id');
+      tasks =  [...tasks, ACTION_TASK().map(_ => applyProfile(profileId, {visState: state}, {centerMap: false}))];
+    }
+    else {
+      tasks =  [...tasks, ACTION_TASK().map(_ => startReloadingDataset(datasetKey))];
+    }
+  }
+  else {
     const layersToRemove = state.layers.filter(layer => layer.config.dataId == id);
     const idxsToRemove = [];
     layersToRemove.reduce((remainedLayers, layer) => {
@@ -2192,15 +2214,41 @@ export function enableDatasetUpdater(state, { datasetKey }) {
 };
 
 export function startReloadingDatasetUpdater(state, { datasetKey }) {
-  const dataset = state.datasets[datasetKey];
-  const task = ACTION_TASK().map(_ => reloadDataset(dataset));
+  const dataset = typeof datasetKey == 'object' ? datasetKey : state.datasets[datasetKey];
+  const oldDataset = state.datasets[dataset.id];
+  const { query: qstr, sessions } = dataset;
+  const shouldReload = typeof datasetKey == 'string' 
+    || oldDataset.query != qstr 
+    || JSON.stringify(oldDataset.sessions) != JSON.stringify(sessions);
+
+  const query = gql(restrictSession(qstr, sessions));
+  const reloadTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).map(
+    result => addDataToMap({
+      datasets: {
+        info: {
+          ...dataset,
+          reloading: false,
+          timestamp: moment().valueOf()
+        },
+        data: makeDataset(query, result.data[extractOperation(query)], sessions)
+      },
+      options: {
+        keepExistingConfig: true,
+        centerMap: false,
+        autoCreateLayers: false
+      }
+    })
+  );
+  const closeModalTask = ACTION_TASK().map(_ => toggleModal(null));
+  const task = shouldReload ? reloadTask : closeModalTask;
+
   const newState = {
     ...state,
     datasets: {
       ...state.datasets,
-      [datasetKey]: {
+      [dataset.id]: {
         ...dataset,
-        reloading: dataset.enabled
+        reloading: shouldReload && dataset.enabled
       }
     }
   };

@@ -104,6 +104,60 @@ const FooterActionWrapper = styled.div`
 
 LoadDatabaseFactory.deps = [PanelHeaderActionFactory];
 
+class SessionGrid extends Component {
+  componentDidMount() {
+    this._mounted = true;
+  }
+
+  componentWillUnmount() {
+    this._mounted = false;
+  }
+
+  shouldComponentUpdate() {
+    return !this._mounted;
+  }
+
+  render() {
+    return (
+      <JqxGrid
+        ref={'sessionGrid'}
+        width={'100%'}
+        height={'100%'}
+        theme={'material'}
+        source={new jqx.dataAdapter({
+          localdata: this.props.sessions,
+          datatype: 'array',
+          datafields: [
+            { name: 'id', type: 'int' },
+            { name: 'start_date', type: 'string' },
+            { name: 'end_date', type: 'string' },
+            { name: 'count', type: 'int' },
+            { name: 'selected', type: 'boolean' }
+          ]
+        })}
+        columns={[
+          { text: 'ID', datafield: 'id', cellsalign: 'center', align: 'center', editable: false, width: '10%' },
+          { text: 'Start Date', datafield: 'start_date', cellsalign: 'center', align: 'center', editable: false, width: '35%' },
+          { text: 'End Date', datafield: 'end_date', align: 'center', cellsalign: 'center', editable: false, width: '35%' },
+          { text: 'Count', datafield: 'count', cellsalign: 'center', align: 'center', editable: false, width: '15%' },
+          { text: '✔', datafield: 'selected', columntype: 'checkbox', cellsalign: 'center', align: 'center', editable: true, width: '5%',
+            cellvaluechanging: ((row) => {
+              const rowdata = this.refs.sessionGrid.getrowdata(row);
+              this.props.selectSession(rowdata.id);
+            }).bind(this)
+          },
+        ]}
+        rowsheight={30}
+        columnsheight={25}
+        pageable={false}
+        sortable={true}
+        altrows={true}
+        editable={true}
+      />
+    );
+  }
+}
+
 function LoadDatabaseFactory(PanelHeaderAction) {
   class LoadDatabase extends Component {
     static propTypes = {
@@ -123,24 +177,15 @@ function LoadDatabaseFactory(PanelHeaderAction) {
 
     static defaultProps = {
       updating: false,
-      oldDataset: {}
     };
 
-    componentDidMount() {
+    _onConfirmButtonClick() {
       if (this.props.updating) {
-        this.props.initDataset(this.props.oldDataset);
+        this.props.updateDataset();
       }
-    }
-
-    _addDataset() {
-      let selectedSessions = [];
-      const { updating, oldDataset } = this.props;
-      if (this.refs?.sessionGrid) {
-        const rows = this.refs.sessionGrid.getrows();
-        selectedSessions = rows.filter(row => row.selected).map(row => row.id);
+      else {
+        this.props.addDataset();
       }
-
-      this.props.addDataset({selectedSessions, updating, oldDataset});
     }
 
     render() {
@@ -156,7 +201,6 @@ function LoadDatabaseFactory(PanelHeaderAction) {
         queryTestResult,
         queryTestTime,
         sessions,
-        selectedSessions,
         updating
       } = this.props;
 
@@ -257,36 +301,7 @@ function LoadDatabaseFactory(PanelHeaderAction) {
                 <div className="selection">
                   {isLoadingSession ? <LoadingDialog size="64" height="25vh" /> : (
                     <div style={{ height: '25vh', width: '100%' }}>
-                      <JqxGrid
-                        ref={'sessionGrid'}
-                        width={'100%'}
-                        height={'100%'}
-                        theme={'material'}
-                        source={new jqx.dataAdapter({
-                          localdata: sessions.map(s => selectedSessions.findIndex(id => id == s.id) >= 0 ? { ...s, selected: true } : s),
-                          datatype: 'array',
-                          datafields: [
-                            { name: 'id', type: 'int' },
-                            { name: 'start_date', type: 'string' },
-                            { name: 'end_date', type: 'string' },
-                            { name: 'count', type: 'int' },
-                            { name: 'selected', type: 'boolean' }
-                          ]
-                        })}
-                        columns={[
-                          { text: 'ID', datafield: 'id', cellsalign: 'center', align: 'center', editable: false, width: '10%' },
-                          { text: 'Start Date', datafield: 'start_date', cellsalign: 'center', align: 'center', editable: false, width: '35%' },
-                          { text: 'End Date', datafield: 'end_date', align: 'center', cellsalign: 'center', editable: false, width: '35%' },
-                          { text: 'Count', datafield: 'count', cellsalign: 'center', align: 'center', editable: false, width: '15%' },
-                          { text: '✔', datafield: 'selected', columntype: 'checkbox', cellsalign: 'center', align: 'center', editable: true, width: '5%' },
-                        ]}
-                        rowsheight={30}
-                        columnsheight={25}
-                        pageable={false}
-                        sortable={true}
-                        altrows={true}
-                        editable={true}
-                      />
+                      <SessionGrid sessions={sessions} selectSession={this.props.selectSession} />
                     </div>
                   )}
                 </div>
@@ -298,7 +313,10 @@ function LoadDatabaseFactory(PanelHeaderAction) {
               <Button className="modal--footer--cancel-button" link onClick={this.props.onClose}>
                 <FormattedMessage id={'modal.button.defaultCancel'} />
               </Button>
-              <Button className="modal--footer--confirm-button" onClick={this._addDataset.bind(this)} >
+              <Button 
+                className="modal--footer--confirm-button" 
+                onClick={this._onConfirmButtonClick.bind(this)} 
+              >
                 {updating ? (
                   <FormattedMessage id={'modal.button.update'} />
                 ) : (

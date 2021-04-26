@@ -30,9 +30,8 @@ import {
   GRAPHQL_QUERY_TASK,
   GRAPHQL_MUTATION_TASK
 } from 'tasks/tasks';
-import { removeNotification, toggleModal, addNotification } from 'actions/ui-state-actions';
-import { applyProfile } from 'actions/map-profile-actions';
-import { addDataToMap } from 'actions/actions';
+import {removeNotification, toggleModal, addNotification} from 'actions/ui-state-actions';
+import {addDataToMap} from 'actions/actions';
 import {
   DEFAULT_NOTIFICATION_TYPES,
   DEFAULT_NOTIFICATION_TOPICS,
@@ -40,10 +39,10 @@ import {
   DATASET_TYPES,
   OVERWRITE_MAP_ID
 } from 'constants/default-settings';
-import { toArray } from 'utils/utils';
-import { FILE_CONFLICT_MSG } from 'cloud-providers';
-import { DATASET_HANDLERS } from 'processors/data-processor';
-import { gql } from '@apollo/client';
+import {toArray} from 'utils/utils';
+import {FILE_CONFLICT_MSG} from 'cloud-providers';
+import {DATASET_HANDLERS} from 'processors/data-processor';
+import {gql} from '@apollo/client';
 import {
   GQL_INSERT_DATASET,
   GQL_GET_DATASETS,
@@ -62,7 +61,6 @@ import {
   loadCloudMapError,
   resetProviderStatus,
 
-  testQuery,
   testQuerySuccess,
   testQueryError,
   loadSession,
@@ -73,10 +71,8 @@ import {
   registerDatasetError,
   unregisterDatasetSuccess,
   unregisterDatasetError,
-  updateDataset,
   updateDatasetSuccess,
   updateDatasetError,
-  reloadDataset,
   loadDatasetSuccess,
   loadDatasetError,
 } from 'actions/provider-actions';
@@ -88,7 +84,6 @@ import {
   extractFields,
   extractOperation,
   restrictSession,
-  filterWithList,
   makeDataset
 } from '../utils/gql-utils';
 
@@ -110,7 +105,7 @@ export const INITIAL_SESSION_STATE = {
   isUnregistering: false,
   isUpdating: false,
   isLoadingDataset: false,
-  selectedSessions: []
+  sessionIds: []
 };
 
 export const INITIAL_PROVIDER_STATE = {
@@ -121,7 +116,7 @@ export const INITIAL_PROVIDER_STATE = {
   successInfo: {},
   mapSaved: null,
   visualizations: [],
-  datasetKey: null,
+  dataset: null,
   collections: {},
   ...INITIAL_SESSION_STATE
 };
@@ -536,9 +531,11 @@ export const setQueryUpdater = (state, { payload: query }) => {
 };
 
 export const selectSessionUpdater = (state, { payload: id }) => {
+  const sessions = state.sessions.map(s => s.id == id ? { ...s, selected: !s.selected } : s);
   return {
     ...state,
-    sessions: state.sessions.map(s => s.id == id ? { ...s, selected: !s.selected } : s)
+    sessionIds: sessions.filter(s => s.selected).map(s => s.id),
+    sessions
   };
 };
 
@@ -559,7 +556,11 @@ export const loadSessionUpdater = (state) => {
 export const loadSessionSuccessUpdater = (state, {sessions}) => ({
   ...state,
   isLoadingSession: false,
-  sessions
+  sessions: sessions.map(s => ({
+    ...s,
+    start_date: moment(s.start_date).format('YYYY-MM-DD HH:mm:ss'),
+    end_date: moment(s.end_date).format('YYYY-MM-DD HH:mm:ss')
+  }))
 });
 
 export const loadSessionErrorUpdater = (state, {error}) => ({
@@ -569,7 +570,7 @@ export const loadSessionErrorUpdater = (state, {error}) => ({
 });
 
 export const testQueryUpdater = (state, { payload: { nextAction, payload } }) => {
-  const query = gql(state.query);
+  const query = gql(restrictSession(state.query, state.sessionIds));
   const startTime = new Date();
   const queryTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).bimap(
     res => {
@@ -612,12 +613,13 @@ export const testQueryErrorUpdater = (state, { payload: error }) => {
   };
 };
 
-export const addDatasetUpdater = (state, { payload: { selectedSessions, updating, oldDataset } }) => {
+export const addDatasetUpdater = (state) => {
   const {
     query, 
     queryTestResult,
     queryError,
     datasetLabel,
+    sessionIds
   } = state;
 
   if (datasetLabel == '') {
@@ -634,81 +636,126 @@ export const addDatasetUpdater = (state, { payload: { selectedSessions, updating
     }
   }
 
-  if (!queryTestResult && (!updating || updating && (oldDataset.query != query))) {
+  if (queryTestResult == null) {
+    return {
+      ...state,
+      queryTestError: 'Please run the query successfully'
+    }
+  }
+  const datasetInfo = {
+    type: DATASET_TYPES.database,
+    label: datasetLabel,
+    id: generateHashId(),
+    query: query,
+    sessions: sessionIds,
+    enabled: true
+  };
+  const mapInfo = {
+    datasets: {
+      info: {
+        ...datasetInfo,
+        timestamp: moment().valueOf()
+      },
+      data: makeDataset(query, queryTestResult, sessionIds)
+    },
+    options: {
+      autoCreateLayers: false
+    }
+  };
+
+  const tasks = [
+    createActionTask(addDataToMap, mapInfo),
+    createActionTask(registerDataset, datasetInfo)
+  ].filter(d => d);
+
+  return withTask(state, tasks);
+};
+
+export const updateDatasetUpdater = (state) => {
+  const {
+    query, 
+    queryTestResult,
+    queryError,
+    datasetLabel: label,
+    dataset,
+    sessionIds
+  } = state;
+
+  if (label == '') {
+    return {
+      ...state,
+      labelError: 'Please fill the dataset label'
+    };
+  }
+
+  if (queryError || !query) {
+    return {
+      ...state,
+      queryError: 'Please complete query without errors'
+    }
+  }
+
+  if (queryTestResult == null && query != dataset.query) {
     return {
       ...state,
       queryTestError: 'Please run the query successfully'
     }
   }
 
-  let map = {
-    options: {
-      autoCreateLayers: false
-    }
+  const datasetInfo = {
+    id: dataset.id,
+    enabled: dataset.enabled,
+    type: dataset.type,
+    query,
+    label,
+    sessions: [...sessionIds]
   };
 
-  if (updating) {
-    map = {
-      ...map,
-      datasets: {
-        info: {
-          label: state.datasetLabel,
-          query: state.query,
-          sessions: selectedSessions,
-          id: oldDataset.id,
-          enabled: oldDataset.enabled,
-          timestamp: oldDataset.timestamp,
-          type: oldDataset.type
-        }
-      }
-    };
-  }
-  // when creating a new dataset
-  else {
-    map = {
-      ...map,
-      datasets: {
-        info: {
-          type: DATASET_TYPES.database,
-          label: state.datasetLabel,
-          id: generateHashId(),
-          query: state.query,
-          sessions: selectedSessions,
-          enabled: true,
-          timestamp: moment().valueOf(),
-          sessions: selectedSessions
-        }
-      }
-    };
-  }
-
-  if (updating) {
-    if (queryTestResult) {
-      map.datasets.data = makeDataset(query, queryTestResult, selectedSessions);
-      map.datasets.info.timestamp = moment().valueOf();
-    }
-  }
-  else {
-    map.datasets.data = makeDataset(query, queryTestResult, selectedSessions);
-  }
-
-  const tasks = [
-    createActionTask(addDataToMap, map),
-    updating && !queryTestResult && createActionTask(reloadDataset, {...oldDataset, ...map.datasets.info}),
-    createActionTask(updating ? updateDataset : registerDataset, map.datasets.info)
-  ].filter(d => d);
-
-  return withTask(state, tasks);
-};
-
-export const registerDatasetUpdater = (state, { payload: info }) => {
-  const {id, type, label, enabled, query, sessions} = info;
-  const mutation = GQL_INSERT_DATASET();
-  const insertDatasetTask = GRAPHQL_MUTATION_TASK({
-    variables: {id, type, label, enabled, query, sessions},
+  const newState = {
+    ...state,
+    dataset: {
+      ...dataset,
+      ...datasetInfo,
+      info: {...datasetInfo}
+    },
+    isUpdating: true
+  };
+  
+  const mutation = GQL_UPDATE_DATASET();
+  const updateTask = GRAPHQL_MUTATION_TASK({
+    variables: datasetInfo,
     mutation
   }).bimap(
-    res => registerDatasetSuccess(info),
+    _ => updateDatasetSuccess(),
+    err => updateDatasetError(err)
+  );
+  const tasks = [
+    createActionTask(toggleModal, null),
+    createActionTask(startReloadingDataset, newState.dataset),
+    updateTask
+  ].filter(d => d);
+
+
+  return withTask(newState, tasks);
+};
+
+export const updateDatasetSuccessUpdater = (state) => ({
+  ...state,
+  isUpdateing: false,
+});
+
+export const updateDatasetErrorUpdater = (state) => ({
+  ...state,
+  isUpdateing: false
+});
+
+export const registerDatasetUpdater = (state, { payload: datasetInfo }) => {
+  const mutation = GQL_INSERT_DATASET();
+  const insertDatasetTask = GRAPHQL_MUTATION_TASK({
+    variables: datasetInfo, // {id, type, label, enabled, query, sessions}
+    mutation
+  }).bimap(
+    _ => registerDatasetSuccess(datasetInfo),
     err => registerDatasetError(err)
   );
   const newState = { ...state, isRegistering: true };
@@ -757,34 +804,6 @@ export const unregisterDatasetErrorUpdater = (state, { payload: error }) => {
     ...state,
     isUnregistering: false,
     error
-  };
-};
-
-export const updateDatasetUpdater = (state, { payload: { id, label, query, type, sessions, enabled } }) => {
-  const mutation = GQL_UPDATE_DATASET();
-  const updateDatasetTask = GRAPHQL_MUTATION_TASK({
-    variables: { id, label, query, type, sessions, enabled },
-    mutation
-  }).bimap(
-    res => updateDatasetSuccess(res),
-    err => updateDatasetError(err)
-  );
-  const newState = { ...state, isUpdateing: true };
-
-  return withTask(newState, updateDatasetTask);
-};
-
-export const updateDatasetSuccessUpdater = (state, { payload: info }) => {
-  return {
-    ...state,
-    isUpdateing: false
-  };
-};
-
-export const updateDatasetErrorUpdater = (state, { payload: info }) => {
-  return {
-    ...state,
-    isUpdateing: false
   };
 };
 
@@ -866,23 +885,10 @@ export const loadDatasetErrorUpdater = (state, { payload: error }) => {
   };
 };
 
-export const initDatasetUpdater = (state, { payload: oldDataset }) => {
-  const { query, sessions, label } = oldDataset;
-
-  return {
-    ...state,
-    query,
-    datasetLabel: label,
-    selectedSessions: sessions,
-    isCheckedSession: sessions.length > 0,
-    isAvailableSessionId: checkSessionId(query)
-  };
-};
-
-export const reloadDatasetUpdater = (state, { dataset, visState }) => {
+export const reloadDatasetUpdater = (state, { dataset }) => {
   const { query: qstr, sessions } = dataset;
   const query = gql(restrictSession(qstr, sessions));
-  const loadTask = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).map(
+  const task = GRAPHQL_QUERY_TASK({ query, fetchPolicy: 'network-only' }).map(
     result => {
       const data = makeDataset(query, result.data[extractOperation(query)], sessions);
       return addDataToMap({
@@ -902,26 +908,23 @@ export const reloadDatasetUpdater = (state, { dataset, visState }) => {
       });
     }
   );
-  const profileTask = visState && ACTION_TASK().map(_ => applyProfile(null, visState, {}));
-  const tasks = [loadTask, profileTask].filter(d => d);
 
-  return withTask(state, tasks);
+  return withTask(state, task);
 };
 
-export const setDatasetUpdater = (state, {datasetKey}) => ({
+export const setDatasetUpdater = (state, {dataset}) => ({
   ...state,
-  datasetKey,
-  collections: {
-    ...state.collections,
-    ...(state.datasetKey ? {
-      [state.datasetKey]: Object.keys(INITIAL_SESSION_STATE).reduce((acc, key) => ({
-        ...acc,
-        [key]: state[key]
-      }), {})
-    } : {})
-  },
-  ...(state.collections[datasetKey] ? Object.keys(INITIAL_SESSION_STATE).reduce((acc, key) => ({
-    ...acc,
-    [key]: state.collections[datasetKey][key]
-  }), {}) : {})
+  dataset,
+  query: dataset.query,
+  datasetLabel: dataset.label,
+  queryTestResult: null,
+  queryError: null,
+  queryTestError: null,
+  queryTestTime: 0,
+  sessions: state.sessions.map(s => ({
+    ...s,
+    selected: dataset.sessions.find(sid => sid == s.id) ? true : false
+  })),
+  sessionIds: dataset.sessions,
+  isAvailableSessionId: checkSessionId(dataset.query)
 });

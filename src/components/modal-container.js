@@ -383,6 +383,7 @@ export default function ModalContainerFactory(
                 loadSession={this.props.providerActions.loadSession}
                 selectSession={this.props.providerActions.selectSession}
                 addDataset={this.props.providerActions.addDataset}
+                updateDataset={this.props.providerActions.updateDataset}
                 testQuery={this.props.providerActions.testQuery}
                 loadFiles={uiState.loadFiles}
                 fileLoading={visState.fileLoading}
@@ -410,6 +411,7 @@ export default function ModalContainerFactory(
                 loadSession={this.props.providerActions.loadSession}
                 selectSession={this.props.providerActions.selectSession}
                 addDataset={this.props.providerActions.addDataset}
+                updateDataset={this.props.providerActions.updateDataset}
                 initDataset={this.props.providerActions.initDataset}
                 testQuery={this.props.providerActions.testQuery}
               />

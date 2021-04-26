@@ -172,7 +172,7 @@ export default function SidePanelFactory(
     };
 
     _setupDataset = key => {
-      this.props.providerActions.setDataset(key);
+      this.props.providerActions.setDataset(this.props.datasets[key]);
       this.props.uiStateActions.openDatasetModal(key);
     };
 
