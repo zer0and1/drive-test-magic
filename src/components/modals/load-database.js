@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component} from 'react';
+import React, {Component, createRef} from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {StyledExportSection} from 'components/common/styled-components';
@@ -28,7 +28,7 @@ import LoadingDialog from './loading-dialog';
 import {Button} from 'components/common/styled-components';
 import {FormattedMessage} from 'localization';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
-import {Reload, Play} from 'components/common/icons';
+import {Reload, Play, Delete} from 'components/common/icons';
 import {media} from 'styles/media-breakpoints';
 
 const StyledDBSection = styled(StyledExportSection)`
@@ -72,6 +72,13 @@ const StyledSection = styled.div`
   white-space: nowrap;
   width: ${props => props.width};
   height: ${props => props.height ? props.height : 'fit-content'};
+`;
+
+const SessionSection = styled(StyledSection)`
+  width: 50%;
+  height: 20px;
+  margin-top: 2px;
+  display: flex;
 `;
 
 const StyledErrorMessage = styled.div`
@@ -284,15 +291,27 @@ function LoadDatabaseFactory(PanelHeaderAction) {
                     <StyledSection width="50%">
                       <FormattedMessage id={'modal.loadDatabase.sessionTitle'} />
                     </StyledSection>
-                    <StyledSection width="50%" height="20px" style={{ marginTop: '2px' }}>
+                    <SessionSection>
                       {isLoadingSession == false ? (
-                        <PanelHeaderAction
-                          tooltip={'tooltip.reloadSession'}
-                          IconComponent={Reload}
-                          onClick={() => this.props.loadSession()}
-                        />
+                        <>
+                          <PanelHeaderAction
+                            tooltip={'tooltip.reloadSession'}
+                            IconComponent={Reload}
+                            onClick={() => this.props.loadSession()}
+                            className={'session-action'}
+                          />
+                          <PanelHeaderAction
+                            tooltip={'tooltip.reloadSession'}
+                            IconComponent={Delete}
+                            onClick={() => {
+                              this.props.selectSession(-1)
+                              this.props.loadSession();
+                            }}
+                          />
+                        </>
                       ) : null}
-                    </StyledSection>
+                      
+                    </SessionSection>
                   </div>
                   <div className="subtitle">
                     <FormattedMessage id={'modal.loadDatabase.sessionSubtitle'} />

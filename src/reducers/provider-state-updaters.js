@@ -531,7 +531,11 @@ export const setQueryUpdater = (state, { payload: query }) => {
 };
 
 export const selectSessionUpdater = (state, { payload: id }) => {
-  const sessions = state.sessions.map(s => s.id == id ? { ...s, selected: !s.selected } : s);
+  const sessions = state.sessions.map(s => {
+    const selected = id == -1 ? false : s.id == id ? !s.selected : s.selected;
+    return {...s, selected};
+  });
+
   return {
     ...state,
     sessionIds: sessions.filter(s => s.selected).map(s => s.id),
