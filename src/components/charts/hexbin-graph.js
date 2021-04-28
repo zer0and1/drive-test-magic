@@ -37,6 +37,10 @@ const colors = [
 
 let chartConfig = {
   type: 'line',
+  globals: {
+    fontFamily: "ff-clan-web-pro,'Helvetica Neue',Helvetica,sans-serif",
+    shadow: false
+  },
   options: {},
   theme: 'dark',
   backgroundColor: "#29323c",
@@ -55,9 +59,22 @@ let chartConfig = {
       all: "%d %M, %H:00"
     },
     guide: {
-      lineColor: '#4e5053',
       visible: true
-    }
+    },
+    item: {
+      fontColor: '#A0A7B4'
+    },
+    lineColor: '#A0A7B4',
+    lineWidth: '1px',
+    maxItems: 8,
+    tick: {
+      lineColor: '#A0A7B4',
+      lineWidth: '1px'
+    },
+    transform: {
+      type: 'date'
+    },
+    zooming: true
   },
   crosshairX: {
     // plotLabel: {
@@ -69,13 +86,32 @@ let chartConfig = {
   },
   scaleY: {
     guide: {
-      lineColor: '#4e5053'
+      lineColor: '#4e5053',
+      lineStyle: 'solid'
+    },
+    item: {
+      fontColor: '#A0A7B4'
+    },
+    lineColor: '#A0A7B4',
+    lineWidth: '1px',
+    tick: {
+      lineColor: '#A0A7B4',
+      lineWidth: '1px'
     },
     markers: []
   },
   legend: {
     adjustLayout: true,
-    marginTop: -20
+    marginTop: -20,
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+    item: {
+      fontColor: '#A0A7B4'
+    },
+    marker: {
+      borderColor: 'transparent',
+      borderRadius: '50px'
+    }
   },
   tooltip: {
     visible: false
@@ -223,11 +259,10 @@ function HexbinGraphFactory() {
           marker: {
             backgroundColor: colors[iter]
           },
-          legendText: cellnames[ids] + "<br/>" +
+          legendText: cellnames[ids] + "(<span style='color:" + colors[iter] + "'>#samples: </span>" + smps.filter(item => item.key === ids)[0]?.value + ") <br/>" +
             "<span style='color:" + colors[iter] + "'>#avg:</span>" + mean(yvalues[ids])?.toFixed(2) +
-            "<span style='color:" + colors[iter] + "'>#max:</span>" + max(yvalues[ids]) +
-            "<span style='color:" + colors[iter] + "'>#min:</span>" + min(yvalues[ids]) +
-            "<span style='color:" + colors[iter] + "'>#smp:</span>" + smps.filter(item => item.key === ids)[0]?.value,
+            "<span style='color:" + colors[iter] + "'>&nbsp;#max:</span>" + max(yvalues[ids]) +
+            "<span style='color:" + colors[iter] + "'>&nbsp;#min:</span>" + min(yvalues[ids]),
           values: yvalues[ids].map(num => num != null ? Number(num) : null)
         }
         const anno = {

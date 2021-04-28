@@ -83,6 +83,7 @@ class KeplerTable {
     const allIndexes = allData.map((_, i) => i);
 
     this.id = datasetInfo.id;
+    this.type = datasetInfo.type;
     this.label = datasetInfo.label;
     this.enabled = datasetInfo.enabled;
     this.loadingCompleted = datasetInfo.loadingCompleted;
@@ -355,7 +356,7 @@ class KeplerTable {
    */
   _assetField(fieldName, condition) {
     if (!condition) {
-      Console.error(`${fieldName} doesnt exist in dataset ${this.id}`);
+      console.error(`${fieldName} doesnt exist in dataset ${this.id}`);
     }
   }
 }

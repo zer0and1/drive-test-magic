@@ -541,7 +541,7 @@ export const selectSessionUpdater = (state, { payload: id }) => {
 
 export const loadSessionUpdater = (state) => {
   const query = GQL_GET_SESSIONS();
-  const task = GRAPHQL_QUERY_TASK({query}).bimap(
+  const task = GRAPHQL_QUERY_TASK({query, fetchPolicy: 'network-only'}).bimap(
     res => loadSessionSuccess(res.data.signal_db_sessions_view),
     err => loadSessionError(err)
   );
@@ -559,7 +559,8 @@ export const loadSessionSuccessUpdater = (state, {sessions}) => ({
   sessions: sessions.map(s => ({
     ...s,
     start_date: moment(s.start_date).format('YYYY-MM-DD HH:mm:ss'),
-    end_date: moment(s.end_date).format('YYYY-MM-DD HH:mm:ss')
+    end_date: moment(s.end_date).format('YYYY-MM-DD HH:mm:ss'),
+    selected: state.sessionIds.findIndex(sid => sid == s.id) >= 0
   }))
 });
 

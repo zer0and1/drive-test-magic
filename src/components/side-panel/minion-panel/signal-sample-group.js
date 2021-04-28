@@ -147,16 +147,16 @@ function SignalSampleGroupFactory(MinionGroup) {
             <td colSpan="4" style={{ height: '10px' }}></td>
           </tr>
           <tr>
-            <td colSpan="2">Module Type: </td>
-            <td colSpan="2">{data.minion_module_type}</td>
+            <td colSpan="1">Module Type: </td>
+            <td colSpan="3">{data.minion_module_type}</td>
           </tr>
           <tr>
-            <td colSpan="2">Antenna Type: </td>
-            <td colSpan="2">{data.minion_antenna_type}</td>
+            <td colSpan="1">Antenna Type: </td>
+            <td colSpan="3">{data.minion_antenna_type}</td>
           </tr>
           <tr>
-            <td colSpan="2">Firmware:</td>
-            <td colSpan="2">{data.minion_module_firmware}</td>
+            <td colSpan="1">Firmware:</td>
+            <td colSpan="3">{data.minion_module_firmware}</td>
           </tr>
         </tbody>
       </table>
