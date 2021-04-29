@@ -2399,23 +2399,25 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
     return null;
   }
 
-  const dates = filtered.map(dateField.valueAccessor);
+  const {valueAccessor: dateAccessor} = dateField;
+  const dates = filtered.map(dateAccessor);
   const startDate = Math.min(...dates);
   const endDate = Math.max(...dates);
   interval *= 1000; // convert interval time to ms
-  const newDates = [];
+  const samplingDates = [];
   const avgs = [];
   let stackedValues = [];
    
   for(let pointer = startDate; pointer <= endDate; pointer += interval) {
-    newDates.push(pointer);
+    samplingDates.push(pointer);
     stackedValues.push(0);
   }
 
   const groups = _.groupBy(filtered, minionColumnIdx);
   const series = Object.keys(groups).sort((a, b) => a > b ? 1 : -1).reduce((acc, key) => {
-    const values = groups[key].map(fieldAccessor);
-    const minionDates = groups[key].map(dateField.valueAccessor).sort((a, b) => a - b);
+    const entries = groups[key].sort((a, b) => dateAccessor(a) - dateAccessor(b));
+    const values = entries.map(fieldAccessor);
+    const minionDates = entries.map(dateAccessor);
     const avg = _.round(aggregate(values, AGGREGATION_TYPES.average), 2);
     avgs.push(avg);
 
@@ -2433,7 +2435,7 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
       let idx = 0;
       let newValues = [];
       
-      newDates.forEach(dt => {
+      samplingDates.forEach(dt => {
         const spanValues = [];
         
         while(minionDates[idx] <= dt + interval) {
@@ -2504,8 +2506,8 @@ export function generateDataReport(dataset, field, aggregation, interval, type) 
     },
     ...(aggregation ? {
       scaleX: {
-        values: newDates
+        values: samplingDates
       }
-    } : null)
+    } : {})
   };
 };

@@ -132,9 +132,6 @@ function DataReportChartFactory() {
         zingchart.exec('data-report-chart', 'viewall');
         return true;
       }
-      else {
-        console.log(ago)
-      }
 
       return false;
     }
