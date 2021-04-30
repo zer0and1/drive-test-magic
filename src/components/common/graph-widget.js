@@ -67,8 +67,7 @@ function GraphWidgetFactory(HexbinGraph) {
         showGraphState,
         visState,
         layers,
-        allData,
-        fields
+        dataset
       } = this.props;
 
       const enodebField = fields && fields.find(f => f.name == "enodeb_id");
@@ -77,6 +76,7 @@ function GraphWidgetFactory(HexbinGraph) {
         return null;
       }
       
+      const {allData, fields} = dataset;
       const layerId = visState?.layer?.id;
       const layer = layers.find(item => item.id === layerId);
       const fieldName = layer?.config?.colorField?.name;

@@ -28,7 +28,7 @@ import LoadingDialog from './loading-dialog';
 import {Button} from 'components/common/styled-components';
 import {FormattedMessage} from 'localization';
 import PanelHeaderActionFactory from 'components/side-panel/panel-header-action';
-import {Reload, Play, Delete} from 'components/common/icons';
+import {Reload, Play, Delete, Select} from 'components/common/icons';
 import {media} from 'styles/media-breakpoints';
 
 const StyledDBSection = styled(StyledExportSection)`
@@ -120,8 +120,13 @@ class SessionGrid extends Component {
     this._mounted = false;
   }
 
-  shouldComponentUpdate() {
-    return !this._mounted;
+  shouldComponentUpdate(nextProps) {
+    const {sessions} = nextProps;
+    const selected = sessions.filter(s => s.selected);
+    const isSelectedAll = sessions.length == selected.length;
+    const isSelectedNone = selected.length == 0;
+
+    return !this._mounted || isSelectedAll || isSelectedNone;
   }
 
   render() {
@@ -301,11 +306,17 @@ function LoadDatabaseFactory(PanelHeaderAction) {
                             className={'session-action'}
                           />
                           <PanelHeaderAction
-                            tooltip={'tooltip.reloadSession'}
+                            tooltip={'tooltip.selectAll'}
+                            IconComponent={Select}
+                            onClick={() => {
+                              this.props.selectSession('all')
+                            }}
+                          />
+                           <PanelHeaderAction
+                            tooltip={'tooltip.unselectAll'}
                             IconComponent={Delete}
                             onClick={() => {
-                              this.props.selectSession(-1)
-                              this.props.loadSession();
+                              this.props.selectSession('none')
                             }}
                           />
                         </>

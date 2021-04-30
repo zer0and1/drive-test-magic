@@ -182,7 +182,7 @@ export default function BottomWidgetFactory(
     const datasetName = layers.find(item => item.id === layerId)?.config?.dataId;
     const allData = datasets[datasetName]?.allData
     const fields = datasets[datasetName]?.fields;
-    
+    console.log(layerId, datasetName, allData, fields);
     // if filter is not animating, pass in enlarged filter here because
     // animation controller needs to call reset on it
     const filter = animatedFilter || filters[enlargedFilterIdx];

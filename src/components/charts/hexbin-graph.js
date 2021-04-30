@@ -129,6 +129,7 @@ function HexbinGraphFactory() {
     };
 
     shouldComponentUpdate(nextProps) {
+      console.log(nextProps)
       const { index: newIdx, aggregation: newAggr, lineChart: newPoints } = nextProps;
       const { index: oldIdx, aggregation: oldAggr, lineChart: oldPoints } = HexbinGraph.chartState;
       HexbinGraph.chartState = { index: newIdx, aggregation: newAggr, lineChart: nextProps.lineChart };

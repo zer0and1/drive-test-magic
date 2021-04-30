@@ -228,6 +228,7 @@ export default {
     reloadSession: 'Reload Sessions',
     testQuery: 'Test Query',
     selectAll: 'Select All',
+    unselectAll: 'Unselect All',
     zoomToAll: 'Zoom to All',
     centerToSelected: 'Center to Selected',
     largeMarker: 'Large',

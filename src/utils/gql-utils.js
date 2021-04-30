@@ -59,9 +59,18 @@ export function extractOperation(query) {
   return fieldNode.name.value;
 };
 
+export function checkSessionId(query) {
+  const fields = extractFields(query);
+  return fields && fields.findIndex(f => f == 'session_id') >= 0;
+}
+
 export function restrictSession(query, sessions) {
-  if (!sessions || sessions.length == 0) {
+  if (checkSessionId(query) == false) {
     return query;
+  }
+
+  if (!sessions || sessions.length == 0) {
+    sessions = [];
   }
 
   return insertArguments(query, `session_id: { _in: [${sessions.toString()}] }`);
