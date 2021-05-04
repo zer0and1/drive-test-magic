@@ -1326,7 +1326,8 @@ export const calcHexbinGraphData = (state) => {
     return {...state, hexbinGraphData: null};
   }
 
-  const fieldData = dataset.allData.map(aggrField.valueAccessor);
+  const {filteredIndexForDomain: filtered, allData} = dataset;
+  const fieldData = filtered.map(i => allData[i]).map(aggrField.valueAccessor);
   const ymin = min(fieldData);
   const ymax = max(fieldData);
 
