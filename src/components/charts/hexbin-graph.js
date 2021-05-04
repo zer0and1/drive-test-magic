@@ -21,19 +21,7 @@
 import React, { Component } from 'react';
 import zingchart from 'zingchart/es6';
 import ZingChart from 'zingchart-react';
-import _ from 'lodash';
-import { mean, min, max, median, deviation, variance, sum } from 'd3-array';
-
-const colors = [
-  '#1FBAD6',
-  '#66DA26',
-  '#FF9800',
-  '#7E36AF',
-  '#00ECFF',
-  '#f0ec26', 
-  '#E91E63', 
-  '#d31e1e',
-];
+import {HEXBIN_GRAPH_COLORS} from 'constants/default-settings';
 
 let chartConfig = {
   type: 'line',
@@ -47,11 +35,16 @@ let chartConfig = {
   plotarea: {
     margin: 'dynamic'
   },
+  crosshairX: {},
   plot: {
     highlight: true,
     tooltipText: "%t views: %v<br>%k",
     shadow: 0,
-    aspect: 'jumped'
+    aspect: 'jumped',
+    marker: {
+      size: 0,
+      'border-width': 0
+    }
   },
   scaleX: {
     transform: {
@@ -71,18 +64,7 @@ let chartConfig = {
       lineColor: '#A0A7B4',
       lineWidth: '1px'
     },
-    transform: {
-      type: 'date'
-    },
     zooming: true
-  },
-  crosshairX: {
-    // plotLabel: {
-    //   headerText: '%kl<br/>'
-    // },
-    // scaleLabel: {
-    //   visible: false
-    // }
   },
   scaleY: {
     guide: {
@@ -122,27 +104,11 @@ let chartConfig = {
 
 function HexbinGraphFactory() {
   class HexbinGraph extends Component {
-    static chartState = {
-      index: null,
-      aggregation: null,
-      lineChart: []
-    };
+    static chartState = {};
 
     shouldComponentUpdate(nextProps) {
-      console.log(nextProps)
-      const { index: newIdx, aggregation: newAggr, lineChart: newPoints } = nextProps;
-      const { index: oldIdx, aggregation: oldAggr, lineChart: oldPoints } = HexbinGraph.chartState;
-      HexbinGraph.chartState = { index: newIdx, aggregation: newAggr, lineChart: nextProps.lineChart };
-
-      if (oldIdx != newIdx) {
-        return true;
-      }
-
-      if (oldAggr != newAggr) {
-        return true;
-      }
-
-      if (JSON.stringify(oldPoints) != JSON.stringify(newPoints)) {
+      if (JSON.stringify(nextProps) != JSON.stringify(HexbinGraph.chartState)) {
+        HexbinGraph.chartState = nextProps;
         return true;
       }
 
@@ -151,150 +117,63 @@ function HexbinGraphFactory() {
 
     render() {
       const {
-        lineChart,
-        index,
-        aggregation,
+        groups,
         ymin,
         ymax,
-        cellnames,
-        starttime,
-        endtime,
-        bins,
-        enodebFieldIndex
+        startTime,
+        groupPeriod,
+        groupTimes
       } = this.props;
-
-      const step = bins * 3600000;
-
-      const data = lineChart.map((item) => {
-        const obj = {
-          value: item.data[index - 1],
-          enodeb: item.data[enodebFieldIndex],
-
-          // groupBy time with "some fixed values starting with 1h then like 4h, 1d, 4d, 10d, 1m, 3month"
-          groupTime: Math.floor((new Date(item.data[8]).getTime() - starttime) / step) * step + starttime
-        }
-        return obj
-      });
-
-      let result = data.reduce(function (r, o) {
-        var k = o.groupTime + o.enodeb;
-        if (r[k]) {
-          if (o.value) r[k].values.push(o.value);
-        } else {
-          r[k] = o;
-          r[k].values = [o.value];
-          r[k].average = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
-          r[k].sum = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
-          r[k].max = o.value; // taking 'Maximum' attribute as an items counter(on the first phase)
-          r[k].min = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
-          r[k].median = o.value; // taking 'Minimum' attribute as an items counter(on the first phase)
-          r[k].stdev = 0; // taking 'Stdev' attribute as an items counter(on the first phase)
-          r[k].v = 0; // taking 'variance' attribute as an items counter(on the first phase)
-        }
-        return r;
-      }, {});
-
-      Object.keys(result).forEach(function (k) {
-        // calculate aggregation values
-        result[k].average = result[k].value != undefined ? mean(result[k].values)?.toFixed(2) : null;
-        result[k].max = result[k].value != undefined ? max(result[k].values)?.toFixed(2) : null;
-        result[k].min = result[k].value != undefined ? min(result[k].values)?.toFixed(2) : null;
-        result[k].median = result[k].value != undefined ? median(result[k].values)?.toFixed(2) : null;
-        result[k].sum = result[k].value != undefined ? sum(result[k].values)?.toFixed(2) : null;
-        result[k].stdev = result[k].values.length > 1 ? deviation(result[k].values)?.toFixed(2) : 0;
-        result[k].v = result[k].values.length > 1 ? variance(result[k].values)?.toFixed(2) : 0;
-      })
-
-      const smps = Object.values(_.groupBy(data, 'enodeb')).map(item => { return { "key": item[0].enodeb, "value": item.length } });
-
-      const dataset = _.groupBy(result, 'enodeb');
-      const enodebIds = Object.keys(dataset)
-
-      let labels = [];
-      for (var i of _.range(-1, 50)) {
-        var t = starttime + i * step;
-        labels.push(t)
-        if (t > endtime) break;
-      }
-
-      const yvalues = [];
-      for (var i of enodebIds) {
-        yvalues[i] = []
-        for (var k of labels) {
-          let v = null;
-          switch (aggregation) {
-            case 'maximum':
-              v = result[k + i] !== undefined ? result[k + i]?.max : null;
-              break;
-            case 'minimum':
-              v = result[k + i] !== undefined ? result[k + i]?.min : null;
-              break;
-            case 'median':
-              v = result[k + i] !== undefined ? result[k + i]?.median : null;
-              break;
-            case 'sum':
-              v = result[k + i] !== undefined ? result[k + i]?.sum : null;
-              break;
-            case 'stdev':
-              v = result[k + i] !== undefined ? result[k + i]?.stdev : null;
-              break;
-            case 'variance':
-              v = result[k + i] !== undefined ? result[k + i]?.v : null;
-              break;
-            default:
-              v = result[k + i] !== undefined ? result[k + i]?.average : null;
-          }
-          yvalues[i].push(v);
-        }
-      }
 
       const series = [];
       const annos = [];
       let iter = 0;
 
-      for (var ids of enodebIds) {
+      for (let group of Object.values(groups)) {
+        const {enodeb, count, avg, min, max, values, cellName} = group;
+        const color = HEXBIN_GRAPH_COLORS[iter] || HEXBIN_GRAPH_COLORS[0];
         const item = {
-          text: ids,
+          text: enodeb,
           lineWidth: 10,
-          lineColor: colors[iter],
+          lineColor: color,
           marker: {
-            backgroundColor: colors[iter]
+            backgroundColor: color
           },
-          legendText: cellnames[ids] + "(<span style='color:" + colors[iter] + "'>#samples: </span>" + smps.filter(item => item.key === ids)[0]?.value + ") <br/>" +
-            "<span style='color:" + colors[iter] + "'>#avg:</span>" + mean(yvalues[ids])?.toFixed(2) +
-            "<span style='color:" + colors[iter] + "'>&nbsp;#max:</span>" + max(yvalues[ids]) +
-            "<span style='color:" + colors[iter] + "'>&nbsp;#min:</span>" + min(yvalues[ids]),
-          values: yvalues[ids].map(num => num != null ? Number(num) : null)
+          legendText: cellName + "(<span style='color:" + color + "'>#samples: </span>" + count + ") <br/>" +
+            "<span style='color:" + color + "'>#avg:</span>" + avg +
+            "<span style='color:" + color + "'>&nbsp;#max:</span>" + max +
+            "<span style='color:" + color + "'>&nbsp;#min:</span>" + min,
+          values: values
         }
         const anno = {
           type: 'line',
-          range: [mean(yvalues[ids])],
-          lineColor: colors[iter++],
+          range: [avg],
+          lineColor: color,
           lineStyle: 'dashed',
           alpha: 1,
-          id: ids
+          id: enodeb
         }
         series.push(item);
         annos.push(anno);
+        iter++;
       }
 
-      const GetSortOrder = () => {
-        return (a, b) => {
-          const aVal = smps.filter(item => item.key === a.text)[0].value;
-          const bVal = smps.filter(item => item.key === b.text)[0].value;
-          if (aVal < bVal)
-            return 1;
-          return -1;
-        }
-      }
-      series.sort(GetSortOrder())
+      // const GetSortOrder = () => {
+      //   return (a, b) => {
+      //     const aVal = smps.filter(item => item.key === a.text)[0].value;
+      //     const bVal = smps.filter(item => item.key === b.text)[0].value;
+      //     if (aVal < bVal)
+      //       return 1;
+      //     return -1;
+      //   }
+      // }
+      // series.sort(GetSortOrder())
 
       chartConfig = {
         ...chartConfig,
         scaleX: {
           ...chartConfig.scaleX,
-          minValue: starttime - step,
-          step: step
+          values: groupTimes
         },
         scaleY: {
           ...chartConfig.scaleY,

@@ -84,7 +84,13 @@ import {
 
 import {Layer, LayerClasses, LAYER_ID_LENGTH} from 'layers';
 import {DEFAULT_TEXT_LABEL} from 'layers/layer-factory';
-import {EDITOR_MODES, SORT_ORDER, AGGREGATION_TYPES, REPORT_TYPES} from 'constants/default-settings';
+import {
+  EDITOR_MODES, 
+  SORT_ORDER, 
+  AGGREGATION_TYPES, 
+  REPORT_TYPES, 
+  HEXBIN_GROUPING_TIMES
+} from 'constants/default-settings';
 import {pick_, merge_} from './composer-helpers';
 import {processFileContent, removeLayer, onMouseMove, startReloadingDataset} from 'actions/vis-state-actions';
 
@@ -104,6 +110,7 @@ import {
 import moment from 'moment';
 import {gql} from '@apollo/client';
 import {GQL_UPDATE_DATASET} from 'graphqls';
+import {mean, min, max, median, deviation, variance, sum} from 'd3-array';
 
 // type imports
 /** @typedef {import('./vis-state-updaters').Field} Field */
@@ -1264,7 +1271,7 @@ export function interactionConfigChangeUpdater(state, action) {
  * @type {typeof import('./vis-state-updaters').layerClickUpdater}
  * @public
  */
-export const layerClickUpdater = (state, action) => ({
+export const layerClickUpdater = (state, action) => calcHexbinGraphData({
   ...state,
   mousePos: state.interactionConfig.coordinate.enabled
     ? {
@@ -1274,6 +1281,142 @@ export const layerClickUpdater = (state, action) => ({
     : state.mousePos,
   clicked: action.info && action.info.picked ? action.info : null
 });
+
+/**
+ * Calculate Hexbin Graph Data whenever hexbin is clicked
+ * @memberof visStateUpdaters
+ * @type {typeof import('./vis-state-updaters').calculateHexbinGraphData}
+ * @public
+ */
+export const calcHexbinGraphData = (state) => {
+  const {clicked, datasets, layers} = state;
+
+  if (clicked == null) {
+    return {...state, hexbinGraphData: null};
+  }
+
+  const {
+    layer: {
+      props: {
+        id: layerId
+      }
+    },
+    coordinate,
+    object: {points}
+  } = clicked;
+  const layer = layers.find(l => l.id == layerId);
+  const {
+    config: {
+      visConfig: {colorAggregation: aggregation}, 
+      dataId, 
+      colorField: aggrField
+    }
+  } = layer;
+  
+  if (!aggregation || aggregation == AGGREGATION_TYPES.count) {
+    return {...state, hexbinGraphData: null};
+  }
+
+  const dataset = datasets[dataId];
+  const enodebField = dataset.getColumnField("enodeb_id");
+  const nameField = dataset.getColumnField("cell_name");
+  const dateField = dataset.getColumnField("date");
+
+  if (!enodebField || !dateField || !aggrField || !nameField) {
+    return {...state, hexbinGraphData: null};
+  }
+
+  const fieldData = dataset.allData.map(aggrField.valueAccessor);
+  const ymin = min(fieldData);
+  const ymax = max(fieldData);
+
+  const hexbinAllData = points.map(p => p.data);
+  const cellNames = hexbinAllData.map(nameField.valueAccessor);
+  const enodebs = hexbinAllData.map(enodebField.valueAccessor);
+  const enodebMap = enodebs.reduce((acc, enodeb, idx) => ({
+    ...acc,
+    [enodeb]: cellNames[idx]
+  }), {});
+
+  // calculate lenght of bins
+  const timestamps = hexbinAllData.map(dateField.valueAccessor).map(d => new Date(d).getTime());
+  const startTime = min(timestamps);
+  const endTime = max(timestamps);
+  const diff = moment(endTime).diff(startTime, 'hours');
+  let groupPeriod = 0;
+  for (let p of HEXBIN_GROUPING_TIMES) {
+    if (diff / p < 42) {
+      groupPeriod = p * 3600000; // convert to milliseconds
+      break;
+    }
+  }
+  
+  const hexbinValues = hexbinAllData.map(aggrField.valueAccessor);
+  const hexbinEnodebs = hexbinAllData.map(enodebField.valueAccessor);
+  const preparedData = timestamps.map((ts, idx) => {
+    const groupTime = Math.floor((ts - startTime) / groupPeriod) * groupPeriod + startTime;
+    const enodeb = hexbinEnodebs[idx]
+    return {
+      groupTime,
+      enodeb,
+      value: hexbinValues[idx]
+    }
+  });
+  const aggrFuncMap = {
+    [AGGREGATION_TYPES.average]: mean,
+    [AGGREGATION_TYPES.maximum]: max,
+    [AGGREGATION_TYPES.minimum]: min,
+    [AGGREGATION_TYPES.median]: median,
+    [AGGREGATION_TYPES.stdev]: deviation,
+    [AGGREGATION_TYPES.sum]: sum,
+    [AGGREGATION_TYPES.variance]: variance,
+  };
+  const groupedByEnodeb = _.groupBy(preparedData, 'enodeb');
+  const groupTimes = [];
+  for(let timer = startTime - groupPeriod; timer <= endTime + groupPeriod; timer += groupPeriod) {
+    groupTimes.push(timer);
+  }
+
+  const groups = Object.keys(groupedByEnodeb).reduce((acc, enodeb) => {
+    const enodebGroup = groupedByEnodeb[enodeb];
+    const timeGroup = _.groupBy(enodebGroup, 'groupTime');
+    const aggregatedData = Object.keys(timeGroup).reduce((acc, time) => ({
+      ...acc,
+      [time]: _.round(aggrFuncMap[aggregation](timeGroup[time], d => d.value), 2)
+    }), []);
+    const groupValues = Object.values(enodebGroup.map(d => d.value));
+
+    return {
+      ...acc,
+      [enodeb]: {
+        enodeb,
+        cellName: enodebMap[enodeb],
+        values: groupTimes.map(time => aggregatedData[time] || null),
+        min: _.round(min(groupValues), 2),
+        max: _.round(max(groupValues), 2),
+        avg: _.round(mean(groupValues), 2),
+        count: enodebGroup.length
+      }
+    }
+  }, {});  
+  
+  const hexbinGraphData = {
+    groups,
+    ymin,
+    ymax,
+    startTime,
+    endTime,
+    groupPeriod,
+    coordinate,
+    aggrField,
+    groupTimes
+  };
+
+  return {
+    ...state,
+    hexbinGraphData
+  }
+};
 
 /**
  * Trigger map click event, unselect clicked object

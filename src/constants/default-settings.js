@@ -1033,3 +1033,26 @@ export const SIGNAL_QUALITY = {
   cqi: [16, 12, 8, 4, 0],
   mcs: [27, 20, 13, 6, 0],
 };
+
+export const HEXBIN_GROUPING_TIMES = [
+  1, // 1 hour 
+  4, // 4 hours
+  8, // 8 hours
+  24, // 1 day
+  48, // 2 days
+  96, // 4 days
+  168, // 1 week
+  336, // 2 weeks
+  730 // 1 month
+];
+
+export const HEXBIN_GRAPH_COLORS = [
+  '#1FBAD6',
+  '#66DA26',
+  '#FF9800',
+  '#7E36AF',
+  '#00ECFF',
+  '#f0ec26', 
+  '#E91E63', 
+  '#d31e1e',
+];

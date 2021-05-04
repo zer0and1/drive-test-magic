@@ -26,7 +26,7 @@ import GraphWidgetFactory from './common/graph-widget';
 import DataReportWidgetFactory from './common/data-report-widget';
 import AnimationControlFactory from './common/animation-control/animation-control';
 import AnimationControllerFactory from './common/animation-control/animation-controller';
-import {ANIMATION_WINDOW, FILTER_TYPES} from 'constants/default-settings';
+import {ANIMATION_WINDOW, FILTER_TYPES, AGGREGATION_TYPES} from 'constants/default-settings';
 import {getIntervalBins} from 'utils/filter-utils';
 
 const propTypes = {
@@ -176,13 +176,8 @@ export default function BottomWidgetFactory(
     const showAnimationControl = animatableLayer.length && readyToAnimation;
     const showTimeWidget = enlargedFilterIdx > -1 && Object.keys(datasets).length > 0;
     const showDataReport = visState.dataReport.toggled && Object.keys(datasets).length > 0;
-    const selectedField = visState.clicked?.layer?.props?.updateTriggers?.getColorValue?.colorAggregation;
+    const showHexbinGraph = isGraphShow && visState.hexbinGraphData;
 
-    const layerId = visState.clicked?.layer?.id;
-    const datasetName = layers.find(item => item.id === layerId)?.config?.dataId;
-    const allData = datasets[datasetName]?.allData
-    const fields = datasets[datasetName]?.fields;
-    console.log(layerId, datasetName, allData, fields);
     // if filter is not animating, pass in enlarged filter here because
     // animation controller needs to call reset on it
     const filter = animatedFilter || filters[enlargedFilterIdx];
@@ -250,13 +245,10 @@ export default function BottomWidgetFactory(
             setReportType={visStateActions.setReportType}
           />
         ) : null}
-        {isGraphShow && selectedField != undefined && selectedField != 'count' ? (
+        {showHexbinGraph ? (
           <GraphWidget
             showGraphState={uiStateActions.toggleGraphShow}
-            visState={visState.clicked}
-            layers={layers}
-            allData={allData}
-            fields={fields}
+            graphData={visState.hexbinGraphData}
           />
           ) : null
         }
