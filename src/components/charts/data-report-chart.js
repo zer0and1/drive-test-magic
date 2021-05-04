@@ -70,7 +70,7 @@ const chartConfig = {
     },
     transform: {
       type: 'date',
-      all: "%d %M, %H:%i:%s"
+      all: "%d %M<br>%H:%i:%s"
     },
     zooming: true
   },
