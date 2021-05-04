@@ -120,13 +120,11 @@ function HexbinGraphFactory() {
         groups,
         ymin,
         ymax,
-        startTime,
-        groupPeriod,
         groupTimes
       } = this.props;
 
-      const series = [];
-      const annos = [];
+      let series = [];
+      let markers = [];
       let iter = 0;
 
       for (let group of Object.values(groups)) {
@@ -143,9 +141,10 @@ function HexbinGraphFactory() {
             "<span style='color:" + color + "'>#avg:</span>" + avg +
             "<span style='color:" + color + "'>&nbsp;#max:</span>" + max +
             "<span style='color:" + color + "'>&nbsp;#min:</span>" + min,
-          values: values
+          values: values,
+          samples: count // only needed for sorting series
         }
-        const anno = {
+        const marker = {
           type: 'line',
           range: [avg],
           lineColor: color,
@@ -154,20 +153,11 @@ function HexbinGraphFactory() {
           id: enodeb
         }
         series.push(item);
-        annos.push(anno);
+        markers.push(marker);
         iter++;
       }
 
-      // const GetSortOrder = () => {
-      //   return (a, b) => {
-      //     const aVal = smps.filter(item => item.key === a.text)[0].value;
-      //     const bVal = smps.filter(item => item.key === b.text)[0].value;
-      //     if (aVal < bVal)
-      //       return 1;
-      //     return -1;
-      //   }
-      // }
-      // series.sort(GetSortOrder())
+      series = series.sort((a, b) => b.samples - a.samples);
 
       chartConfig = {
         ...chartConfig,
@@ -179,9 +169,9 @@ function HexbinGraphFactory() {
           ...chartConfig.scaleY,
           minValue: ymin,
           maxValue: ymax,
-          markers: annos
+          markers
         },
-        series: series
+        series
       }
 
       let key = false;
