@@ -69,7 +69,8 @@ const chartConfig = {
       lineWidth: '1px'
     },
     transform: {
-      type: 'date'
+      type: 'date',
+      all: "%d %M, %H:%i:%s"
     },
     zooming: true
   },
