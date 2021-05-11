@@ -21,6 +21,8 @@ query MyQuery {
     command_id_ack
     sleep_interval
     aux
+    battery_state
+    battery_soc
   }
   signal_db_signal_samples(where:{minion_id: {_eq: "${minionId}"}}, order_by: {date: desc }, limit: 1) {
     date

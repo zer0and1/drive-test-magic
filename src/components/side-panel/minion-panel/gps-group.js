@@ -31,6 +31,14 @@ function GPSGroupFactory(MinionGroup) {
             <td>h:</td>
             <td>{data.lastupdate && moment(data.lastupdate).format("HH:mm:ss")}</td>
           </tr>
+          {data.battery_state && data.battery_state != 'Not Present' ? (
+            <tr>
+            <td>Battery State:</td>
+            <td>{data.battery_state}</td>
+            <td>Battery SOC:</td>
+            <td>{data.battery_soc}%</td>
+          </tr>
+          ) : null}
         </tbody>
       </table>
     </MinionGroup>
