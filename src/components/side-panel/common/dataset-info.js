@@ -56,9 +56,10 @@ export default function DatasetInfoFactory() {
 
     render() {
       const { dataset } = this.props;
-      const { enabled, reloading } = dataset;
+      const { reloading } = dataset;
       const { timeAgoLabel } = this.state;
-
+      const enabled = dataset.type !== 'database' || dataset.enabled;
+      
       return (
         <StyledDataRowCount className="source-data-rows">
           {enabled ? (

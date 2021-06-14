@@ -213,8 +213,13 @@ export default function DatasetTitleFactory(DatasetTag) {
         dataset,
         userRole
       } = this.props;
-      const hadDBPrivilege = userRole == USER_ROLES.admin || userRole == USER_ROLES.user;
 
+      const hadDBPrivilege = userRole == USER_ROLES.admin || userRole == USER_ROLES.user;
+      const showRemove = dataset.type == 'file' || (hadDBPrivilege && showDeleteDataset);
+      const showSetup = hadDBPrivilege && setupDataset && dataset.type !== 'file';
+      const showReloading = startReloadingDataset && dataset.type !== 'file';
+      const showEnable = enableDataset && dataset.type !== 'file';
+      
       return (
         <StyledDatasetTitle
           className="source-data-title"
@@ -226,12 +231,11 @@ export default function DatasetTitleFactory(DatasetTag) {
               <ArrowRight height="12px" />
             </CenterFlexbox>
           ) : null}
-          {showDeleteDataset && hadDBPrivilege ? (
-            <RemoveDataset datasetKey={dataset.id} removeDataset={removeDataset} />
-          ) : null}
-          {setupDataset && hadDBPrivilege && <SetupDataset datasetKey={dataset.id} setupDataset={setupDataset} />}
-          {startReloadingDataset && <ReloadDataset datasetKey={dataset.id} reloading={dataset.reloading} startReloadingDataset={startReloadingDataset} />}
-          {enableDataset && <EnableDataset datasetKey={dataset.id} enableDataset={enableDataset} enabled={dataset.enabled} />}
+
+          {showRemove && <RemoveDataset datasetKey={dataset.id} removeDataset={removeDataset} />}
+          {showSetup && <SetupDataset datasetKey={dataset.id} setupDataset={setupDataset} />}
+          {showReloading && <ReloadDataset datasetKey={dataset.id} reloading={dataset.reloading} startReloadingDataset={startReloadingDataset} />}
+          {showEnable && <EnableDataset datasetKey={dataset.id} enableDataset={enableDataset} enabled={dataset.enabled} />}
         </StyledDatasetTitle>
       );
     }

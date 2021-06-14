@@ -118,7 +118,20 @@ export const defaultAddDataToMapOptions = {
  * @public
  */
 export const addDataToMapUpdater = (state, {payload}) => {
-  const {datasets, config, info} = payload;
+  const {config, info} = payload;
+  let datasets = payload.datasets;
+
+  if (Array.isArray(datasets)) {
+    datasets = datasets.map(ds => ds.info.format == 'row' ? {
+      ...ds,
+      info: {
+        ...ds.info,
+        timestamp: new Date().getTime(),
+        type: 'file',
+        enabled: true
+      }
+    } : ds);
+  }
 
   const options = {
     ...defaultAddDataToMapOptions,
