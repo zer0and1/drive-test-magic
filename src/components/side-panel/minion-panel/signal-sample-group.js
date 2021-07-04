@@ -126,10 +126,10 @@ function SignalSampleGroupFactory(MinionGroup) {
           <tr>
             <td>RSRQ:</td>
             <td>{data.rsrq != undefined && <ProgressBar value={data.rsrq} prog={data.rsrq_prog} level={data.rsrq_level} />}</td>
-            <td>{data.connection_type == 'LTE' ? 'SINR' : 'ECIO'}:</td>
+            <td>{data.connection_type == 'WCDMA' ? 'ECIO' : 'SINR'}:</td>
             <td>{data.sinr_ecio != undefined && <ProgressBar value={data.sinr_ecio} prog={data.sinr_ecio_prog} level={data.sinr_ecio_level} />}</td>
           </tr>
-          {data.connection_type == 'LTE' && (
+          {data.connection_type != 'WCDMA' && (
             <tr>
               <td>CQI:</td>
               <td>{data.cqi != undefined && <ProgressBar value={data.cqi} prog={data.cqi_prog} level={data.cqi_level} />}</td>
