@@ -173,7 +173,7 @@ export function calcLevel(val, factor, type) {
   let quality = [];
 
   if (factor == 'sinr_ecio') {
-    quality = SIGNAL_QUALITY[type == 'LTE' ? 'sinr' : 'ecio'];
+    quality = SIGNAL_QUALITY[type === 'WCDMA' ? 'ecio' : 'sinr'];
   }
   else {
     quality = SIGNAL_QUALITY[factor];

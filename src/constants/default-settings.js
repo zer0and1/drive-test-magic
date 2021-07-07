@@ -52,11 +52,11 @@ export const ICON_PREFIX = `${CLOUDFRONT}/geodude`;
 export const DEFAULT_MAPBOX_API_URL = 'https://api.mapbox.com';
 export const MQTT_BROKER_URL = 'ws://159.89.0.130:9001';
 
-export const HASURA_SERVER_API_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
-export const AUTH_SEVER_API_URL = 'http://kminion.herokuapp.com/api/get_token';
+// export const HASURA_SERVER_API_ENDPOINT = 'https://kepler-data-center.hasura.app/v1/graphql';
+// export const AUTH_SEVER_API_URL = 'http://kminion.herokuapp.com/api/get_token';
 
-// export const HASURA_SERVER_API_ENDPOINT = 'http://159.89.0.130:8080/v1/graphql';
-// export const AUTH_SEVER_API_URL = 'http://159.89.0.130:5000/api/get_token';
+export const HASURA_SERVER_API_ENDPOINT = 'http://159.89.0.130:8080/v1/graphql';
+export const AUTH_SEVER_API_URL = 'http://159.89.0.130:5000/api/get_token';
 
 // Modal Ids
 /**
@@ -1026,7 +1026,7 @@ export const AUTH_TOKENS = {
 
 export const SIGNAL_QUALITY = {
   rssi: [-44, -65, -75, -85, -100],
-  sinr: [30, 12.5, 10, 7, -12],
+  sinr: [25, 13, 10, 7, 0],
   rsrq: [-3, -5, -9, -12, -20],
   rsrp_rscp: [-44, -84, -102, -111, -130],
   ecio: [0, -2, -5, -10, -20],
