@@ -18,20 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component, useCallback} from 'react';
+import React, { Component, useCallback } from 'react';
 import classnames from 'classnames';
 
 import PropTypes from 'prop-types';
-import {SortableContainer, SortableElement} from 'react-sortable-hoc';
+import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import styled from 'styled-components';
-import {createSelector} from 'reselect';
-import {injectIntl} from 'react-intl';
-import {FormattedMessage} from 'localization';
-import {arrayMove} from 'utils/data-utils';
+import { createSelector } from 'reselect';
+import { injectIntl } from 'react-intl';
+import { FormattedMessage } from 'localization';
+import { arrayMove } from 'utils/data-utils';
+import axios from 'axios';
+import JqxWindow from 'jqwidgets-scripts/jqwidgets-react-tsx/jqxwindow';
 
 import LayerPanelFactory from './layer-panel/layer-panel';
 import SourceDataCatalogFactory from './common/source-data-catalog';
-import {Add} from 'components/common/icons';
+import { Add } from 'components/common/icons';
 import ItemSelector from 'components/common/item-selector/item-selector';
 import {
   Button,
@@ -40,16 +42,16 @@ import {
   SidePanelSection
 } from 'components/common/styled-components';
 
-import {LAYER_BLENDINGS, USER_ROLES} from 'constants/default-settings';
+import { LAYER_BLENDINGS, USER_ROLES } from 'constants/default-settings';
 
 import $ from 'jquery';
 import 'gasparesganga-jquery-loading-overlay';
 
-const LayerBlendingSelector = ({layerBlending, updateLayerBlending, intl}) => {
+const LayerBlendingSelector = ({ layerBlending, updateLayerBlending, intl }) => {
   const labeledLayerBlendings = Object.keys(LAYER_BLENDINGS).reduce(
     (acc, current) => ({
       ...acc,
-      [intl.formatMessage({id: LAYER_BLENDINGS[current].label})]: current
+      [intl.formatMessage({ id: LAYER_BLENDINGS[current].label })]: current
     }),
     {}
   );
@@ -65,7 +67,7 @@ const LayerBlendingSelector = ({layerBlending, updateLayerBlending, intl}) => {
         <FormattedMessage id="layerBlending.title" />
       </PanelLabel>
       <ItemSelector
-        selectedItems={intl.formatMessage({id: LAYER_BLENDINGS[layerBlending].label})}
+        selectedItems={intl.formatMessage({ id: LAYER_BLENDINGS[layerBlending].label })}
         options={Object.keys(labeledLayerBlendings)}
         multiSelect={false}
         searchable={false}
@@ -102,8 +104,15 @@ const SortableStyledItem = styled.div`
   }
 `;
 
+const WelcomeText = styled.div`
+  margin-bottom: 16px;
+  color: white;
+  font-size: 16px;
+  line-height: 24px;
+`;
+
 export function AddDataButtonFactory() {
-  const AddDataButton = ({onClick, isInactive}) => (
+  const AddDataButton = ({ onClick, isInactive }) => (
     <Button
       className="add-data-button"
       onClick={onClick}
@@ -124,15 +133,15 @@ LayerManagerFactory.deps = [AddDataButtonFactory, LayerPanelFactory, SourceDataC
 function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
   // By wrapping layer panel using a sortable element we don't have to implement the drag and drop logic into the panel itself;
   // Developers can provide any layer panel implementation and it will still be sortable
-  const SortableItem = SortableElement(({children, isSorting}) => {
+  const SortableItem = SortableElement(({ children, isSorting }) => {
     return (
-      <SortableStyledItem className={classnames('sortable-layer-items', {sorting: isSorting})}>
+      <SortableStyledItem className={classnames('sortable-layer-items', { sorting: isSorting })}>
         {children}
       </SortableStyledItem>
     );
   });
 
-  const WrappedSortableContainer = SortableContainer(({children}) => {
+  const WrappedSortableContainer = SortableContainer(({ children }) => {
     return <div>{children}</div>;
   });
 
@@ -163,14 +172,25 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       updateLayerOrder: PropTypes.func.isRequired
     };
     state = {
-      isSorting: false
+      isSorting: false,
+      welcomeText: '',
     };
+    welcomeWnd = React.createRef();
 
     componentDidMount() {
       const { userRole } = this.props;
       if (userRole && userRole != USER_ROLES.not_allowed && Object.keys(this.props.datasets).length == 0) {
         $('.side-panel__content').LoadingOverlay('show');
-        this.props.loadDataset();
+
+        if (userRole == USER_ROLES.guest) {
+          axios.get('/welcome.txt').then(res => {
+            $('.side-panel__content').LoadingOverlay('hide', true);
+            this.setState({ welcomeText: res.data });
+            this.welcomeWnd.current?.open();
+          });
+        } else {
+          this.props.loadDataset();
+        }
       }
     }
 
@@ -191,26 +211,32 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
       this.props.addLayer();
     };
 
-    _handleSort = ({oldIndex, newIndex}) => {
+    _handleSort = ({ oldIndex, newIndex }) => {
       this.props.updateLayerOrder(arrayMove(this.props.layerOrder, oldIndex, newIndex));
-      this.setState({isSorting: false});
+      this.setState({ isSorting: false });
+    };
+
+    _handleWelcomeContinue = () => {
+      this.welcomeWnd.current?.close();
+      this.props.loadDataset();
+      $('.side-panel__content').LoadingOverlay('show');
     };
 
     _onSortStart = () => {
-      this.setState({isSorting: true});
+      this.setState({ isSorting: true });
     };
 
-    _updateBeforeSortStart = ({index}) => {
+    _updateBeforeSortStart = ({ index }) => {
       // if layer config is active, close it
-      const {layerOrder, layers, layerConfigChange} = this.props;
+      const { layerOrder, layers, layerConfigChange } = this.props;
       const layerIdx = layerOrder[index];
       if (layers[layerIdx].config.isConfigActive) {
-        layerConfigChange(layers[layerIdx], {isConfigActive: false});
+        layerConfigChange(layers[layerIdx], { isConfigActive: false });
       }
     };
 
     render() {
-      const {layers, datasets, layerOrder, openModal, intl, userRole} = this.props;
+      const { layers, datasets, layerOrder, openModal, intl, userRole } = this.props;
       const hadDBPrivilege = userRole == USER_ROLES.admin || userRole == USER_ROLES.user;
       const defaultDataset = Object.keys(datasets)[0];
       const layerTypeOptions = this.layerTypeOptionsSelector(this.props);
@@ -289,6 +315,33 @@ function LayerManagerFactory(AddDataButton, LayerPanel, SourceDataCatalog) {
             updateLayerBlending={this.props.updateLayerBlending}
             intl={intl}
           />
+          <JqxWindow
+            ref={this.welcomeWnd}
+            theme={"metrodark"}
+            width={800}
+            height={600}
+            closeButtonSize={0}
+            autoOpen={false}
+            resizable={false}
+            isModal={true}
+            draggable={false}
+          >
+            <div style={{ border: 'none', padding: 0 }} />
+            <div>
+              <div style={{ padding: 24, height: 'calc(100% - 48px)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+                  <WelcomeText>
+                    {this.state.welcomeText.split(/\n/).map(str => <p>{str}</p>)}
+                  </WelcomeText>
+                  <div>
+                    <Button secondary onClick={this._handleWelcomeContinue} width={50} style={{ float: 'right' }}>
+                      Continue
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </JqxWindow>
         </div>
       );
     }
