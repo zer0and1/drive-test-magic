@@ -1,0 +1,6 @@
+Welcome to drive-test-magic test server
+You are logged as a guest, so you have read only access for data and pre created reports.
+You will be able to filter sample data with all functionalities of full version, but your reports will not be saved.
+May we suggest you first click layers icon to load sample data from a DB, allow up to 30seconds to load those 100k+ samples that you can then explore.Those samples are real data gathered on the 4G networks with our minion. 
+For full hands-on demo of all features including minion management please contact sales.
+drive-test-magic team
